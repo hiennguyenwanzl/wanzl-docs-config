@@ -96,46 +96,6 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
         }
     };
 
-    const openSwaggerUI = () => {
-        if (version.api_specs?.openapi && onViewApiSpec) {
-            // Handle both string and FileData formats
-            const spec = typeof version.api_specs.openapi === 'string'
-                ? { name: 'openapi.yaml', content: version.api_specs.openapi, size: version.api_specs.openapi.length }
-                : version.api_specs.openapi;
-            onViewApiSpec(spec, 'swagger', 'OpenAPI Specification');
-        }
-    };
-
-    const openAsyncAPIStudio = () => {
-        if (version.api_specs?.mqtt && onViewApiSpec) {
-            // Handle both string and FileData formats
-            const spec = typeof version.api_specs.mqtt === 'string'
-                ? { name: 'asyncapi.yaml', content: version.api_specs.mqtt, size: version.api_specs.mqtt.length }
-                : version.api_specs.mqtt;
-            onViewApiSpec(spec, 'mqtt', 'AsyncAPI Specification');
-        }
-    };
-
-    const viewApiDocumentation = () => {
-        const hasSwagger = version.api_specs?.openapi;
-        const hasMqtt = version.api_specs?.mqtt;
-
-        if (hasSwagger && hasMqtt) {
-            const choice = confirm('Which documentation would you like to view?\nOK = Swagger UI\nCancel = AsyncAPI Studio');
-            if (choice) {
-                openSwaggerUI();
-            } else {
-                openAsyncAPIStudio();
-            }
-        } else if (hasSwagger) {
-            openSwaggerUI();
-        } else if (hasMqtt) {
-            openAsyncAPIStudio();
-        } else {
-            alert('No API specifications available for this version');
-        }
-    };
-
     const hasSwaggerSpec = version.api_specs?.openapi;
     const hasMqttSpec = version.api_specs?.mqtt;
 
@@ -388,62 +348,6 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
 
                 {/* Sidebar */}
                 <div className="space-y-6">
-                    {/* Quick Actions */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Quick Actions</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full justify-start"
-                                    leftIcon={<FileText className="w-4 h-4" />}
-                                    onClick={viewApiDocumentation}
-                                >
-                                    View API Documentation
-                                </Button>
-
-                                {hasSwaggerSpec && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-full justify-start"
-                                        leftIcon={<Code className="w-4 h-4" />}
-                                        onClick={openSwaggerUI}
-                                    >
-                                        Open in Swagger UI
-                                    </Button>
-                                )}
-
-                                {hasMqttSpec && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-full justify-start"
-                                        leftIcon={<Wifi className="w-4 h-4" />}
-                                        onClick={openAsyncAPIStudio}
-                                    >
-                                        Open in AsyncAPI Studio
-                                    </Button>
-                                )}
-
-                                {onEditReleaseNotes && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-full justify-start"
-                                        leftIcon={<BookOpen className="w-4 h-4" />}
-                                        onClick={onEditReleaseNotes}
-                                    >
-                                        Edit Release Notes
-                                    </Button>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-
                     {/* Version Info */}
                     <Card>
                         <CardHeader>
@@ -490,8 +394,12 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                             <Code className="w-4 h-4 text-green-600" />
                                             <span className="text-gray-600">OpenAPI Spec</span>
                                         </div>
-                                        <Button variant="ghost" size="xs" onClick={openSwaggerUI}>
-                                            <ExternalLink className="w-3 h-3" />
+                                        <Button
+                                            variant="ghost"
+                                            size="xs"
+                                            onClick={() => setActiveTab('swagger')}
+                                        >
+                                            <Eye className="w-3 h-3" />
                                         </Button>
                                     </div>
                                 )}
@@ -501,8 +409,12 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                             <Wifi className="w-4 h-4 text-purple-600" />
                                             <span className="text-gray-600">AsyncAPI Spec</span>
                                         </div>
-                                        <Button variant="ghost" size="xs" onClick={openAsyncAPIStudio}>
-                                            <ExternalLink className="w-3 h-3" />
+                                        <Button
+                                            variant="ghost"
+                                            size="xs"
+                                            onClick={() => setActiveTab('mqtt')}
+                                        >
+                                            <Eye className="w-3 h-3" />
                                         </Button>
                                     </div>
                                 )}

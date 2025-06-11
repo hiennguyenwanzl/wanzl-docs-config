@@ -5,9 +5,15 @@ import Input from '../ui/Input.js';
 import Textarea from '../ui/Textarea.js';
 import Select from '../ui/Select.js';
 import ImageUpload from '../ui/ImageUpload.js';
-import { DEFAULTS, PROTOCOL_TYPE_OPTIONS, SERVICE_CATEGORY_OPTIONS, STATUS_OPTIONS, VALIDATION } from '@/constants';
+import { DEFAULTS, SERVICE_CATEGORY_OPTIONS, STATUS_OPTIONS, VALIDATION } from '@/constants';
 import { validateRequired, generateId } from '@/utils/helpers.ts';
 import type { ServiceFormProps, Service, ProtocolType, ValidationResult } from '@/types/index.ts';
+
+// Fixed protocol type options - only one protocol per service
+const PROTOCOL_TYPE_OPTIONS = [
+    { value: 'REST', label: 'REST API (Swagger/OpenAPI)' },
+    { value: 'MQTT', label: 'MQTT (AsyncAPI)' }
+];
 
 const ServiceForm: React.FC<ServiceFormProps> = ({
                                                      service,

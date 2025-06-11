@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Upload, Trash2, FileText, Code, Plus, AlertCircle } from 'lucide-react';
+import { Eye, Upload, Trash2, FileText, Code, Plus, AlertCircle, Wifi } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
@@ -23,6 +23,7 @@ interface VersionFormProps {
     version?: any;
     productId: string;
     serviceId: string;
+    serviceProtocolType: 'REST' | 'MQTT'; // Add service protocol type
     onSave: (versionData: any) => Promise<void>;
     onCancel: () => void;
     onPreview?: (version: any) => void;
@@ -33,6 +34,7 @@ const VersionForm: React.FC<VersionFormProps> = ({
                                                      version,
                                                      productId,
                                                      serviceId,
+                                                     serviceProtocolType,
                                                      onSave,
                                                      onCancel,
                                                      onPreview,
@@ -48,7 +50,6 @@ const VersionForm: React.FC<VersionFormProps> = ({
         breaking_changes: version?.breaking_changes || false,
         introduction: version?.introduction || '',
         getting_started: version?.getting_started || '',
-        supported_apis: version?.supported_apis || ['swagger'],
         api_specs: {
             openapi: version?.api_specs?.openapi || null,
             mqtt: version?.api_specs?.mqtt || null
@@ -56,7 +57,8 @@ const VersionForm: React.FC<VersionFormProps> = ({
         tutorials: version?.tutorials || [],
         code_examples: version?.code_examples || {},
         service_id: serviceId,
-        product_id: productId
+        product_id: productId,
+        service_protocol_type: serviceProtocolType
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -82,12 +84,6 @@ const VersionForm: React.FC<VersionFormProps> = ({
         { value: 'stable', label: 'Stable' },
         { value: 'beta', label: 'Beta' },
         { value: 'deprecated', label: 'Deprecated' }
-    ];
-
-    const apiTypeOptions = [
-        { value: 'swagger', label: 'Swagger/OpenAPI Only' },
-        { value: 'mqtt', label: 'MQTT/AsyncAPI Only' },
-        { value: 'both', label: 'Both Swagger and MQTT' }
     ];
 
     const updateField = (field: string, value: any) => {
@@ -135,11 +131,12 @@ const VersionForm: React.FC<VersionFormProps> = ({
         if (!formData.version) newErrors.version = 'Version is required';
         if (!formData.release_date) newErrors.release_date = 'Release date is required';
 
-        if (formData.supported_apis.includes('swagger') && !formData.api_specs.openapi) {
-            newErrors.openapi = 'OpenAPI specification is required for Swagger support';
+        // Validate API specs based on service protocol type
+        if (serviceProtocolType === 'REST' && !formData.api_specs.openapi) {
+            newErrors.openapi = 'OpenAPI specification is required for REST API services';
         }
-        if (formData.supported_apis.includes('mqtt') && !formData.api_specs.mqtt) {
-            newErrors.mqtt = 'AsyncAPI specification is required for MQTT support';
+        if (serviceProtocolType === 'MQTT' && !formData.api_specs.mqtt) {
+            newErrors.mqtt = 'AsyncAPI specification is required for MQTT services';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -152,9 +149,9 @@ const VersionForm: React.FC<VersionFormProps> = ({
             const versionData = {
                 ...formData,
                 tutorials: formData.tutorials.filter(t => t.title.trim() || t.content.trim()),
-                supports_swagger: formData.supported_apis.includes('swagger') || formData.supported_apis.includes('both'),
-                supports_mqtt: formData.supported_apis.includes('mqtt') || formData.supported_apis.includes('both'),
-                supported_apis: formData.supported_apis
+                supports_swagger: serviceProtocolType === 'REST',
+                supports_mqtt: serviceProtocolType === 'MQTT',
+                supported_apis: [serviceProtocolType.toLowerCase()]
             };
 
             await onSave(versionData);
@@ -165,13 +162,25 @@ const VersionForm: React.FC<VersionFormProps> = ({
         }
     };
 
-    const shouldShowSwaggerUpload = () => {
-        return formData.supported_apis.includes('swagger') || formData.supported_apis.includes('both');
+    const getProtocolInfo = () => {
+        if (serviceProtocolType === 'REST') {
+            return {
+                icon: <Code className="w-6 h-6 text-green-600" />,
+                title: 'REST API Version',
+                description: 'This version requires an OpenAPI/Swagger specification file',
+                fileType: 'OpenAPI Specification'
+            };
+        } else {
+            return {
+                icon: <Wifi className="w-6 h-6 text-purple-600" />,
+                title: 'MQTT API Version',
+                description: 'This version requires an AsyncAPI specification file',
+                fileType: 'AsyncAPI Specification'
+            };
+        }
     };
 
-    const shouldShowMqttUpload = () => {
-        return formData.supported_apis.includes('mqtt') || formData.supported_apis.includes('both');
-    };
+    const protocolInfo = getProtocolInfo();
 
     return (
         <div className="w-full max-w-4xl mx-auto">
@@ -183,7 +192,7 @@ const VersionForm: React.FC<VersionFormProps> = ({
                             {isEditing ? 'Edit API Version' : 'Create New API Version'}
                         </h2>
                         <p className="text-gray-600 mt-1 text-sm">
-                            {isEditing ? 'Update version information' : 'Add a new API version to this service'}
+                            {isEditing ? 'Update version information' : `Add a new ${serviceProtocolType} API version to this service`}
                         </p>
                     </div>
                     <div className="flex space-x-3">
@@ -211,6 +220,17 @@ const VersionForm: React.FC<VersionFormProps> = ({
                         >
                             {isSubmitting ? 'Saving...' : (isEditing ? 'Update Version' : 'Create Version')}
                         </Button>
+                    </div>
+                </div>
+
+                {/* Protocol Type Info */}
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="flex items-center space-x-3 mb-4">
+                        {protocolInfo.icon}
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{protocolInfo.title}</h3>
+                            <p className="text-gray-600 text-sm">{protocolInfo.description}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -285,54 +305,37 @@ const VersionForm: React.FC<VersionFormProps> = ({
                     </div>
                 </div>
 
-                {/* API Type Selection */}
+                {/* API Specification Upload */}
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">API Type Support</h3>
-                    <Select
-                        label="Supported API Types"
-                        value={formData.supported_apis[0] || 'swagger'}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            updateField('supported_apis', value === 'both' ? ['swagger', 'mqtt'] : [value]);
-                        }}
-                        options={apiTypeOptions}
-                        required
-                    />
-                </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{protocolInfo.fileType}</h3>
 
-                {/* API Specifications */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">API Specifications</h3>
+                    {serviceProtocolType === 'REST' && (
+                        <div className="space-y-4">
+                            <FileUpload
+                                label="OpenAPI Specification (Swagger)"
+                                description="Upload OpenAPI/Swagger YAML or JSON file"
+                                accept=".yaml,.yml,.json"
+                                currentFile={formData.api_specs.openapi}
+                                onFileUpload={(file) => updateApiSpec('openapi', file)}
+                                allowedTypes={['.yaml', '.yml', '.json']}
+                            />
+                            {errors.openapi && <p className="text-sm text-red-600">{errors.openapi}</p>}
+                        </div>
+                    )}
 
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        {shouldShowSwaggerUpload() && (
-                            <div className="space-y-4">
-                                <FileUpload
-                                    label="OpenAPI Specification (Swagger)"
-                                    description="Upload OpenAPI/Swagger YAML or JSON file"
-                                    accept=".yaml,.yml,.json"
-                                    currentFile={formData.api_specs.openapi}
-                                    onFileUpload={(file) => updateApiSpec('openapi', file)}
-                                    allowedTypes={['.yaml', '.yml', '.json']}
-                                />
-                                {errors.openapi && <p className="text-sm text-red-600">{errors.openapi}</p>}
-                            </div>
-                        )}
-
-                        {shouldShowMqttUpload() && (
-                            <div className="space-y-4">
-                                <FileUpload
-                                    label="AsyncAPI Specification (MQTT)"
-                                    description="Upload AsyncAPI YAML or JSON file for MQTT endpoints"
-                                    accept=".yaml,.yml,.json"
-                                    currentFile={formData.api_specs.mqtt}
-                                    onFileUpload={(file) => updateApiSpec('mqtt', file)}
-                                    allowedTypes={['.yaml', '.yml', '.json']}
-                                />
-                                {errors.mqtt && <p className="text-sm text-red-600">{errors.mqtt}</p>}
-                            </div>
-                        )}
-                    </div>
+                    {serviceProtocolType === 'MQTT' && (
+                        <div className="space-y-4">
+                            <FileUpload
+                                label="AsyncAPI Specification (MQTT)"
+                                description="Upload AsyncAPI YAML or JSON file for MQTT endpoints"
+                                accept=".yaml,.yml,.json"
+                                currentFile={formData.api_specs.mqtt}
+                                onFileUpload={(file) => updateApiSpec('mqtt', file)}
+                                allowedTypes={['.yaml', '.yml', '.json']}
+                            />
+                            {errors.mqtt && <p className="text-sm text-red-600">{errors.mqtt}</p>}
+                        </div>
+                    )}
                 </div>
 
                 {/* Documentation */}
@@ -428,7 +431,9 @@ const VersionForm: React.FC<VersionFormProps> = ({
                                     ...formData.code_examples,
                                     curl: e.target.value
                                 })}
-                                placeholder="curl -X POST https://api.example.com/v1/endpoint"
+                                placeholder={serviceProtocolType === 'REST'
+                                    ? "curl -X POST https://api.example.com/v1/endpoint"
+                                    : "mosquitto_pub -h broker.example.com -t topic/name -m 'message'"}
                                 rows={3}
                             />
                         </div>
@@ -443,7 +448,9 @@ const VersionForm: React.FC<VersionFormProps> = ({
                                     ...formData.code_examples,
                                     javascript: e.target.value
                                 })}
-                                placeholder="const response = await fetch('/api/endpoint', { method: 'POST' });"
+                                placeholder={serviceProtocolType === 'REST'
+                                    ? "const response = await fetch('/api/endpoint', { method: 'POST' });"
+                                    : "const mqtt = require('mqtt'); const client = mqtt.connect('mqtt://broker.example.com');"}
                                 rows={4}
                             />
                         </div>

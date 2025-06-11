@@ -61,36 +61,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     };
 
     const getVersionIcon = (version: any) => {
-        const hasSwagger = version.api_specs?.openapi || version.supported_apis?.includes('swagger');
-        const hasMqtt = version.api_specs?.mqtt || version.supported_apis?.includes('mqtt');
+        const protocolType = version.service_protocol_type;
 
-        if (hasSwagger && hasMqtt) {
-            return (
-                <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 rounded-sm bg-green-500 flex items-center justify-center">
-                        <Code className="w-2 h-2 text-white" />
-                    </div>
-                    <div className="w-3 h-3 rounded-sm bg-purple-500 flex items-center justify-center">
-                        <Wifi className="w-2 h-2 text-white" />
-                    </div>
-                </div>
-            );
-        } else if (hasMqtt) {
+        if (protocolType === 'MQTT') {
             return (
                 <div className="w-4 h-4 rounded-sm bg-purple-500 flex items-center justify-center">
                     <Wifi className="w-2.5 h-2.5 text-white" />
                 </div>
             );
-        } else if (hasSwagger) {
+        } else {
             return (
                 <div className="w-4 h-4 rounded-sm bg-green-500 flex items-center justify-center">
                     <Code className="w-2.5 h-2.5 text-white" />
-                </div>
-            );
-        } else {
-            return (
-                <div className="w-4 h-4 rounded-sm bg-gray-400 flex items-center justify-center">
-                    <FileText className="w-2.5 h-2.5 text-white" />
                 </div>
             );
         }
@@ -113,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
             <div
                 key={version.version}
-                className={`ml-12 relative ${isSelected ? 'bg-blue-100' : ''}`}
+                className="ml-12 relative"
             >
                 {/* Connection line to parent service */}
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200 -ml-6"></div>
@@ -121,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <button
                     onClick={() => onSelectVersion(productId, serviceId, version.version)}
-                    className={`w-full text-left px-3 py-2.5 text-sm transition-all duration-200 group hover:bg-gray-50 flex items-center space-x-3 ${
+                    className={`w-full text-left px-3 py-2.5 text-sm transition-all duration-200 group hover:bg-gray-50 flex items-center space-x-3 rounded-lg ${
                         isSelected
                             ? 'text-blue-900 font-medium bg-blue-100'
                             : 'text-gray-600 hover:text-gray-900'
@@ -168,10 +150,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="absolute left-6 top-0 bottom-0 w-px bg-gray-200"></div>
                 <div className="absolute left-6 top-6 w-6 h-px bg-gray-200"></div>
 
-                <div className={`ml-6 ${isServiceSelected ? 'bg-blue-100' : ''}`}>
+                <div className="ml-6">
                     <button
                         onClick={() => onSelectService(productId, service.id)}
-                        className={`w-full text-left px-4 py-3 text-sm transition-all duration-200 flex items-center group hover:bg-gray-50 ${
+                        className={`w-full text-left px-4 py-3 text-sm transition-all duration-200 flex items-center group hover:bg-gray-50 rounded-lg ${
                             isServiceSelected
                                 ? 'text-blue-900 font-medium bg-blue-100'
                                 : 'text-gray-700 hover:text-gray-900'
@@ -249,60 +231,58 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         return (
             <div key={product.id} className="mb-2">
-                <div className={`${isProductSelected ? 'bg-blue-100' : ''}`}>
-                    <button
-                        onClick={() => onSelectProduct(product.id)}
-                        className={`w-full text-left px-4 py-4 transition-all duration-200 flex items-center group hover:bg-gray-50 ${
-                            isProductSelected
-                                ? 'text-blue-900 font-semibold bg-blue-100'
-                                : 'text-gray-800 hover:text-gray-900'
-                        }`}
-                    >
-                        <div className="flex items-center space-x-3 flex-1 min-w-0">
-                            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                                <Package className="w-4 h-4 text-white" />
-                            </div>
-                            {!isCollapsed && (
-                                <>
-                                    <span className="truncate font-semibold text-base">{product.display_name || product.name}</span>
-                                    <div className="flex items-center space-x-2 ml-auto">
-                                        <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full font-semibold">
-                                            {servicesCount}
-                                        </span>
-                                        {productServices.length > 0 && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onToggleProduct(product.id);
-                                                }}
-                                                className="p-1 hover:bg-indigo-200 rounded transition-colors duration-200"
-                                            >
-                                                {isExpanded ? (
-                                                    <ChevronDown className="w-4 h-4" />
-                                                ) : (
-                                                    <ChevronRight className="w-4 h-4" />
-                                                )}
-                                            </button>
-                                        )}
-                                    </div>
-                                </>
-                            )}
+                <button
+                    onClick={() => onSelectProduct(product.id)}
+                    className={`w-full text-left px-4 py-4 transition-all duration-200 flex items-center group hover:bg-gray-50 rounded-lg ${
+                        isProductSelected
+                            ? 'text-blue-900 font-semibold bg-blue-100'
+                            : 'text-gray-800 hover:text-gray-900'
+                    }`}
+                >
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <Package className="w-4 h-4 text-white" />
                         </div>
-
-                        {/* Tooltip for collapsed mode */}
-                        {isCollapsed && (
-                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                                {product.display_name || product.name} ({servicesCount} services)
-                            </div>
+                        {!isCollapsed && (
+                            <>
+                                <span className="truncate font-semibold text-base">{product.display_name || product.name}</span>
+                                <div className="flex items-center space-x-2 ml-auto">
+                                    <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full font-semibold">
+                                        {servicesCount}
+                                    </span>
+                                    {productServices.length > 0 && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onToggleProduct(product.id);
+                                            }}
+                                            className="p-1 hover:bg-indigo-200 rounded transition-colors duration-200"
+                                        >
+                                            {isExpanded ? (
+                                                <ChevronDown className="w-4 h-4" />
+                                            ) : (
+                                                <ChevronRight className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+                            </>
                         )}
-                    </button>
+                    </div>
 
-                    {isExpanded && productServices.length > 0 && !isCollapsed && (
-                        <div className="pb-2">
-                            {productServices.map(service => renderService(service, product.id))}
+                    {/* Tooltip for collapsed mode */}
+                    {isCollapsed && (
+                        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+                            {product.display_name || product.name} ({servicesCount} services)
                         </div>
                     )}
-                </div>
+                </button>
+
+                {isExpanded && productServices.length > 0 && !isCollapsed && (
+                    <div className="pb-2">
+                        {productServices.map(service => renderService(service, product.id))}
+                    </div>
+                )}
             </div>
         );
     };
