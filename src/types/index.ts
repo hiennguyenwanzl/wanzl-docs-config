@@ -42,7 +42,7 @@ export interface Service {
     icon?: string | null;
     overview?: string;
     key_features: string[];
-    supported_protocols: Protocol[];
+    protocol_type: 'REST' | 'MQTT'; // Single protocol per service
     integration_guide?: string;
     versions_count?: number;
     latest_version?: string;
@@ -84,9 +84,10 @@ export interface Tutorial {
     content: string;
 }
 
+// Fixed ApiSpecs interface - unified type for both cases
 export interface ApiSpecs {
-    openapi?: string;
-    mqtt?: string;
+    openapi?: string | FileData | null;
+    mqtt?: string | FileData | null;
 }
 
 export interface ReleaseNote {
@@ -261,12 +262,6 @@ export interface VersionFormProps {
     isEditing?: boolean;
 }
 
-// Make sure ApiSpecs interface includes both possible formats
-export interface ApiSpecs {
-    openapi?: string | FileData | null;
-    mqtt?: string | FileData | null;
-}
-
 export interface ImageUploadProps {
     onImageUpload: (image: string | null) => void;
     currentImage?: string | null;
@@ -393,30 +388,11 @@ export interface ExportStructure {
     };
 }
 
-// Form Component Props
-export interface ProductFormProps {
-    product?: Product | null;
-    onSave: (product: Product) => void | Promise<void>;
-    onCancel: () => void;
-    onPreview?: (product: Product) => void;
-    isEditing?: boolean;
-}
 
-export interface ServiceFormProps {
-    service?: Service | null;
-    productId: string;
-    onSave: (service: Service) => void | Promise<void>;
-    onCancel: () => void;
-    onPreview?: (service: Service) => void;
-    isEditing?: boolean;
-}
+// Protocol Types - Single protocol per service
+export const PROTOCOL_TYPES = {
+    REST: 'REST',
+    MQTT: 'MQTT'
+} as const;
 
-export interface VersionFormProps {
-    version?: ApiVersion | null;
-    productId: string;
-    serviceId: string;
-    onSave: (version: ApiVersion) => void | Promise<void>;
-    onCancel: () => void;
-    onPreview?: (version: ApiVersion) => void;
-    isEditing?: boolean;
-}
+export type ProtocolType = typeof PROTOCOL_TYPES[keyof typeof PROTOCOL_TYPES];

@@ -1,11 +1,9 @@
 import React from 'react';
 import {
     Package,
-    Plus,
     ChevronRight,
     ChevronDown,
     Settings,
-    Globe,
     Eye,
     Menu,
     X,
@@ -31,6 +29,8 @@ interface SidebarProps {
     onAddProduct: () => void;
     expandedProducts: string[];
     onToggleProduct: (productId: string) => void;
+    onPreviewProject?: () => void;
+    onSettings?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -45,7 +45,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                                              onSelectVersion,
                                              onAddProduct,
                                              expandedProducts,
-                                             onToggleProduct
+                                             onToggleProduct,
+                                             onPreviewProject,
+                                             onSettings
                                          }) => {
     const [isCollapsed, setIsCollapsed] = React.useState(false);
     const [isMobileOpen, setIsMobileOpen] = React.useState(false);
@@ -111,7 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         return (
             <div
                 key={version.version}
-                className={`ml-12 relative ${isSelected ? 'bg-blue-50 rounded-r-lg border-l-2 border-blue-500' : ''}`}
+                className={`ml-12 relative ${isSelected ? 'bg-blue-100' : ''}`}
             >
                 {/* Connection line to parent service */}
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200 -ml-6"></div>
@@ -121,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => onSelectVersion(productId, serviceId, version.version)}
                     className={`w-full text-left px-3 py-2.5 text-sm transition-all duration-200 group hover:bg-gray-50 flex items-center space-x-3 ${
                         isSelected
-                            ? 'text-blue-900 font-medium bg-blue-50'
+                            ? 'text-blue-900 font-medium bg-blue-100'
                             : 'text-gray-600 hover:text-gray-900'
                     }`}
                 >
@@ -166,12 +168,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="absolute left-6 top-0 bottom-0 w-px bg-gray-200"></div>
                 <div className="absolute left-6 top-6 w-6 h-px bg-gray-200"></div>
 
-                <div className={`ml-6 ${isServiceSelected ? 'bg-blue-50 rounded-r-lg border-l-2 border-blue-400' : ''}`}>
+                <div className={`ml-6 ${isServiceSelected ? 'bg-blue-100' : ''}`}>
                     <button
                         onClick={() => onSelectService(productId, service.id)}
                         className={`w-full text-left px-4 py-3 text-sm transition-all duration-200 flex items-center group hover:bg-gray-50 ${
                             isServiceSelected
-                                ? 'text-blue-900 font-medium bg-blue-50'
+                                ? 'text-blue-900 font-medium bg-blue-100'
                                 : 'text-gray-700 hover:text-gray-900'
                         }`}
                     >
@@ -247,12 +249,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         return (
             <div key={product.id} className="mb-2">
-                <div className={`${isProductSelected ? 'bg-blue-50 rounded-lg border-l-4 border-blue-500' : ''}`}>
+                <div className={`${isProductSelected ? 'bg-blue-100' : ''}`}>
                     <button
                         onClick={() => onSelectProduct(product.id)}
-                        className={`w-full text-left px-4 py-4 transition-all duration-200 flex items-center group hover:bg-gray-50 rounded-lg ${
+                        className={`w-full text-left px-4 py-4 transition-all duration-200 flex items-center group hover:bg-gray-50 ${
                             isProductSelected
-                                ? 'text-blue-900 font-semibold bg-blue-50'
+                                ? 'text-blue-900 font-semibold bg-blue-100'
                                 : 'text-gray-800 hover:text-gray-900'
                         }`}
                     >
@@ -370,28 +372,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     <PanelLeftClose className="w-4 h-4" />
                                 </Button>
                             </div>
-
-                            {/* Add Product Button */}
-                            <div className="mt-4">
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    onClick={onAddProduct}
-                                    leftIcon={<Plus className="w-4 h-4" />}
-                                    className="w-full"
-                                >
-                                    Add Product
-                                </Button>
-                            </div>
                         </>
                     )}
                 </div>
 
-                {/* Products List - only show when expanded */}
-                {!isCollapsed && (
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        <div className="p-4">
-                            {products.length === 0 ? (
+                {/* Products List */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-4">
+                        {products.length === 0 ? (
+                            !isCollapsed && (
                                 <div className="text-center py-12">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                                         <Package className="w-8 h-8 text-gray-400" />
@@ -404,43 +393,74 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         variant="primary"
                                         size="sm"
                                         onClick={onAddProduct}
-                                        leftIcon={<Plus className="w-4 h-4" />}
+                                        leftIcon={<Package className="w-4 h-4" />}
                                     >
                                         Create Product
                                     </Button>
                                 </div>
-                            ) : (
-                                <div className="space-y-1">
-                                    {products.map(renderProduct)}
-                                </div>
-                            )}
-                        </div>
+                            )
+                        ) : (
+                            <div className="space-y-1">
+                                {products.map(renderProduct)}
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
 
-                {/* Footer - only show when expanded */}
-                {!isCollapsed && (
-                    <div className="p-4 border-t border-gray-200 flex-shrink-0 bg-gray-50">
+                {/* Footer with Settings and Preview */}
+                <div className="p-4 border-t border-gray-200 flex-shrink-0 bg-gray-50">
+                    {isCollapsed ? (
+                        // Collapsed footer - icon buttons only
+                        <div className="space-y-2 flex flex-col items-center">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onPreviewProject}
+                                className="w-8 h-8 p-0 text-gray-600 hover:text-gray-900 relative group"
+                            >
+                                <Eye className="w-4 h-4" />
+                                {/* Tooltip */}
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+                                    Preview Project
+                                </div>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onSettings}
+                                className="w-8 h-8 p-0 text-gray-600 hover:text-gray-900 relative group"
+                            >
+                                <Settings className="w-4 h-4" />
+                                {/* Tooltip */}
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+                                    Settings
+                                </div>
+                            </Button>
+                        </div>
+                    ) : (
+                        // Expanded footer - full buttons
                         <div className="space-y-2">
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 className="w-full justify-start text-gray-600 hover:text-gray-900"
-                                leftIcon={<Globe className="w-4 h-4" />}
+                                leftIcon={<Eye className="w-4 h-4" />}
+                                onClick={onPreviewProject}
                             >
-                                Preview Site
+                                Preview Project
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 className="w-full justify-start text-gray-600 hover:text-gray-900"
                                 leftIcon={<Settings className="w-4 h-4" />}
+                                onClick={onSettings}
                             >
                                 Settings
                             </Button>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </>
     );

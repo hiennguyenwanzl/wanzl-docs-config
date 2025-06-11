@@ -1,4 +1,6 @@
 // API Types
+import {ProtocolType} from "@/types";
+
 export const API_TYPES = {
     SWAGGER: 'swagger',
     MQTT: 'mqtt'
@@ -37,7 +39,7 @@ export const PRODUCT_CATEGORIES = [
 
 export type ProductCategory = typeof PRODUCT_CATEGORIES[number];
 
-// Protocols
+// Protocols (kept for compatibility)
 export const PROTOCOLS = [
     'REST',
     'MQTT',
@@ -96,7 +98,7 @@ export const DEFAULTS = {
         category: 'general',
         overview: '',
         key_features: [''],
-        supported_protocols: ['REST'] as Protocol[],
+        protocol_type: 'REST' as ProtocolType, // Single protocol per service
         integration_guide: '',
         status: 'active' as EntityStatus,
         sort_order: 1
@@ -119,7 +121,7 @@ export const DEFAULTS = {
 export const VALIDATION = {
     REQUIRED_FIELDS: {
         PRODUCT: ['name', 'display_name', 'short_description'],
-        SERVICE: ['name', 'display_name', 'short_description'],
+        SERVICE: ['name', 'display_name', 'short_description', 'protocol_type'],
         VERSION: ['version']
     },
     MIN_LENGTHS: {
@@ -153,7 +155,13 @@ export const EXPORT_STRUCTURE = {
     }
 } as const;
 
-// Protocol Options for Forms
+// Protocol Type Options for Forms
+export const PROTOCOL_TYPE_OPTIONS = [
+    { value: 'REST', label: 'REST API (Swagger/OpenAPI)' },
+    { value: 'MQTT', label: 'MQTT (AsyncAPI)' }
+];
+
+// Protocol Options for Forms (kept for compatibility)
 export const PROTOCOL_OPTIONS = PROTOCOLS.map(protocol => ({
     value: protocol,
     label: protocol === 'REST' ? 'REST API' : protocol

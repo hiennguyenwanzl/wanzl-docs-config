@@ -124,7 +124,7 @@ const useProjectData = (initialData: ProjectData = initialState): UseProjectData
             category: serviceData.category || 'general',
             status: serviceData.status || 'active',
             key_features: serviceData.key_features || [''],
-            supported_protocols: serviceData.supported_protocols || ['REST'],
+            supported_protocols: serviceData.protocol_type || ['REST'],
             sort_order: serviceData.sort_order || 1,
             created_at: formatDate(),
             updated_at: formatDate()

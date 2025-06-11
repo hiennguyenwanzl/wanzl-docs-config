@@ -5,9 +5,9 @@ import Input from '../ui/Input.js';
 import Textarea from '../ui/Textarea.js';
 import Select from '../ui/Select.js';
 import ImageUpload from '../ui/ImageUpload.js';
-import { DEFAULTS, PROTOCOL_OPTIONS, SERVICE_CATEGORY_OPTIONS, STATUS_OPTIONS, VALIDATION } from '../../constants';
-import { validateRequired, generateId } from '../../utils/helpers.js';
-import type { ServiceFormProps, Service, Protocol, ValidationResult } from '../../types';
+import { DEFAULTS, PROTOCOL_TYPE_OPTIONS, SERVICE_CATEGORY_OPTIONS, STATUS_OPTIONS, VALIDATION } from '@/constants';
+import { validateRequired, generateId } from '@/utils/helpers.ts';
+import type { ServiceFormProps, Service, ProtocolType, ValidationResult } from '@/types/index.ts';
 
 const ServiceForm: React.FC<ServiceFormProps> = ({
                                                      service,
@@ -64,32 +64,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         }));
     };
 
-    const addProtocol = (): void => {
-        const availableProtocols = PROTOCOL_OPTIONS.map(p => p.value).filter(
-            p => !(formData.supported_protocols || []).includes(p as Protocol)
-        );
-        if (availableProtocols.length > 0) {
-            setFormData(prev => ({
-                ...prev,
-                supported_protocols: [...(prev.supported_protocols || []), availableProtocols[0] as Protocol]
-            }));
-        }
-    };
-
-    const updateProtocol = (index: number, value: string): void => {
-        setFormData(prev => ({
-            ...prev,
-            supported_protocols: prev.supported_protocols?.map((p, i) => i === index ? value as Protocol : p) || []
-        }));
-    };
-
-    const removeProtocol = (index: number): void => {
-        setFormData(prev => ({
-            ...prev,
-            supported_protocols: prev.supported_protocols?.filter((_, i) => i !== index) || []
-        }));
-    };
-
     const validateForm = (): boolean => {
         const validation: ValidationResult = validateRequired(
             formData as Record<string, any>,
@@ -97,12 +71,17 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         );
         const newErrors = { ...validation.errors };
 
+        // Additional validations
         if (formData.name && formData.name.length < VALIDATION.MIN_LENGTHS.name) {
             newErrors.name = `Name must be at least ${VALIDATION.MIN_LENGTHS.name} characters`;
         }
 
         if (formData.short_description && formData.short_description.length < VALIDATION.MIN_LENGTHS.short_description) {
             newErrors.short_description = `Description must be at least ${VALIDATION.MIN_LENGTHS.short_description} characters`;
+        }
+
+        if (!formData.protocol_type) {
+            newErrors.protocol_type = 'Protocol type is required';
         }
 
         setErrors(newErrors);
@@ -128,7 +107,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 category: formData.category || 'general',
                 status: formData.status || 'active',
                 key_features: (formData.key_features || []).filter(f => f.trim()),
-                supported_protocols: formData.supported_protocols || ['REST'],
+                protocol_type: formData.protocol_type || 'REST',
                 sort_order: formData.sort_order || 1,
                 display_name: formData.display_name || formData.name
             } as Service;
@@ -219,7 +198,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-6">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-6">
                         <Select
                             label="Category"
                             value={formData.category || ''}
@@ -228,11 +207,51 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                             required
                         />
                         <Select
+                            label="Protocol Type"
+                            value={formData.protocol_type || ''}
+                            onChange={(e) => updateField('protocol_type', e.target.value as ProtocolType)}
+                            options={PROTOCOL_TYPE_OPTIONS}
+                            error={errors.protocol_type}
+                            required
+                            helperText="Choose the API protocol this service supports"
+                        />
+                        <Select
                             label="Status"
                             value={formData.status || ''}
                             onChange={(e) => updateField('status', e.target.value)}
                             options={STATUS_OPTIONS}
                         />
+                    </div>
+                </div>
+
+                {/* Protocol Information */}
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Protocol Information</h3>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0">
+                                {formData.protocol_type === 'REST' ? (
+                                    <div className="w-8 h-8 rounded bg-green-500 flex items-center justify-center">
+                                        <span className="text-white text-xs font-bold">API</span>
+                                    </div>
+                                ) : (
+                                    <div className="w-8 h-8 rounded bg-purple-500 flex items-center justify-center">
+                                        <span className="text-white text-xs font-bold">MQTT</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="font-medium text-blue-900">
+                                    {formData.protocol_type === 'REST' ? 'REST API Service' : 'MQTT Service'}
+                                </h4>
+                                <p className="text-sm text-blue-700 mt-1">
+                                    {formData.protocol_type === 'REST'
+                                        ? 'This service will use REST API with OpenAPI/Swagger documentation. API versions will require OpenAPI specification files.'
+                                        : 'This service will use MQTT protocol with AsyncAPI documentation. API versions will require AsyncAPI specification files.'
+                                    }
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -290,46 +309,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => removeFeature(index)}
-                                        className="text-red-600 hover:text-red-700"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Supported Protocols */}
-                    <div className="mt-6">
-                        <div className="flex items-center justify-between mb-3">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Supported Protocols
-                            </label>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addProtocol}
-                                leftIcon={<Plus className="w-4 h-4" />}
-                                disabled={(formData.supported_protocols || []).length >= PROTOCOL_OPTIONS.length}
-                            >
-                                Add Protocol
-                            </Button>
-                        </div>
-                        <div className="space-y-3">
-                            {(formData.supported_protocols || ['REST']).map((protocol, index) => (
-                                <div key={index} className="flex items-center space-x-3">
-                                    <Select
-                                        value={protocol}
-                                        onChange={(e) => updateProtocol(index, e.target.value)}
-                                        options={PROTOCOL_OPTIONS}
-                                        className="flex-1"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => removeProtocol(index)}
                                         className="text-red-600 hover:text-red-700"
                                     >
                                         <Trash2 className="w-4 h-4" />

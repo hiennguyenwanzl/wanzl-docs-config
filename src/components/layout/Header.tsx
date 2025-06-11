@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Search } from 'lucide-react';
+import { Package, Search, FileText } from 'lucide-react';
 import Button from '../ui/Button.js';
 import Input from '../ui/Input.js';
 
@@ -9,7 +9,9 @@ interface HeaderProps {
     onImport: () => void;
     onExport: () => void;
     onSave: () => void;
+    onOpenTemplate?: () => void;
     hasChanges?: boolean;
+    hasProjects?: boolean; // New prop to determine if template button should be shown
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -18,7 +20,9 @@ const Header: React.FC<HeaderProps> = ({
                                            onImport,
                                            onExport,
                                            onSave,
-                                           hasChanges = false
+                                           onOpenTemplate,
+                                           hasChanges = false,
+                                           hasProjects = false
                                        }) => {
     return (
         <header className="bg-white border-b border-gray-200 px-6 py-4">
@@ -47,6 +51,18 @@ const Header: React.FC<HeaderProps> = ({
 
                 {/* Actions */}
                 <div className="flex items-center space-x-3">
+                    {/* Template Button - only show when no projects exist */}
+                    {!hasProjects && onOpenTemplate && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onOpenTemplate}
+                            leftIcon={<FileText className="w-4 h-4" />}
+                        >
+                            Open Template
+                        </Button>
+                    )}
+
                     <Button
                         variant="outline"
                         size="sm"
