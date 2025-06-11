@@ -17,47 +17,31 @@ import Button from '../ui/Button';
 import Breadcrumb from '../ui/Breadcrumb';
 import Card, { CardHeader, CardTitle, CardContent } from '../ui/Card';
 import ApiSpecViewer from '../ui/ApiSpecViewer';
+import type { ApiVersion } from '@/types';
 
-interface EnhancedVersionDetailViewProps {
-    version: {
-        version: string;
-        status: string;
-        release_date: string;
-        deprecated?: boolean;
-        beta?: boolean;
-        breaking_changes?: boolean;
-        introduction?: string;
-        getting_started?: string;
-        tutorials?: Array<{ title: string; content: string }>;
-        code_examples?: Record<string, string>;
-        supported_until?: string;
-        api_specs?: {
-            openapi?: { name: string; content: string; size?: number };
-            mqtt?: { name: string; content: string; size?: number };
-        };
-        supported_apis?: string[];
-    };
+interface VersionDetailViewProps {
+    version: ApiVersion;
     productId: string;
     serviceId: string;
     onGoToService: () => void;
     onGoToProduct: () => void;
     onGoToProductsList: () => void;
-    onEditVersion: (version: any) => void;
+    onEditVersion: (version: ApiVersion) => void;
     onEditReleaseNotes?: () => void;
     onViewApiSpec?: (spec: any, type: 'swagger' | 'mqtt', title: string) => void;
 }
 
-const VersionDetailView: React.FC<EnhancedVersionDetailViewProps> = ({
-                                                                                 version,
-                                                                                 productId,
-                                                                                 serviceId,
-                                                                                 onGoToService,
-                                                                                 onGoToProduct,
-                                                                                 onGoToProductsList,
-                                                                                 onEditVersion,
-                                                                                 onEditReleaseNotes,
-                                                                                 onViewApiSpec
-                                                                             }) => {
+const VersionDetailView: React.FC<VersionDetailViewProps> = ({
+                                                                 version,
+                                                                 productId,
+                                                                 serviceId,
+                                                                 onGoToService,
+                                                                 onGoToProduct,
+                                                                 onGoToProductsList,
+                                                                 onEditVersion,
+                                                                 onEditReleaseNotes,
+                                                                 onViewApiSpec
+                                                             }) => {
     const [activeTab, setActiveTab] = useState('overview');
 
     const breadcrumbItems = [
@@ -114,13 +98,21 @@ const VersionDetailView: React.FC<EnhancedVersionDetailViewProps> = ({
 
     const openSwaggerUI = () => {
         if (version.api_specs?.openapi && onViewApiSpec) {
-            onViewApiSpec(version.api_specs.openapi, 'swagger', 'OpenAPI Specification');
+            // Handle both string and FileData formats
+            const spec = typeof version.api_specs.openapi === 'string'
+                ? { name: 'openapi.yaml', content: version.api_specs.openapi, size: version.api_specs.openapi.length }
+                : version.api_specs.openapi;
+            onViewApiSpec(spec, 'swagger', 'OpenAPI Specification');
         }
     };
 
     const openAsyncAPIStudio = () => {
         if (version.api_specs?.mqtt && onViewApiSpec) {
-            onViewApiSpec(version.api_specs.mqtt, 'mqtt', 'AsyncAPI Specification');
+            // Handle both string and FileData formats
+            const spec = typeof version.api_specs.mqtt === 'string'
+                ? { name: 'asyncapi.yaml', content: version.api_specs.mqtt, size: version.api_specs.mqtt.length }
+                : version.api_specs.mqtt;
+            onViewApiSpec(spec, 'mqtt', 'AsyncAPI Specification');
         }
     };
 
@@ -324,7 +316,9 @@ const VersionDetailView: React.FC<EnhancedVersionDetailViewProps> = ({
                                 </p>
                             </div>
                             <ApiSpecViewer
-                                spec={version.api_specs.openapi}
+                                spec={typeof version.api_specs.openapi === 'string'
+                                    ? { name: 'openapi.yaml', content: version.api_specs.openapi, size: version.api_specs.openapi.length }
+                                    : version.api_specs.openapi}
                                 type="swagger"
                                 title="OpenAPI Specification"
                             />
@@ -340,7 +334,9 @@ const VersionDetailView: React.FC<EnhancedVersionDetailViewProps> = ({
                                 </p>
                             </div>
                             <ApiSpecViewer
-                                spec={version.api_specs.mqtt}
+                                spec={typeof version.api_specs.mqtt === 'string'
+                                    ? { name: 'asyncapi.yaml', content: version.api_specs.mqtt, size: version.api_specs.mqtt.length }
+                                    : version.api_specs.mqtt}
                                 type="mqtt"
                                 title="AsyncAPI Specification"
                             />

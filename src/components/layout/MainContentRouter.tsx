@@ -248,7 +248,7 @@ const MainContentRouter: React.FC<MainContentRouterProps> = ({
 
                 return (
                     <VersionDetailView
-                        version={version.version}
+                        version={version}
                         productId={selectedProduct!}
                         serviceId={selectedService!}
                         onGoToService={() => onNavigate.goToServiceDetail(selectedProduct!, selectedService!)}

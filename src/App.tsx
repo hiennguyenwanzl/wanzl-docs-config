@@ -7,6 +7,7 @@ import Sidebar from './components/layout/Sidebar';
 import MainContentRouter from './components/layout/MainContentRouter';
 import ProductForm from './components/forms/ProductForm';
 import ServiceForm from './components/forms/ServiceForm';
+import VersionForm from './components/forms/VersionForm';
 import Modal from './components/ui/Modal';
 import Button from './components/ui/Button';
 import Card, { CardContent } from './components/ui/Card';
@@ -19,170 +20,10 @@ import {
 } from './utils/exportUtils';
 import {
     EMPTY_PROJECT_DATA,
-    TEMPLATE_PRODUCTS,
-    TEMPLATE_SERVICES,
-    TEMPLATE_VERSIONS,
     initializeProjectWithTemplates
 } from './data/defaultData';
 import { generateId, formatDate } from './utils/helpers';
 import type { ProjectData, FileData, Product, Service, ApiVersion } from './types';
-
-// Enhanced Version Form Component
-const EnhancedVersionForm: React.FC<{
-    version?: any;
-    productId: string;
-    serviceId: string;
-    onSave: (data: any) => Promise<void>;
-    onCancel: () => void;
-    onPreview?: (data: any) => void;
-    isEditing?: boolean;
-}> = ({ version, productId, serviceId, onSave, onCancel, onPreview, isEditing = false }) => {
-    const [formData, setFormData] = useState({
-        version: version?.version || '1.0.0',
-        status: version?.status || 'stable',
-        release_date: version?.release_date?.split('T')[0] || new Date().toISOString().split('T')[0],
-        supported_until: version?.supported_until?.split('T')[0] || '',
-        deprecated: version?.deprecated || false,
-        beta: version?.beta || false,
-        breaking_changes: version?.breaking_changes || false,
-        introduction: version?.introduction || '',
-        getting_started: version?.getting_started || '',
-        supported_apis: version?.supported_apis || ['swagger'],
-        api_specs: {
-            openapi: version?.api_specs?.openapi || null,
-            mqtt: version?.api_specs?.mqtt || null
-        },
-        tutorials: version?.tutorials || [],
-        release_notes: version?.release_notes || [],
-        service_id: serviceId,
-        product_id: productId
-    });
-
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    React.useEffect(() => {
-        if (!isEditing && !version) {
-            setFormData(prev => ({
-                ...prev,
-                api_specs: { openapi: null, mqtt: null },
-                tutorials: [],
-                release_notes: [],
-                introduction: '',
-                getting_started: ''
-            }));
-        }
-    }, [isEditing, version]);
-
-    const statusOptions = [
-        { value: 'stable', label: 'Stable' },
-        { value: 'beta', label: 'Beta' },
-        { value: 'deprecated', label: 'Deprecated' }
-    ];
-
-    const updateField = (field: string, value: any) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-        if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: '' }));
-        }
-    };
-
-    const handleSubmit = async () => {
-        const newErrors: Record<string, string> = {};
-        if (!formData.version) newErrors.version = 'Version is required';
-        if (!formData.release_date) newErrors.release_date = 'Release date is required';
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
-
-        setIsSubmitting(true);
-        try {
-            await onSave(formData);
-        } catch (error) {
-            console.error('Failed to save version:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-xl font-bold text-gray-900">
-                        {isEditing ? 'Edit API Version' : 'Create New API Version'}
-                    </h2>
-                    <p className="text-gray-600 mt-1 text-sm">
-                        {isEditing ? 'Update version information' : 'Add a new API version to this service'}
-                    </p>
-                </div>
-                <div className="flex space-x-3">
-                    <Button type="button" variant="secondary" onClick={onCancel}>
-                        Cancel
-                    </Button>
-                    <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
-                        {isSubmitting ? 'Saving...' : (isEditing ? 'Update Version' : 'Create Version')}
-                    </Button>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Version Number *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.version}
-                            onChange={(e) => updateField('version', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            {statusOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </input>
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Documentation</h3>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Introduction
-                        </label>
-                        <textarea
-                            value={formData.introduction}
-                            onChange={(e) => updateField('introduction', e.target.value)}
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Brief introduction to this API version..."
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Getting Started
-                        </label>
-                        <textarea
-                            value={formData.getting_started}
-                            onChange={(e) => updateField('getting_started', e.target.value)}
-                            rows={4}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Instructions for getting started with this API..."
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // File Upload Component for Import
 const FileUpload: React.FC<{ onFileUpload: (data: Partial<ProjectData>) => void }> = ({ onFileUpload }) => {
@@ -260,7 +101,7 @@ function App() {
         return projectData.versions[productId]?.[serviceId]?.length || 0;
     }, [projectData.versions]);
 
-    // Navigation functions
+    // Navigation functions - Enhanced with automatic expansion
     const navigationHandlers = {
         goToProductsList: () => {
             setCurrentView('products');
@@ -273,18 +114,43 @@ function App() {
             setSelectedService(null);
             setSelectedVersion(null);
             setCurrentView('product_detail');
+
+            // Auto-expand the product in sidebar
+            if (!expandedProducts.includes(productId)) {
+                setExpandedProducts(prev => [...prev, productId]);
+            }
         },
         goToServiceDetail: (productId: string, serviceId: string) => {
             setSelectedProduct(productId);
             setSelectedService(serviceId);
             setSelectedVersion(null);
             setCurrentView('service_detail');
+
+            // Auto-expand the product and service in sidebar
+            const productExpanded = expandedProducts.includes(productId);
+            const serviceExpanded = expandedProducts.includes(`${productId}-${serviceId}`);
+
+            const newExpanded = [...expandedProducts];
+            if (!productExpanded) newExpanded.push(productId);
+            if (!serviceExpanded) newExpanded.push(`${productId}-${serviceId}`);
+
+            setExpandedProducts(newExpanded);
         },
         goToVersionDetail: (productId: string, serviceId: string, versionId: string) => {
             setSelectedProduct(productId);
             setSelectedService(serviceId);
             setSelectedVersion(versionId);
             setCurrentView('version_detail');
+
+            // Auto-expand the product and service in sidebar
+            const productExpanded = expandedProducts.includes(productId);
+            const serviceExpanded = expandedProducts.includes(`${productId}-${serviceId}`);
+
+            const newExpanded = [...expandedProducts];
+            if (!productExpanded) newExpanded.push(productId);
+            if (!serviceExpanded) newExpanded.push(`${productId}-${serviceId}`);
+
+            setExpandedProducts(newExpanded);
         }
     };
 
@@ -305,6 +171,11 @@ function App() {
             delete updatedData.versions[productId];
             delete updatedData.apiSpecs[productId];
             setProjectData(updatedData);
+
+            // Clear selection if deleted product was selected
+            if (selectedProduct === productId) {
+                navigationHandlers.goToProductsList();
+            }
         },
         handleAddService: () => {
             setEditingService(null);
@@ -327,6 +198,11 @@ function App() {
                 delete updatedData.apiSpecs[selectedProduct][serviceId];
             }
             setProjectData(updatedData);
+
+            // Clear selection if deleted service was selected
+            if (selectedService === serviceId) {
+                navigationHandlers.goToProductDetail(selectedProduct);
+            }
         },
         handleAddVersion: () => {
             setEditingVersion(null);
@@ -347,6 +223,11 @@ function App() {
                 delete updatedData.apiSpecs[selectedProduct][selectedService][versionId];
             }
             setProjectData(updatedData);
+
+            // Clear selection if deleted version was selected
+            if (selectedVersion === versionId) {
+                navigationHandlers.goToServiceDetail(selectedProduct, selectedService);
+            }
         },
         handleSaveReleaseNotes: (productId: string, serviceId: string, versionId: string, data: any) => {
             const updatedData = { ...projectData };
@@ -370,6 +251,25 @@ function App() {
         }
     };
 
+    // Enhanced toggle handler for sidebar expansion
+    const handleToggleProduct = useCallback((id: string) => {
+        setExpandedProducts(prev => {
+            if (prev.includes(id)) {
+                // If collapsing, also collapse all children
+                if (!id.includes('-')) {
+                    // This is a product, collapse all its services too
+                    return prev.filter(item => !item.startsWith(`${id}-`) && item !== id);
+                } else {
+                    // This is a service, just collapse it
+                    return prev.filter(item => item !== id);
+                }
+            } else {
+                // Expanding
+                return [...prev, id];
+            }
+        });
+    }, []);
+
     // Form submission handlers
     const handleSaveProduct = async (productData: Product) => {
         const updatedData = { ...projectData };
@@ -389,6 +289,9 @@ function App() {
         setProjectData(updatedData);
         setShowProductForm(false);
         setEditingProduct(null);
+
+        // Navigate to the new/edited product
+        navigationHandlers.goToProductDetail(productData.id);
     };
 
     const handleSaveService = async (serviceData: Service) => {
@@ -421,6 +324,9 @@ function App() {
         setProjectData(updatedData);
         setShowServiceForm(false);
         setEditingService(null);
+
+        // Navigate to the new/edited service
+        navigationHandlers.goToServiceDetail(selectedProduct, serviceData.id);
     };
 
     const handleSaveVersion = async (versionData: any) => {
@@ -459,6 +365,9 @@ function App() {
         setProjectData(updatedData);
         setShowVersionForm(false);
         setEditingVersion(null);
+
+        // Navigate to the new/edited version
+        navigationHandlers.goToVersionDetail(selectedProduct, selectedService, versionData.version);
     };
 
     // Import/Export handlers
@@ -521,7 +430,7 @@ function App() {
                 hasChanges={false}
             />
 
-            <div className="flex flex-1">
+            <div className="flex flex-1 relative">
                 <Sidebar
                     products={projectData.products}
                     services={projectData.services}
@@ -534,9 +443,7 @@ function App() {
                     onSelectVersion={navigationHandlers.goToVersionDetail}
                     onAddProduct={actionHandlers.handleAddProduct}
                     expandedProducts={expandedProducts}
-                    onToggleProduct={(id) => setExpandedProducts(prev =>
-                        prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-                    )}
+                    onToggleProduct={handleToggleProduct}
                 />
 
                 <main className="flex-1 overflow-auto">
@@ -640,6 +547,29 @@ function App() {
                         setEditingService(null);
                     }}
                     isEditing={!!editingService}
+                />
+            </Modal>
+
+            {/* Version Form Modal */}
+            <Modal
+                isOpen={showVersionForm}
+                onClose={() => {
+                    setShowVersionForm(false);
+                    setEditingVersion(null);
+                }}
+                title={editingVersion ? 'Edit API Version' : 'Create New API Version'}
+                size="xl"
+            >
+                <VersionForm
+                    version={editingVersion}
+                    productId={selectedProduct!}
+                    serviceId={selectedService!}
+                    onSave={handleSaveVersion}
+                    onCancel={() => {
+                        setShowVersionForm(false);
+                        setEditingVersion(null);
+                    }}
+                    isEditing={!!editingVersion}
                 />
             </Modal>
 
