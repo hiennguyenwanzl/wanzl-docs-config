@@ -1,7 +1,7 @@
 import React from 'react';
-import { Package, Search, FileText } from 'lucide-react';
-import Button from '../ui/Button.js';
-import Input from '../ui/Input.js';
+import { Package, Search, FileText, Upload, Download, Save } from 'lucide-react';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
 
 interface HeaderProps {
     onSearch: (searchTerm: string) => void;
@@ -58,8 +58,9 @@ const Header: React.FC<HeaderProps> = ({
                             size="sm"
                             onClick={onOpenTemplate}
                             leftIcon={<FileText className="w-4 h-4" />}
+                            className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100"
                         >
-                            Open Template
+                            Use Template
                         </Button>
                     )}
 
@@ -67,6 +68,7 @@ const Header: React.FC<HeaderProps> = ({
                         variant="outline"
                         size="sm"
                         onClick={onImport}
+                        leftIcon={<Upload className="w-4 h-4" />}
                     >
                         Import Project
                     </Button>
@@ -75,6 +77,7 @@ const Header: React.FC<HeaderProps> = ({
                         variant="secondary"
                         size="sm"
                         onClick={onExport}
+                        leftIcon={<Download className="w-4 h-4" />}
                     >
                         Export Data
                     </Button>
@@ -83,6 +86,7 @@ const Header: React.FC<HeaderProps> = ({
                         variant="primary"
                         size="sm"
                         onClick={onSave}
+                        leftIcon={<Save className="w-4 h-4" />}
                         className={hasChanges ? 'animate-pulse' : ''}
                     >
                         {hasChanges ? 'Save Changes' : 'Save Project'}

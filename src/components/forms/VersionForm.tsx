@@ -23,7 +23,7 @@ interface VersionFormProps {
     version?: any;
     productId: string;
     serviceId: string;
-    serviceProtocolType: 'REST' | 'MQTT'; // Add service protocol type
+    serviceProtocolType?: 'REST' | 'MQTT'; // Add service protocol type
     onSave: (versionData: any) => Promise<void>;
     onCancel: () => void;
     onPreview?: (version: any) => void;
@@ -34,7 +34,7 @@ const VersionForm: React.FC<VersionFormProps> = ({
                                                      version,
                                                      productId,
                                                      serviceId,
-                                                     serviceProtocolType,
+                                                     serviceProtocolType = 'REST', // Default to REST if not provided
                                                      onSave,
                                                      onCancel,
                                                      onPreview,
@@ -168,14 +168,16 @@ const VersionForm: React.FC<VersionFormProps> = ({
                 icon: <Code className="w-6 h-6 text-green-600" />,
                 title: 'REST API Version',
                 description: 'This version requires an OpenAPI/Swagger specification file',
-                fileType: 'OpenAPI Specification'
+                fileType: 'OpenAPI Specification',
+                color: 'green'
             };
         } else {
             return {
                 icon: <Wifi className="w-6 h-6 text-purple-600" />,
                 title: 'MQTT API Version',
                 description: 'This version requires an AsyncAPI specification file',
-                fileType: 'AsyncAPI Specification'
+                fileType: 'AsyncAPI Specification',
+                color: 'purple'
             };
         }
     };
@@ -224,12 +226,16 @@ const VersionForm: React.FC<VersionFormProps> = ({
                 </div>
 
                 {/* Protocol Type Info */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className={`bg-white rounded-lg border-2 ${protocolInfo.color === 'green' ? 'border-green-200 bg-green-50' : 'border-purple-200 bg-purple-50'} p-6`}>
                     <div className="flex items-center space-x-3 mb-4">
                         {protocolInfo.icon}
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{protocolInfo.title}</h3>
-                            <p className="text-gray-600 text-sm">{protocolInfo.description}</p>
+                            <h3 className={`text-lg font-semibold ${protocolInfo.color === 'green' ? 'text-green-900' : 'text-purple-900'}`}>
+                                {protocolInfo.title}
+                            </h3>
+                            <p className={`${protocolInfo.color === 'green' ? 'text-green-700' : 'text-purple-700'} text-sm`}>
+                                {protocolInfo.description}
+                            </p>
                         </div>
                     </div>
                 </div>

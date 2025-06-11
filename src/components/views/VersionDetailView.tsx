@@ -192,11 +192,11 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
             </div>
 
             {/* Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-6">
-                    {activeTab === 'overview' && (
-                        <>
+            <div className="space-y-6">
+                {/* Main Content - Full Width for Swagger */}
+                {activeTab === 'overview' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 space-y-6">
                             {/* Introduction */}
                             <Card>
                                 <CardHeader>
@@ -264,170 +264,182 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                     </CardContent>
                                 </Card>
                             )}
-                        </>
-                    )}
+                        </div>
 
-                    {activeTab === 'swagger' && hasSwaggerSpec && (
+                        {/* Sidebar */}
                         <div className="space-y-6">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-2">Swagger/OpenAPI Specification</h2>
-                                <p className="text-gray-600">
-                                    Interactive API documentation powered by OpenAPI specification.
-                                </p>
-                            </div>
+                            {/* Version Info */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Version Information</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-3 text-sm">
+                                        <div>
+                                            <span className="font-medium text-gray-500">Version:</span>
+                                            <p className="text-gray-900">{version.version}</p>
+                                        </div>
+                                        <div>
+                                            <span className="font-medium text-gray-500">Status:</span>
+                                            <p className="text-gray-900 capitalize">{version.status}</p>
+                                        </div>
+                                        <div>
+                                            <span className="font-medium text-gray-500">Release Date:</span>
+                                            <p className="text-gray-900">
+                                                {new Date(version.release_date).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        {version.supported_until && (
+                                            <div>
+                                                <span className="font-medium text-gray-500">Support Until:</span>
+                                                <p className="text-gray-900">
+                                                    {new Date(version.supported_until).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* API Specifications */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>API Specifications</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2 text-sm">
+                                        {hasSwaggerSpec && (
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <div className="flex items-center space-x-2">
+                                                    <Code className="w-4 h-4 text-green-600" />
+                                                    <span className="text-gray-600">OpenAPI Spec</span>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="xs"
+                                                    onClick={() => setActiveTab('swagger')}
+                                                >
+                                                    <Eye className="w-3 h-3" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {hasMqttSpec && (
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <div className="flex items-center space-x-2">
+                                                    <Wifi className="w-4 h-4 text-purple-600" />
+                                                    <span className="text-gray-600">AsyncAPI Spec</span>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="xs"
+                                                    onClick={() => setActiveTab('mqtt')}
+                                                >
+                                                    <Eye className="w-3 h-3" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center justify-between py-2">
+                                            <span className="text-gray-600">Examples</span>
+                                            <Button variant="ghost" size="xs">
+                                                <ExternalLink className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                )}
+
+                {/* Full Width Swagger Content */}
+                {activeTab === 'swagger' && hasSwaggerSpec && (
+                    <div className="w-full">
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Swagger/OpenAPI Specification</h2>
+                            <p className="text-gray-600">
+                                Interactive API documentation powered by OpenAPI specification.
+                            </p>
+                        </div>
+
+                        {/* Full-width API Spec Viewer without height restrictions */}
+                        <div className="w-full">
                             <ApiSpecViewer
                                 spec={typeof version.api_specs.openapi === 'string'
                                     ? { name: 'openapi.yaml', content: version.api_specs.openapi, size: version.api_specs.openapi.length }
                                     : version.api_specs.openapi}
                                 type="swagger"
                                 title="OpenAPI Specification"
+                                className="w-full"
                             />
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {activeTab === 'mqtt' && hasMqttSpec && (
-                        <div className="space-y-6">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-2">MQTT/AsyncAPI Specification</h2>
-                                <p className="text-gray-600">
-                                    Event-driven API documentation for MQTT messaging.
-                                </p>
-                            </div>
+                {/* Full Width MQTT Content */}
+                {activeTab === 'mqtt' && hasMqttSpec && (
+                    <div className="w-full">
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">MQTT/AsyncAPI Specification</h2>
+                            <p className="text-gray-600">
+                                Event-driven API documentation for MQTT messaging.
+                            </p>
+                        </div>
+
+                        {/* Full-width API Spec Viewer without height restrictions */}
+                        <div className="w-full">
                             <ApiSpecViewer
                                 spec={typeof version.api_specs.mqtt === 'string'
                                     ? { name: 'asyncapi.yaml', content: version.api_specs.mqtt, size: version.api_specs.mqtt.length }
                                     : version.api_specs.mqtt}
                                 type="mqtt"
                                 title="AsyncAPI Specification"
+                                className="w-full"
                             />
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {activeTab === 'release-notes' && (
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Release Notes</h2>
-                                    <p className="text-gray-600">
-                                        What's new, changed, or fixed in version {version.version}
-                                    </p>
-                                </div>
-                                {onEditReleaseNotes && (
-                                    <Button
-                                        variant="outline"
-                                        onClick={onEditReleaseNotes}
-                                        leftIcon={<Edit2 className="w-4 h-4" />}
-                                    >
-                                        Edit Release Notes
-                                    </Button>
-                                )}
+                {activeTab === 'release-notes' && (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">Release Notes</h2>
+                                <p className="text-gray-600">
+                                    What's new, changed, or fixed in version {version.version}
+                                </p>
                             </div>
-
-                            <Card>
-                                <CardContent className="p-6">
-                                    <div className="text-center py-8">
-                                        <BookOpen className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                                        <h3 className="text-sm font-medium text-gray-900 mb-1">No release notes yet</h3>
-                                        <p className="text-sm text-gray-500 mb-4">
-                                            Document what's new, changed, or fixed in this version
-                                        </p>
-                                        {onEditReleaseNotes && (
-                                            <Button
-                                                onClick={onEditReleaseNotes}
-                                                leftIcon={<Plus className="w-4 h-4" />}
-                                            >
-                                                Create Release Notes
-                                            </Button>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            {onEditReleaseNotes && (
+                                <Button
+                                    variant="outline"
+                                    onClick={onEditReleaseNotes}
+                                    leftIcon={<Edit2 className="w-4 h-4" />}
+                                >
+                                    Edit Release Notes
+                                </Button>
+                            )}
                         </div>
-                    )}
-                </div>
 
-                {/* Sidebar */}
-                <div className="space-y-6">
-                    {/* Version Info */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Version Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3 text-sm">
-                                <div>
-                                    <span className="font-medium text-gray-500">Version:</span>
-                                    <p className="text-gray-900">{version.version}</p>
-                                </div>
-                                <div>
-                                    <span className="font-medium text-gray-500">Status:</span>
-                                    <p className="text-gray-900 capitalize">{version.status}</p>
-                                </div>
-                                <div>
-                                    <span className="font-medium text-gray-500">Release Date:</span>
-                                    <p className="text-gray-900">
-                                        {new Date(version.release_date).toLocaleDateString()}
+                        <Card>
+                            <CardContent className="p-6">
+                                <div className="text-center py-8">
+                                    <BookOpen className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                                    <h3 className="text-sm font-medium text-gray-900 mb-1">No release notes yet</h3>
+                                    <p className="text-sm text-gray-500 mb-4">
+                                        Document what's new, changed, or fixed in this version
                                     </p>
-                                </div>
-                                {version.supported_until && (
-                                    <div>
-                                        <span className="font-medium text-gray-500">Support Until:</span>
-                                        <p className="text-gray-900">
-                                            {new Date(version.supported_until).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* API Specifications */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>API Specifications</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-2 text-sm">
-                                {hasSwaggerSpec && (
-                                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                        <div className="flex items-center space-x-2">
-                                            <Code className="w-4 h-4 text-green-600" />
-                                            <span className="text-gray-600">OpenAPI Spec</span>
-                                        </div>
+                                    {onEditReleaseNotes && (
                                         <Button
-                                            variant="ghost"
-                                            size="xs"
-                                            onClick={() => setActiveTab('swagger')}
+                                            onClick={onEditReleaseNotes}
+                                            leftIcon={<Plus className="w-4 h-4" />}
                                         >
-                                            <Eye className="w-3 h-3" />
+                                            Create Release Notes
                                         </Button>
-                                    </div>
-                                )}
-                                {hasMqttSpec && (
-                                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                        <div className="flex items-center space-x-2">
-                                            <Wifi className="w-4 h-4 text-purple-600" />
-                                            <span className="text-gray-600">AsyncAPI Spec</span>
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="xs"
-                                            onClick={() => setActiveTab('mqtt')}
-                                        >
-                                            <Eye className="w-3 h-3" />
-                                        </Button>
-                                    </div>
-                                )}
-                                <div className="flex items-center justify-between py-2">
-                                    <span className="text-gray-600">Examples</span>
-                                    <Button variant="ghost" size="xs">
-                                        <ExternalLink className="w-3 h-3" />
-                                    </Button>
+                                    )}
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
             </div>
         </div>
     );

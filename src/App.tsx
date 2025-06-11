@@ -101,6 +101,9 @@ function App() {
         return projectData.versions[productId]?.[serviceId]?.length || 0;
     }, [projectData.versions]);
 
+    // Check if there are any products (for template button visibility)
+    const hasProjects = projectData.products.length > 0;
+
     // Navigation functions - Enhanced with automatic expansion
     const navigationHandlers = {
         goToProductsList: () => {
@@ -412,6 +415,22 @@ function App() {
         setShowQuickStartModal(false);
     };
 
+    // Template handler - NEW
+    const handleOpenTemplate = () => {
+        setShowQuickStartModal(true);
+    };
+
+    // Settings and preview handlers - NEW
+    const handleSettings = () => {
+        // TODO: Implement settings modal
+        console.log('Settings clicked');
+    };
+
+    const handlePreviewProject = () => {
+        // TODO: Implement project preview
+        actionHandlers.handlePreviewProducts();
+    };
+
     // Show quick start modal on first load if no products exist
     React.useEffect(() => {
         if (projectData.products.length === 0) {
@@ -427,7 +446,9 @@ function App() {
                 onImport={() => setShowImportModal(true)}
                 onExport={() => setShowExportModal(true)}
                 onSave={handleExportProject}
+                onOpenTemplate={handleOpenTemplate}
                 hasChanges={false}
+                hasProjects={hasProjects}
             />
 
             <div className="flex flex-1 relative">
@@ -444,6 +465,8 @@ function App() {
                     onAddProduct={actionHandlers.handleAddProduct}
                     expandedProducts={expandedProducts}
                     onToggleProduct={handleToggleProduct}
+                    onPreviewProject={handlePreviewProject}
+                    onSettings={handleSettings}
                 />
 
                 <main className="flex-1 overflow-auto">
