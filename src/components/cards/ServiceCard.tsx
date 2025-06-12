@@ -71,14 +71,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                         </div>
                     )}
 
-                    {/* Protocol Badge - positioned at top-right */}
-                    <div className="absolute top-2 right-2 z-20">
-                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${protocolInfo.badgeColor} shadow-sm`}>
-                            {protocolInfo.icon}
-                            <span>{service.protocol_type || 'REST'}</span>
-                        </div>
-                    </div>
-
                     {/* Background Pattern - only show if no icon */}
                     {!service.icon && (
                         <div className="absolute inset-0 opacity-10">
@@ -102,9 +94,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                         {service.category || 'General'}
                                     </span>
                                     <span className="text-xs text-gray-400">•</span>
-                                    <span className="text-xs text-gray-500 font-medium">
-                                        {protocolInfo.label}
-                                    </span>
+                                    <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${protocolInfo.badgeColor}`}>
+                                        {protocolInfo.icon}
+                                        <span>{service.protocol_type || 'REST'}</span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
@@ -149,16 +142,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                             </div>
                         </div>
 
-                        {/* Enhanced Protocol Display */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500">Protocol:</span>
-                                <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${protocolInfo.badgeColor}`}>
-                                    {protocolInfo.icon}
-                                    <span>{service.protocol_type || 'REST'}</span>
-                                </div>
-                            </div>
 
+                        <div className="flex items-center justify-between">
                             {/* Status indicator */}
                             <div className="flex items-center space-x-1">
                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>

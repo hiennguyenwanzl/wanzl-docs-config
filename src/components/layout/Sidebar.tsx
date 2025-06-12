@@ -5,14 +5,10 @@ import {
     ChevronDown,
     Settings,
     Eye,
-    Menu,
-    X,
     Code,
     Wifi,
-    FileText,
     PanelLeftClose,
     PanelLeftOpen,
-    Box,
     Plus
 } from 'lucide-react';
 import Button from '../ui/Button';
@@ -63,6 +59,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         setIsMobileOpen(!isMobileOpen);
     };
 
+    // Handle clicking anywhere on sidebar when collapsed to expand
+    const handleSidebarClick = (e: React.MouseEvent) => {
+        if (isCollapsed && e.currentTarget === e.target) {
+            setIsCollapsed(false);
+        }
+    };
+
     const getVersionIcon = (version: any) => {
         const protocolType = version.service_protocol_type;
 
@@ -109,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         {getVersionIcon(version)}
                     </button>
                     {/* Enhanced Tooltip for collapsed mode */}
-                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg">
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg pointer-events-none">
                         <div className="font-medium">v{version.version}</div>
                         <div className="text-xs text-gray-300">{version.status}</div>
                         {/* Arrow */}
@@ -172,14 +175,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </div>
                     </button>
                     {/* Enhanced Tooltip for collapsed mode */}
-                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px]">
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px] pointer-events-none">
                         <div className="font-medium">{service.display_name || service.name}</div>
                         <div className="text-xs text-gray-300">{serviceVersions.length} versions</div>
                         <div className="text-xs text-gray-300 mt-1">{service.protocol_type || 'REST'} API</div>
                         {/* Arrow */}
                         <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                     </div>
-                    {/* Collapsed versions */}
+                    {/* Show collapsed versions when expanded */}
                     {isServiceExpanded && serviceVersions.length > 0 && (
                         <div className="mt-1 space-y-1">
                             {serviceVersions
@@ -298,14 +301,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </div>
                     </button>
                     {/* Enhanced Tooltip for collapsed mode */}
-                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px]">
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px] pointer-events-none">
                         <div className="font-medium">{product.display_name || product.name}</div>
                         <div className="text-xs text-gray-300">{servicesCount} services</div>
                         <div className="text-xs text-gray-300 mt-1">{product.category || 'Other'}</div>
                         {/* Arrow */}
                         <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                     </div>
-                    {/* Collapsed services */}
+                    {/* Show collapsed services when expanded */}
                     {isExpanded && productServices.length > 0 && (
                         <div className="mt-2 space-y-1">
                             {productServices.map(service => renderService(service, product.id))}
@@ -380,19 +383,34 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={toggleMobile}
                 className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md border border-gray-200"
             >
-                {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMobileOpen ? (
+                    <div className="w-5 h-5 relative">
+                        <div className="absolute inset-0 w-5 h-0.5 bg-gray-600 rotate-45 top-2"></div>
+                        <div className="absolute inset-0 w-5 h-0.5 bg-gray-600 -rotate-45 top-2"></div>
+                    </div>
+                ) : (
+                    <div className="w-5 h-5 relative">
+                        <div className="absolute w-5 h-0.5 bg-gray-600 top-1"></div>
+                        <div className="absolute w-5 h-0.5 bg-gray-600 top-2"></div>
+                        <div className="absolute w-5 h-0.5 bg-gray-600 top-3"></div>
+                    </div>
+                )}
             </button>
 
             {mobileOverlay}
 
-            <div className={`
-                ${isCollapsed ? 'w-16' : 'w-80'} 
-                ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
-                bg-white border-r border-gray-200 flex flex-col
-                transition-all duration-300 ease-in-out
-                shadow-lg lg:shadow-none
-            `}>
+            <div
+                className={`
+                    ${isCollapsed ? 'w-16' : 'w-80'} 
+                    ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
+                    bg-white border-r border-gray-200 flex flex-col
+                    transition-all duration-300 ease-in-out
+                    shadow-lg lg:shadow-none
+                    cursor-pointer
+                `}
+                onClick={handleSidebarClick}
+            >
                 {/* Header */}
                 <div className="p-4 border-b border-gray-200 flex-shrink-0 bg-gray-50">
                     <div className="flex items-center justify-between">
@@ -408,14 +426,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </div>
                         )}
 
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={toggleCollapse}
-                            className="hidden lg:flex p-1"
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCollapse();
+                            }}
+                            className={`
+                                hidden lg:flex p-1 hover:bg-gray-100 rounded transition-colors duration-200
+                                focus:outline-none text-gray-600 hover:text-gray-900
+                                ${isCollapsed ? 'w-8 h-8 items-center justify-center' : ''}
+                            `}
+                            style={{ border: 'none', boxShadow: 'none' }}
+                            onBlur={(e) => e.target.blur()}
                         >
                             {isCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-                        </Button>
+                        </button>
                     </div>
                 </div>
 
@@ -435,7 +460,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     <Button
                                         variant="primary"
                                         size="sm"
-                                        onClick={onAddProduct}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onAddProduct();
+                                        }}
                                         leftIcon={<Plus className="w-4 h-4" />}
                                     >
                                         Create Product
@@ -444,46 +472,51 @@ const Sidebar: React.FC<SidebarProps> = ({
                             )
                         ) : (
                             <div className="space-y-1">
-                                {products.map(renderProduct)}
+                                {/* Hide products tree when collapsed */}
+                                {!isCollapsed && products.map(renderProduct)}
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Enhanced Footer - Settings and Preview with better collapsed support */}
+                {/* Enhanced Footer - Better collapsed support */}
                 <div className="p-4 border-t border-gray-200 flex-shrink-0 bg-gray-50">
                     {isCollapsed ? (
-                        // Collapsed: Stacked icon buttons with enhanced tooltips
-                        <div className="space-y-3 flex flex-col items-center w-full">
+                        // Collapsed: Larger icons with better tooltips
+                        <div className="space-y-4 flex flex-col items-center w-full">
                             <div className="relative group w-full">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={onPreviewProject}
-                                    className="w-full h-10 p-0 text-gray-600 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center rounded-md"
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onPreviewProject?.();
+                                    }}
+                                    className="w-full h-12 p-0 text-gray-600 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center rounded-md transition-colors duration-200 focus:outline-none"
+                                    onBlur={(e) => e.target.blur()}
                                 >
-                                    <Eye className="w-5 h-5" />
-                                </Button>
-                                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg">
+                                    <Eye className="w-6 h-6" />
+                                </button>
+                                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg pointer-events-none">
                                     <div className="font-medium">Preview Site</div>
                                     <div className="text-xs text-gray-300">See how your docs look</div>
-                                    {/* Arrow */}
+                                    {/* Arrow positioned better */}
                                     <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                                 </div>
                             </div>
                             <div className="relative group w-full">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={onSettings}
-                                    className="w-full h-10 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center rounded-md"
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onSettings?.();
+                                    }}
+                                    className="w-full h-12 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center rounded-md transition-colors duration-200 focus:outline-none"
+                                    onBlur={(e) => e.target.blur()}
                                 >
-                                    <Settings className="w-5 h-5" />
-                                </Button>
-                                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg">
+                                    <Settings className="w-6 h-6" />
+                                </button>
+                                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg pointer-events-none">
                                     <div className="font-medium">Settings</div>
                                     <div className="text-xs text-gray-300">Configure preferences</div>
-                                    {/* Arrow */}
+                                    {/* Arrow positioned better */}
                                     <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                                 </div>
                             </div>
@@ -491,24 +524,28 @@ const Sidebar: React.FC<SidebarProps> = ({
                     ) : (
                         // Expanded: Full buttons with improved styling
                         <div className="space-y-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 rounded-md"
-                                leftIcon={<Eye className="w-4 h-4" />}
-                                onClick={onPreviewProject}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onPreviewProject?.();
+                                }}
+                                className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 rounded-md p-2 flex items-center space-x-3 focus:outline-none"
+                                onBlur={(e) => e.target.blur()}
                             >
+                                <Eye className="w-4 h-4" />
                                 <span className="font-medium">Preview Site</span>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 rounded-md"
-                                leftIcon={<Settings className="w-4 h-4" />}
-                                onClick={onSettings}
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSettings?.();
+                                }}
+                                className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 rounded-md p-2 flex items-center space-x-3 focus:outline-none"
+                                onBlur={(e) => e.target.blur()}
                             >
+                                <Settings className="w-4 h-4" />
                                 <span className="font-medium">Settings</span>
-                            </Button>
+                            </button>
                         </div>
                     )}
                 </div>
