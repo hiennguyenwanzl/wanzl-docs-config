@@ -100,17 +100,20 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div key={version.version} className="relative group">
                     <button
                         onClick={() => onSelectVersion(productId, serviceId, version.version)}
-                        className={`w-full text-left px-2 py-2 text-sm transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center rounded-md mx-1 relative ${
+                        className={`w-full text-left px-2 py-2 text-sm transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center rounded-md mx-1 relative ${
                             isSelected
                                 ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
-                                : 'text-gray-600 hover:text-gray-900'
+                                : 'text-gray-600 hover:text-blue-600'
                         }`}
                     >
                         {getVersionIcon(version)}
                     </button>
-                    {/* Tooltip for collapsed mode */}
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                        v{version.version} ({version.status})
+                    {/* Enhanced Tooltip for collapsed mode */}
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg">
+                        <div className="font-medium">v{version.version}</div>
+                        <div className="text-xs text-gray-300">{version.status}</div>
+                        {/* Arrow */}
+                        <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                     </div>
                 </div>
             );
@@ -120,10 +123,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div key={version.version} className="relative">
                 <button
                     onClick={() => onSelectVersion(productId, serviceId, version.version)}
-                    className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 group hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center space-x-2 rounded-md mx-2 relative ${
+                    className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 group hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center space-x-2 rounded-md mx-2 relative ${
                         isSelected
                             ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500 ml-2'
-                            : 'text-gray-600 hover:text-gray-900'
+                            : 'text-gray-600 hover:text-blue-600'
                     }`}
                 >
                     <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -146,29 +149,35 @@ const Sidebar: React.FC<SidebarProps> = ({
         const isServiceExpanded = expandedProducts.includes(`${productId}-${service.id}`);
         const isServiceSelected = selectedService === service.id && selectedProduct === productId;
 
-        // Get service icon
+        // Get service icon with fallback
         const serviceIcon = service.icon ? (
-            <img src={service.icon} alt={service.name} className="w-5 h-5 object-contain rounded" />
+            <img src={service.icon} alt={service.name} className="w-6 h-6 object-contain rounded" />
         ) : (
-            <DefaultServiceIcon className="w-5 h-5 text-blue-600" />
+            <DefaultServiceIcon className="w-6 h-6 text-blue-600" />
         );
 
         if (isCollapsed) {
             return (
-                <div key={service.id} className="relative group">
+                <div key={service.id} className="relative group mb-1">
                     <button
                         onClick={() => onSelectService(productId, service.id)}
-                        className={`w-full text-left px-2 py-2.5 text-sm transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center rounded-md mx-1 relative ${
+                        className={`w-full text-left px-2 py-3 text-sm transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center rounded-md mx-1 relative ${
                             isServiceSelected
                                 ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
-                                : 'text-gray-700 hover:text-gray-900'
+                                : 'text-gray-700 hover:text-blue-600'
                         }`}
                     >
-                        {serviceIcon}
+                        <div className="w-6 h-6 flex items-center justify-center">
+                            {serviceIcon}
+                        </div>
                     </button>
-                    {/* Tooltip for collapsed mode */}
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                        {service.display_name || service.name} ({serviceVersions.length} versions)
+                    {/* Enhanced Tooltip for collapsed mode */}
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px]">
+                        <div className="font-medium">{service.display_name || service.name}</div>
+                        <div className="text-xs text-gray-300">{serviceVersions.length} versions</div>
+                        <div className="text-xs text-gray-300 mt-1">{service.protocol_type || 'REST'} API</div>
+                        {/* Arrow */}
+                        <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                     </div>
                     {/* Collapsed versions */}
                     {isServiceExpanded && serviceVersions.length > 0 && (
@@ -194,22 +203,25 @@ const Sidebar: React.FC<SidebarProps> = ({
         }
 
         return (
-            <div key={service.id} className="relative">
+            <div key={service.id} className="relative mb-1">
                 <div className="mx-2">
                     <button
                         onClick={() => onSelectService(productId, service.id)}
-                        className={`w-full text-left px-3 py-2.5 text-sm transition-all duration-200 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md relative ${
+                        className={`w-full text-left px-3 py-3 text-sm transition-all duration-200 flex items-center group hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md relative ${
                             isServiceSelected
                                 ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
-                                : 'text-gray-700 hover:text-gray-900'
+                                : 'text-gray-700 hover:text-blue-600'
                         }`}
                     >
                         <div className="flex items-center space-x-3 flex-1 min-w-0">
-                            <div className="flex-shrink-0">
+                            <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
                                 {serviceIcon}
                             </div>
-                            <span className="truncate font-medium">{service.display_name || service.name}</span>
-                            <div className="flex items-center space-x-2 ml-auto">
+                            <div className="flex-1 min-w-0">
+                                <div className="truncate font-medium">{service.display_name || service.name}</div>
+                                <div className="text-xs text-gray-500 truncate">{service.protocol_type || 'REST'} API</div>
+                            </div>
+                            <div className="flex items-center space-x-2 ml-auto flex-shrink-0">
                                 <span className="text-xs text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full font-medium">
                                     {serviceVersions.length}
                                 </span>
@@ -261,35 +273,41 @@ const Sidebar: React.FC<SidebarProps> = ({
         const servicesCount = productServices.length;
         const isProductSelected = selectedProduct === product.id;
 
-        // Get product icon
+        // Get product icon with fallback
         const productIcon = product.icon ? (
-            <img src={product.icon} alt={product.name} className="w-6 h-6 object-contain rounded-lg" />
+            <img src={product.icon} alt={product.name} className="w-8 h-8 object-contain rounded-lg" />
         ) : (
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-                <Package className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                <Package className="w-5 h-5 text-white" />
             </div>
         );
 
         if (isCollapsed) {
             return (
-                <div key={product.id} className="mb-1 relative group">
+                <div key={product.id} className="mb-2 relative group">
                     <button
                         onClick={() => onSelectProduct(product.id)}
-                        className={`w-full text-left px-2 py-3 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center rounded-lg mx-1 relative ${
+                        className={`w-full text-left px-2 py-4 transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center rounded-lg mx-1 relative ${
                             isProductSelected
                                 ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
-                                : 'text-gray-800 hover:text-gray-900'
+                                : 'text-gray-800 hover:text-blue-600'
                         }`}
                     >
-                        {productIcon}
+                        <div className="w-8 h-8 flex items-center justify-center">
+                            {productIcon}
+                        </div>
                     </button>
-                    {/* Tooltip for collapsed mode */}
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                        {product.display_name || product.name} ({servicesCount} services)
+                    {/* Enhanced Tooltip for collapsed mode */}
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px]">
+                        <div className="font-medium">{product.display_name || product.name}</div>
+                        <div className="text-xs text-gray-300">{servicesCount} services</div>
+                        <div className="text-xs text-gray-300 mt-1">{product.category || 'Other'}</div>
+                        {/* Arrow */}
+                        <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                     </div>
                     {/* Collapsed services */}
                     {isExpanded && productServices.length > 0 && (
-                        <div className="mt-1 space-y-1">
+                        <div className="mt-2 space-y-1">
                             {productServices.map(service => renderService(service, product.id))}
                         </div>
                     )}
@@ -298,21 +316,24 @@ const Sidebar: React.FC<SidebarProps> = ({
         }
 
         return (
-            <div key={product.id} className="mb-1">
+            <div key={product.id} className="mb-2">
                 <button
                     onClick={() => onSelectProduct(product.id)}
-                    className={`w-full text-left px-3 py-3 transition-all duration-200 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg mx-2 relative ${
+                    className={`w-full text-left px-3 py-4 transition-all duration-200 flex items-center group hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg mx-2 relative ${
                         isProductSelected
                             ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500 ml-2'
-                            : 'text-gray-800 hover:text-gray-900'
+                            : 'text-gray-800 hover:text-blue-600'
                     }`}
                 >
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
                             {productIcon}
                         </div>
-                        <span className="truncate font-semibold text-base">{product.display_name || product.name}</span>
-                        <div className="flex items-center space-x-2 ml-auto">
+                        <div className="flex-1 min-w-0">
+                            <div className="truncate font-semibold text-base">{product.display_name || product.name}</div>
+                            <div className="text-xs text-gray-500 truncate">{product.category || 'Other'}</div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-auto flex-shrink-0">
                             <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full font-semibold">
                                 {servicesCount}
                             </span>
@@ -336,7 +357,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </button>
 
                 {isExpanded && productServices.length > 0 && (
-                    <div className="mt-2 ml-4 space-y-1">
+                    <div className="mt-2 ml-2 space-y-1">
                         {productServices.map(service => renderService(service, product.id))}
                     </div>
                 )}
@@ -429,58 +450,64 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </div>
 
-                {/* Footer - Settings and Preview */}
+                {/* Enhanced Footer - Settings and Preview with better collapsed support */}
                 <div className="p-4 border-t border-gray-200 flex-shrink-0 bg-gray-50">
                     {isCollapsed ? (
-                        // Collapsed: Icon buttons with tooltips
-                        <div className="space-y-2 flex flex-col items-center">
-                            <div className="relative group">
+                        // Collapsed: Stacked icon buttons with enhanced tooltips
+                        <div className="space-y-3 flex flex-col items-center w-full">
+                            <div className="relative group w-full">
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={onPreviewProject}
-                                    className="w-8 h-8 p-0 text-gray-600 hover:text-gray-900"
+                                    className="w-full h-10 p-0 text-gray-600 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center rounded-md"
                                 >
-                                    <Eye className="w-4 h-4" />
+                                    <Eye className="w-5 h-5" />
                                 </Button>
-                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                                    Preview Site
+                                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg">
+                                    <div className="font-medium">Preview Site</div>
+                                    <div className="text-xs text-gray-300">See how your docs look</div>
+                                    {/* Arrow */}
+                                    <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                                 </div>
                             </div>
-                            <div className="relative group">
+                            <div className="relative group w-full">
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={onSettings}
-                                    className="w-8 h-8 p-0 text-gray-600 hover:text-gray-900"
+                                    className="w-full h-10 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center rounded-md"
                                 >
-                                    <Settings className="w-4 h-4" />
+                                    <Settings className="w-5 h-5" />
                                 </Button>
-                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                                    Settings
+                                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg">
+                                    <div className="font-medium">Settings</div>
+                                    <div className="text-xs text-gray-300">Configure preferences</div>
+                                    {/* Arrow */}
+                                    <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        // Expanded: Full buttons
+                        // Expanded: Full buttons with improved styling
                         <div className="space-y-2">
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 rounded-md"
                                 leftIcon={<Eye className="w-4 h-4" />}
                                 onClick={onPreviewProject}
                             >
-                                Preview Site
+                                <span className="font-medium">Preview Site</span>
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 rounded-md"
                                 leftIcon={<Settings className="w-4 h-4" />}
                                 onClick={onSettings}
                             >
-                                Settings
+                                <span className="font-medium">Settings</span>
                             </Button>
                         </div>
                     )}

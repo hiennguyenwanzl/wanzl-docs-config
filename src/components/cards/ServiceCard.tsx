@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, Code, Wifi } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import DefaultServiceIcon from '../ui/DefaultServiceIcon';
@@ -12,7 +12,7 @@ interface ServiceCardProps {
         short_description: string;
         category?: string;
         icon?: string | null;
-        supported_protocols?: string[];
+        protocol_type?: 'REST' | 'MQTT'; // Updated to match single protocol
     };
     versionsCount: number;
     onClick: () => void;
@@ -27,22 +27,57 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                                      onEdit,
                                                      onDelete
                                                  }) => {
+    // Get protocol-specific styling and info
+    const getProtocolInfo = () => {
+        const protocolType = service.protocol_type || 'REST'; // Default to REST for backward compatibility
+
+        if (protocolType === 'MQTT') {
+            return {
+                icon: <Wifi className="w-4 h-4 text-purple-600" />,
+                label: 'MQTT API',
+                bgColor: 'from-purple-50 to-purple-100',
+                badgeColor: 'bg-purple-100 text-purple-700',
+                iconBgColor: 'bg-purple-200',
+                iconTextColor: 'text-purple-600'
+            };
+        } else {
+            return {
+                icon: <Code className="w-4 h-4 text-green-600" />,
+                label: 'REST API',
+                bgColor: 'from-green-50 to-green-100',
+                badgeColor: 'bg-green-100 text-green-700',
+                iconBgColor: 'bg-green-200',
+                iconTextColor: 'text-green-600'
+            };
+        }
+    };
+
+    const protocolInfo = getProtocolInfo();
+
     return (
-        <Card hover className="cursor-pointer group" onClick={onClick}>
-            <div className="flex h-32">
-                {/* Large Icon Section - Full Height */}
-                <div className="w-32 h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-l-lg border-r border-gray-200 relative overflow-hidden">
+        <Card hover className="cursor-pointer group transition-all duration-200 hover:shadow-lg" onClick={onClick}>
+            <div className="flex h-36">
+                {/* Enhanced Icon Section with Protocol-specific Styling */}
+                <div className={`w-36 h-full flex items-center justify-center bg-gradient-to-br ${protocolInfo.bgColor} rounded-l-lg border-r border-gray-200 relative overflow-hidden`}>
                     {service.icon ? (
                         <img
                             src={service.icon}
                             alt={service.name}
-                            className="w-28 h-28 object-contain z-10 rounded-lg"
+                            className="w-20 h-20 object-contain z-10 rounded-lg shadow-sm"
                         />
                     ) : (
-                        <div className="w-20 h-20 rounded-lg bg-blue-200 flex items-center justify-center z-10 shadow-inner">
-                            <DefaultServiceIcon className="w-12 h-12 text-blue-600" size={48} />
+                        <div className={`w-16 h-16 rounded-lg ${protocolInfo.iconBgColor} flex items-center justify-center z-10 shadow-inner`}>
+                            <DefaultServiceIcon className={`w-10 h-10 ${protocolInfo.iconTextColor}`} size={40} />
                         </div>
                     )}
+
+                    {/* Protocol Badge - positioned at top-right */}
+                    <div className="absolute top-2 right-2 z-20">
+                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${protocolInfo.badgeColor} shadow-sm`}>
+                            {protocolInfo.icon}
+                            <span>{service.protocol_type || 'REST'}</span>
+                        </div>
+                    </div>
 
                     {/* Background Pattern - only show if no icon */}
                     {!service.icon && (
@@ -58,10 +93,21 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 <div className="flex-1 p-4 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-semibold text-gray-900 leading-tight">
-                                {service.display_name || service.name}
-                            </h3>
-                            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-gray-900 leading-tight truncate">
+                                    {service.display_name || service.name}
+                                </h3>
+                                <div className="flex items-center space-x-2 mt-1">
+                                    <span className="text-xs text-gray-500 font-medium">
+                                        {service.category || 'General'}
+                                    </span>
+                                    <span className="text-xs text-gray-400">•</span>
+                                    <span className="text-xs text-gray-500 font-medium">
+                                        {protocolInfo.label}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -86,31 +132,39 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                 </Button>
                             </div>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2 leading-relaxed">
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
                             {service.short_description}
                         </p>
                     </div>
 
-                    <div className="space-y-2">
-                        <div className="flex items-center space-x-3">
-                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-medium">
-                                {service.category || 'General'}
-                            </span>
-                            <span className="text-xs text-gray-500 font-medium">
-                                {versionsCount} version{versionsCount !== 1 ? 's' : ''}
-                            </span>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-medium">
+                                    {service.category || 'General'}
+                                </span>
+                                <span className="text-xs text-gray-500 font-medium">
+                                    {versionsCount} version{versionsCount !== 1 ? 's' : ''}
+                                </span>
+                            </div>
                         </div>
 
-                        {/* Protocol Tags */}
-                        {service.supported_protocols && service.supported_protocols.length > 0 && (
-                            <div className="flex items-center space-x-1">
-                                {service.supported_protocols.map(protocol => (
-                                    <span key={protocol} className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">
-                                        {protocol}
-                                    </span>
-                                ))}
+                        {/* Enhanced Protocol Display */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-500">Protocol:</span>
+                                <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${protocolInfo.badgeColor}`}>
+                                    {protocolInfo.icon}
+                                    <span>{service.protocol_type || 'REST'}</span>
+                                </div>
                             </div>
-                        )}
+
+                            {/* Status indicator */}
+                            <div className="flex items-center space-x-1">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className="text-xs text-gray-500">Active</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

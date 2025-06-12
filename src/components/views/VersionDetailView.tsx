@@ -79,17 +79,11 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
     const getApiTypeIcon = () => {
         const hasSwagger = version.api_specs?.openapi;
         const hasMqtt = version.api_specs?.mqtt;
+        const protocolType = version.service_protocol_type;
 
-        if (hasSwagger && hasMqtt) {
-            return (
-                <div className="flex items-center space-x-2">
-                    <Code className="w-6 h-6 text-green-600" />
-                    <Wifi className="w-6 h-6 text-purple-600" />
-                </div>
-            );
-        } else if (hasMqtt) {
+        if (protocolType === 'MQTT' || hasMqtt) {
             return <Wifi className="w-8 h-8 text-purple-600" />;
-        } else if (hasSwagger) {
+        } else if (protocolType === 'REST' || hasSwagger) {
             return <Code className="w-8 h-8 text-green-600" />;
         } else {
             return <FileText className="w-8 h-8 text-gray-600" />;
@@ -98,11 +92,13 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
 
     const hasSwaggerSpec = version.api_specs?.openapi;
     const hasMqttSpec = version.api_specs?.mqtt;
+    const protocolType = version.service_protocol_type || 'REST';
 
+    // Build tabs based on protocol type and available specs
     const tabs = [
         { id: 'overview', label: 'Overview', icon: <Eye className="w-4 h-4" /> },
-        ...(hasSwaggerSpec ? [{ id: 'swagger', label: 'Swagger/OpenAPI', icon: <Code className="w-4 h-4" /> }] : []),
-        ...(hasMqttSpec ? [{ id: 'mqtt', label: 'MQTT/AsyncAPI', icon: <Wifi className="w-4 h-4" /> }] : []),
+        ...(protocolType === 'REST' && hasSwaggerSpec ? [{ id: 'swagger', label: 'REST API', icon: <Code className="w-4 h-4" /> }] : []),
+        ...(protocolType === 'MQTT' && hasMqttSpec ? [{ id: 'mqtt', label: 'MQTT API', icon: <Wifi className="w-4 h-4" /> }] : []),
         { id: 'release-notes', label: 'Release Notes', icon: <BookOpen className="w-4 h-4" /> }
     ];
 
@@ -112,14 +108,18 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
 
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
-                    {/* API Type Icon */}
-                    <div className="w-16 h-16 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-gray-200">
+                    {/* API Type Icon with Protocol-specific styling */}
+                    <div className={`w-16 h-16 flex items-center justify-center rounded-lg border border-gray-200 ${
+                        protocolType === 'MQTT'
+                            ? 'bg-gradient-to-br from-purple-50 to-purple-100'
+                            : 'bg-gradient-to-br from-green-50 to-green-100'
+                    }`}>
                         {getApiTypeIcon()}
                     </div>
                     <div>
                         <div className="flex items-center space-x-3 mb-2">
                             <h1 className="text-2xl font-bold text-gray-900">
-                                API Version {version.version}
+                                {protocolType} API Version {version.version}
                             </h1>
                             <span className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusColor(version.status)}`}>
                                 {version.status}
@@ -131,6 +131,18 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                 <span> • Supported until {new Date(version.supported_until).toLocaleDateString()}</span>
                             )}
                         </p>
+                        {/* Protocol indicator */}
+                        <div className="flex items-center space-x-2 mt-1">
+                            <span className="text-sm text-gray-500">Protocol:</span>
+                            <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${
+                                protocolType === 'MQTT'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : 'bg-green-100 text-green-700'
+                            }`}>
+                                {protocolType === 'MQTT' ? <Wifi className="w-3 h-3" /> : <Code className="w-3 h-3" />}
+                                <span>{protocolType}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className="flex space-x-3">
@@ -193,7 +205,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
 
             {/* Content */}
             <div className="space-y-6">
-                {/* Main Content - Full Width for Swagger */}
+                {/* Overview Tab */}
                 {activeTab === 'overview' && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2 space-y-6">
@@ -204,7 +216,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-gray-700 leading-relaxed">
-                                        {version.introduction || 'No introduction available for this version.'}
+                                        {version.introduction || `No introduction available for this ${protocolType} API version.`}
                                     </p>
                                 </CardContent>
                             </Card>
@@ -280,6 +292,10 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                             <p className="text-gray-900">{version.version}</p>
                                         </div>
                                         <div>
+                                            <span className="font-medium text-gray-500">Protocol:</span>
+                                            <p className="text-gray-900">{protocolType}</p>
+                                        </div>
+                                        <div>
                                             <span className="font-medium text-gray-500">Status:</span>
                                             <p className="text-gray-900 capitalize">{version.status}</p>
                                         </div>
@@ -308,7 +324,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-2 text-sm">
-                                        {hasSwaggerSpec && (
+                                        {protocolType === 'REST' && hasSwaggerSpec && (
                                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                                                 <div className="flex items-center space-x-2">
                                                     <Code className="w-4 h-4 text-green-600" />
@@ -323,7 +339,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                                 </Button>
                                             </div>
                                         )}
-                                        {hasMqttSpec && (
+                                        {protocolType === 'MQTT' && hasMqttSpec && (
                                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                                                 <div className="flex items-center space-x-2">
                                                     <Wifi className="w-4 h-4 text-purple-600" />
@@ -351,54 +367,59 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                     </div>
                 )}
 
-                {/* Full Width Swagger Content */}
+                {/* REST API Tab - Full Width with Dynamic Height */}
                 {activeTab === 'swagger' && hasSwaggerSpec && (
                     <div className="w-full">
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Swagger/OpenAPI Specification</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">REST API Specification</h2>
                             <p className="text-gray-600">
                                 Interactive API documentation powered by OpenAPI specification.
                             </p>
                         </div>
 
-                        {/* Full-width API Spec Viewer without height restrictions */}
+                        {/* Full-width API Spec Viewer with dynamic height */}
                         <div className="w-full">
-                            <ApiSpecViewer
-                                spec={typeof version.api_specs.openapi === 'string'
-                                    ? { name: 'openapi.yaml', content: version.api_specs.openapi, size: version.api_specs.openapi.length }
-                                    : version.api_specs.openapi}
-                                type="swagger"
-                                title="OpenAPI Specification"
-                                className="w-full"
-                            />
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                <ApiSpecViewer
+                                    spec={typeof version.api_specs.openapi === 'string'
+                                        ? { name: 'openapi.yaml', content: version.api_specs.openapi, size: version.api_specs.openapi.length }
+                                        : version.api_specs.openapi}
+                                    type="swagger"
+                                    title="OpenAPI Specification"
+                                    className="w-full min-h-[600px]"
+                                />
+                            </div>
                         </div>
                     </div>
                 )}
 
-                {/* Full Width MQTT Content */}
+                {/* MQTT API Tab - Full Width with Dynamic Height */}
                 {activeTab === 'mqtt' && hasMqttSpec && (
                     <div className="w-full">
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">MQTT/AsyncAPI Specification</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">MQTT API Specification</h2>
                             <p className="text-gray-600">
                                 Event-driven API documentation for MQTT messaging.
                             </p>
                         </div>
 
-                        {/* Full-width API Spec Viewer without height restrictions */}
+                        {/* Full-width API Spec Viewer with dynamic height */}
                         <div className="w-full">
-                            <ApiSpecViewer
-                                spec={typeof version.api_specs.mqtt === 'string'
-                                    ? { name: 'asyncapi.yaml', content: version.api_specs.mqtt, size: version.api_specs.mqtt.length }
-                                    : version.api_specs.mqtt}
-                                type="mqtt"
-                                title="AsyncAPI Specification"
-                                className="w-full"
-                            />
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                <ApiSpecViewer
+                                    spec={typeof version.api_specs.mqtt === 'string'
+                                        ? { name: 'asyncapi.yaml', content: version.api_specs.mqtt, size: version.api_specs.mqtt.length }
+                                        : version.api_specs.mqtt}
+                                    type="mqtt"
+                                    title="AsyncAPI Specification"
+                                    className="w-full min-h-[600px]"
+                                />
+                            </div>
                         </div>
                     </div>
                 )}
 
+                {/* Release Notes Tab */}
                 {activeTab === 'release-notes' && (
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">

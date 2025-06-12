@@ -104,6 +104,11 @@ function App() {
     // Check if there are any products (for template button visibility)
     const hasProjects = projectData.products.length > 0;
 
+    const getServiceProtocolType = (productId: string, serviceId: string): 'REST' | 'MQTT' => {
+        const service = projectData.services[productId]?.find(s => s.id === serviceId);
+        return service?.protocol_type || 'REST'; // Default to REST for backward compatibility
+    };
+
     // Navigation functions - Enhanced with automatic expansion
     const navigationHandlers = {
         goToProductsList: () => {
@@ -336,6 +341,7 @@ function App() {
         if (!selectedProduct || !selectedService) return;
 
         const updatedData = { ...projectData };
+        const serviceProtocolType = getServiceProtocolType(selectedProduct, selectedService);
 
         if (!updatedData.versions[selectedProduct]) {
             updatedData.versions[selectedProduct] = {};
@@ -350,14 +356,23 @@ function App() {
             updatedData.apiSpecs[selectedProduct][selectedService] = {};
         }
 
+        // Ensure version data includes the correct protocol type
+        const versionWithProtocol = {
+            ...versionData,
+            service_protocol_type: serviceProtocolType,
+            supports_swagger: serviceProtocolType === 'REST',
+            supports_mqtt: serviceProtocolType === 'MQTT',
+            supported_apis: [serviceProtocolType.toLowerCase()]
+        };
+
         const existingIndex = updatedData.versions[selectedProduct][selectedService].findIndex(
             v => v.version === versionData.version
         );
 
         if (existingIndex >= 0) {
-            updatedData.versions[selectedProduct][selectedService][existingIndex] = versionData;
+            updatedData.versions[selectedProduct][selectedService][existingIndex] = versionWithProtocol;
         } else {
-            updatedData.versions[selectedProduct][selectedService].push(versionData);
+            updatedData.versions[selectedProduct][selectedService].push(versionWithProtocol);
         }
 
         updatedData.apiSpecs[selectedProduct][selectedService][versionData.version] = {
@@ -587,6 +602,7 @@ function App() {
                     version={editingVersion}
                     productId={selectedProduct!}
                     serviceId={selectedService!}
+                    serviceProtocolType={getServiceProtocolType(selectedProduct!, selectedService!)} // Pass protocol type
                     onSave={handleSaveVersion}
                     onCancel={() => {
                         setShowVersionForm(false);
