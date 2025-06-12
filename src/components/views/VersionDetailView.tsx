@@ -16,7 +16,8 @@ import {
 import Button from '../ui/Button';
 import Breadcrumb from '../ui/Breadcrumb';
 import Card, { CardHeader, CardTitle, CardContent } from '../ui/Card';
-import ApiSpecViewer from '../ui/ApiSpecViewer';
+import SwaggerViewer from '../ui/SwaggerViewer';
+import MqttViewer from '../ui/MqttViewer';
 import type { ApiVersion } from '@/types';
 
 interface VersionDetailViewProps {
@@ -367,55 +368,53 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                     </div>
                 )}
 
-                {/* REST API Tab - Full Width with Dynamic Height */}
+                {/* REST API Tab - FIXED: Full Width, No Scrollbars */}
                 {activeTab === 'swagger' && hasSwaggerSpec && (
-                    <div className="w-full">
-                        <div className="mb-6">
+                    <div className="w-full -mx-6">
+                        <div className="px-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">REST API Specification</h2>
                             <p className="text-gray-600">
                                 Interactive API documentation powered by OpenAPI specification.
                             </p>
                         </div>
 
-                        {/* Full-width API Spec Viewer with dynamic height */}
-                        <div className="w-full">
-                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                                <ApiSpecViewer
-                                    spec={typeof version.api_specs.openapi === 'string'
-                                        ? { name: 'openapi.yaml', content: version.api_specs.openapi, size: version.api_specs.openapi.length }
-                                        : version.api_specs.openapi}
-                                    type="swagger"
-                                    title="OpenAPI Specification"
-                                    className="w-full min-h-[600px]"
-                                />
-                            </div>
-                        </div>
+                        {/* FIXED: Full-width API Spec Viewer with NO scrollbars, proper height */}
+                        <SwaggerViewer
+                            spec={typeof version.api_specs.openapi === 'string'
+                                ? version.api_specs.openapi
+                                : version.api_specs.openapi?.content || ''}
+                            isFullscreen={false}
+                            className="w-full"
+                            style={{
+                                height: '800px',
+                                overflow: 'hidden'
+                            }}
+                        />
                     </div>
                 )}
 
-                {/* MQTT API Tab - Full Width with Dynamic Height */}
+                {/* MQTT API Tab - FIXED: Full Width, No Scrollbars */}
                 {activeTab === 'mqtt' && hasMqttSpec && (
-                    <div className="w-full">
-                        <div className="mb-6">
+                    <div className="w-full -mx-6">
+                        <div className="px-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">MQTT API Specification</h2>
                             <p className="text-gray-600">
                                 Event-driven API documentation for MQTT messaging.
                             </p>
                         </div>
 
-                        {/* Full-width API Spec Viewer with dynamic height */}
-                        <div className="w-full">
-                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                                <ApiSpecViewer
-                                    spec={typeof version.api_specs.mqtt === 'string'
-                                        ? { name: 'asyncapi.yaml', content: version.api_specs.mqtt, size: version.api_specs.mqtt.length }
-                                        : version.api_specs.mqtt}
-                                    type="mqtt"
-                                    title="AsyncAPI Specification"
-                                    className="w-full min-h-[600px]"
-                                />
-                            </div>
-                        </div>
+                        {/* FIXED: Full-width API Spec Viewer with NO scrollbars, proper height */}
+                        <MqttViewer
+                            spec={typeof version.api_specs.mqtt === 'string'
+                                ? version.api_specs.mqtt
+                                : version.api_specs.mqtt?.content || ''}
+                            isFullscreen={false}
+                            className="w-full"
+                            style={{
+                                height: '800px',
+                                overflow: 'hidden'
+                            }}
+                        />
                     </div>
                 )}
 

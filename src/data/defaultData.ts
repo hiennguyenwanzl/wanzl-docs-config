@@ -124,7 +124,7 @@ export const TEMPLATE_SERVICES: Record<string, Service[]> = {
                 'Transaction history tracking',
                 'Multiple payment methods support'
             ],
-            supported_protocols: ['REST', 'MQTT'],
+            protocol_type: 'REST',
             integration_guide: 'This service integrates with POS systems and payment gateways to provide seamless transaction processing.',
             sort_order: 1,
             created_at: formatDate(),
@@ -145,7 +145,7 @@ export const TEMPLATE_SERVICES: Record<string, Service[]> = {
                 'Fraud detection',
                 'Real-time authorization'
             ],
-            supported_protocols: ['REST'],
+            protocol_type: 'REST',
             integration_guide: 'Integrate with various payment providers through our unified API interface.',
             sort_order: 2,
             created_at: formatDate(),
@@ -168,7 +168,7 @@ export const TEMPLATE_SERVICES: Record<string, Service[]> = {
                 'Product placement optimization',
                 'Restocking recommendations'
             ],
-            supported_protocols: ['REST', 'MQTT'],
+            protocol_type: 'MQTT',
             integration_guide: 'Connect your shelf sensors and POS systems to get real-time inventory insights.',
             sort_order: 1,
             created_at: formatDate(),
@@ -191,7 +191,7 @@ export const TEMPLATE_SERVICES: Record<string, Service[]> = {
                 'Dwell time calculation',
                 'Privacy-compliant data processing'
             ],
-            supported_protocols: ['REST', 'WebSocket'],
+            protocol_type: 'REST',
             integration_guide: 'Deploy wireless sensors and integrate with our analytics platform for comprehensive customer insights.',
             sort_order: 1,
             created_at: formatDate(),

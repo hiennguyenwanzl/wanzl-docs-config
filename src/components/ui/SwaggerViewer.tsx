@@ -1,50 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'
 import {
     Code,
     Copy,
     Download,
     ExternalLink,
-    ChevronDown,
-    ChevronRight,
     AlertCircle,
-    Eye,
-    Search,
-    Filter
+    Maximize2,
+    Minimize2
 } from 'lucide-react';
 import Button from '../ui/Button';
-import Input from '../ui/Input';
 
 interface SwaggerViewerProps {
     spec: string;
     onClose?: () => void;
     isFullscreen?: boolean;
     className?: string;
-}
-
-interface ParsedSwaggerSpec {
-    openapi: string;
-    info: {
-        title: string;
-        version: string;
-        description?: string;
-        contact?: {
-            name?: string;
-            email?: string;
-        };
-    };
-    servers?: Array<{
-        url: string;
-        description?: string;
-    }>;
-    tags?: Array<{
-        name: string;
-        description?: string;
-    }>;
-    paths: Record<string, any>;
-    components?: {
-        securitySchemes?: any;
-        schemas?: any;
-    };
 }
 
 const SwaggerViewer: React.FC<SwaggerViewerProps> = ({
@@ -54,239 +24,178 @@ const SwaggerViewer: React.FC<SwaggerViewerProps> = ({
                                                          className = ''
                                                      }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [parsedSpec, setParsedSpec] = useState<ParsedSwaggerSpec | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [expandedEndpoints, setExpandedEndpoints] = useState<Set<string>>(new Set());
-    const [selectedTag, setSelectedTag] = useState<string>('all');
+    const [parsedSpec, setParsedSpec] = useState<any>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const swaggerUIRef = useRef<any>(null);
 
     useEffect(() => {
-        parseSpecification();
+        loadSwaggerUI();
     }, [spec]);
 
-    const parseSpecification = async () => {
+    const loadSwaggerUI = async () => {
         try {
-            let parsed: ParsedSwaggerSpec;
-            if (spec.trim().startsWith('{')) {
-                parsed = JSON.parse(spec);
-            } else {
-                // Create comprehensive example for YAML specs
-                parsed = {
-                    openapi: '3.0.3',
-                    info: {
-                        title: 'FastLaner Cloud Service API',
-                        version: '1.0.1',
-                        description: 'API for FastLaner Cloud Service providing transaction processing, receipt generation, and real-time analytics.',
-                        contact: {
-                            name: 'API Support',
-                            email: 'api-support@wanzl.com'
-                        }
-                    },
-                    servers: [
-                        { url: 'https://api.wanzl.com/fastlaner/v1', description: 'Production' },
-                        { url: 'https://staging-api.wanzl.com/fastlaner/v1', description: 'Staging' }
-                    ],
-                    tags: [
-                        { name: 'APK', description: 'APK file management' },
-                        { name: 'Auth', description: 'Authentication endpoints' },
-                        { name: 'Groups', description: 'Group management' },
-                        { name: 'Trolley', description: 'Trolley operations' }
-                    ],
-                    paths: generateExamplePaths()
-                };
-            }
-
-            setParsedSpec(parsed);
+            setIsLoading(true);
             setError(null);
 
-            // Auto-expand first few endpoints
-            if (parsed.paths) {
-                const pathKeys = Object.keys(parsed.paths).slice(0, 2);
-                setExpandedEndpoints(new Set(pathKeys));
+            // Parse the spec
+            let specObject;
+            if (typeof spec === 'string') {
+                if (spec.trim().startsWith('{')) {
+                    specObject = JSON.parse(spec);
+                } else {
+                    // For YAML, we'll use js-yaml parser via CDN
+                    const yamlModule = await loadYAMLParser();
+                    specObject = yamlModule.load(spec);
+                }
+            } else {
+                specObject = spec;
             }
+
+            setParsedSpec(specObject);
+
+            // Load and initialize Swagger UI
+            await loadSwaggerUILibrary();
+            initializeSwaggerUI(specObject);
+
         } catch (err) {
-            setError('Failed to parse OpenAPI specification');
-            console.error('Spec parsing error:', err);
+            console.error('Failed to load Swagger UI:', err);
+            setError('Failed to load API specification. Please check the format.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const generateExamplePaths = () => ({
-        '/api/v1/apks/upload-apk/{groupId}': {
-            post: {
-                tags: ['APK'],
-                summary: 'Upload APK file',
-                description: 'Upload an APK file for a specific group',
-                parameters: [
-                    {
-                        name: 'groupId',
-                        in: 'path',
-                        required: true,
-                        schema: { type: 'string' },
-                        description: 'Group identifier'
-                    }
-                ],
-                requestBody: {
-                    required: true,
-                    content: {
-                        'multipart/form-data': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    file: { type: 'string', format: 'binary' }
-                                }
-                            }
-                        }
-                    }
-                },
-                responses: {
-                    '200': {
-                        description: 'APK uploaded successfully',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    properties: {
-                                        success: { type: 'boolean' },
-                                        message: { type: 'string' },
-                                        apkId: { type: 'string' }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    '400': { description: 'Bad request' },
-                    '401': { description: 'Unauthorized' }
-                }
+    const loadYAMLParser = async () => {
+        return new Promise((resolve, reject) => {
+            if ((window as any).jsyaml) {
+                resolve((window as any).jsyaml);
+                return;
             }
-        },
-        '/api/v1/apks': {
-            get: {
-                tags: ['APK'],
-                summary: 'Search APKs information',
-                description: 'Retrieve information about APK files',
-                parameters: [
-                    {
-                        name: 'search',
-                        in: 'query',
-                        schema: { type: 'string' },
-                        description: 'Search term'
-                    }
-                ],
-                responses: {
-                    '200': {
-                        description: 'APK information retrieved',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'array',
-                                    items: {
-                                        type: 'object',
-                                        properties: {
-                                            id: { type: 'string' },
-                                            name: { type: 'string' },
-                                            version: { type: 'string' },
-                                            size: { type: 'integer' }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        '/api/v1/auth/refresh-token': {
-            post: {
-                tags: ['Auth'],
-                summary: 'Refresh token',
-                description: 'Refresh authentication token',
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    refreshToken: { type: 'string' }
-                                },
-                                required: ['refreshToken']
-                            }
-                        }
-                    }
-                },
-                responses: {
-                    '200': {
-                        description: 'Token refreshed successfully',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    properties: {
-                                        accessToken: { type: 'string' },
-                                        refreshToken: { type: 'string' },
-                                        expiresIn: { type: 'integer' }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
 
-    const toggleEndpoint = (path: string) => {
-        setExpandedEndpoints(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(path)) {
-                newSet.delete(path);
-            } else {
-                newSet.add(path);
-            }
-            return newSet;
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js';
+            script.onload = () => resolve((window as any).jsyaml);
+            script.onerror = () => reject(new Error('Failed to load YAML parser'));
+            document.head.appendChild(script);
         });
     };
 
-    const filteredPaths = () => {
-        if (!parsedSpec?.paths) return {};
+    const loadSwaggerUILibrary = async () => {
+        return new Promise((resolve, reject) => {
+            if ((window as any).SwaggerUIBundle) {
+                resolve((window as any).SwaggerUIBundle);
+                return;
+            }
 
-        let paths = parsedSpec.paths;
+            // Load CSS first
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.2/swagger-ui.css';
+            document.head.appendChild(cssLink);
 
-        // Filter by tag
-        if (selectedTag !== 'all') {
-            paths = Object.fromEntries(
-                Object.entries(paths).filter(([path, methods]: [string, any]) =>
-                    Object.values(methods).some((method: any) =>
-                        method.tags?.includes(selectedTag)
-                    )
-                )
-            );
-        }
-
-        // Filter by search term
-        if (searchTerm) {
-            paths = Object.fromEntries(
-                Object.entries(paths).filter(([path, methods]: [string, any]) =>
-                    path.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    Object.values(methods).some((method: any) =>
-                        method.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        method.description?.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                )
-            );
-        }
-
-        return paths;
+            // Then load JS
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.2/swagger-ui-bundle.min.js';
+            script.onload = () => {
+                const standAloneScript = document.createElement('script');
+                standAloneScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.2/swagger-ui-standalone-preset.min.js';
+                standAloneScript.onload = () => resolve((window as any).SwaggerUIBundle);
+                standAloneScript.onerror = () => reject(new Error('Failed to load Swagger UI standalone'));
+                document.head.appendChild(standAloneScript);
+            };
+            script.onerror = () => reject(new Error('Failed to load Swagger UI bundle'));
+            document.head.appendChild(script);
+        });
     };
 
-    const methodColors: Record<string, string> = {
-        get: 'bg-blue-500 text-white',
-        post: 'bg-green-500 text-white',
-        put: 'bg-orange-500 text-white',
-        delete: 'bg-red-500 text-white',
-        patch: 'bg-purple-500 text-white'
+    const initializeSwaggerUI = (specObject: any) => {
+        if (!containerRef.current || !(window as any).SwaggerUIBundle) return;
+
+        try {
+            // Clear previous instance
+            if (swaggerUIRef.current) {
+                containerRef.current.innerHTML = '';
+            }
+
+            // Create container for Swagger UI
+            const swaggerContainer = document.createElement('div');
+            swaggerContainer.id = `swagger-ui-${Date.now()}`;
+            containerRef.current.appendChild(swaggerContainer);
+
+            // Initialize Swagger UI
+            swaggerUIRef.current = (window as any).SwaggerUIBundle({
+                domNode: swaggerContainer,
+                spec: specObject,
+                layout: 'BaseLayout',
+                deepLinking: true,
+                showExtensions: true,
+                showCommonExtensions: true,
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1,
+                docExpansion: 'list',
+                filter: true,
+                maxDisplayedTags: 50,
+                operationsSorter: 'alpha',
+                tagsSorter: 'alpha',
+                tryItOutEnabled: true,
+                requestInterceptor: (req: any) => {
+                    // Add any request modifications here
+                    return req;
+                },
+                responseInterceptor: (res: any) => {
+                    // Add any response modifications here
+                    return res;
+                },
+                onComplete: () => {
+                    console.log('Swagger UI loaded successfully');
+                },
+                presets: [
+                    (window as any).SwaggerUIBundle.presets.apis,
+                    (window as any).SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    (window as any).SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'],
+                validatorUrl: null // Disable validation
+            });
+
+        } catch (err) {
+            console.error('Failed to initialize Swagger UI:', err);
+            setError('Failed to initialize API documentation viewer');
+        }
+    };
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(spec);
+            // You could add a toast notification here
+        } catch (error) {
+            console.error('Failed to copy spec:', error);
+        }
+    };
+
+    const handleDownload = () => {
+        const blob = new Blob([spec], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'openapi-spec.yaml';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const openInSwaggerEditor = () => {
+        try {
+            const encoded = encodeURIComponent(spec);
+            const url = `https://editor.swagger.io/?url=data:text/yaml;charset=utf-8,${encoded}`;
+            window.open(url, '_blank');
+        } catch (error) {
+            console.error('Failed to open in Swagger Editor:', error);
+        }
     };
 
     if (isLoading) {
@@ -294,7 +203,7 @@ const SwaggerViewer: React.FC<SwaggerViewerProps> = ({
             <div className={`flex items-center justify-center h-96 ${className}`}>
                 <div className="flex flex-col items-center space-y-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-                    <p className="text-gray-600">Loading API Specification...</p>
+                    <p className="text-gray-600">Loading Swagger UI...</p>
                 </div>
             </div>
         );
@@ -303,11 +212,20 @@ const SwaggerViewer: React.FC<SwaggerViewerProps> = ({
     if (error) {
         return (
             <div className={`flex items-center justify-center h-96 ${className}`}>
-                <div className="flex flex-col items-center space-y-4 text-center">
+                <div className="flex flex-col items-center space-y-4 text-center max-w-md">
                     <AlertCircle className="w-12 h-12 text-red-500" />
                     <div>
-                        <h3 className="font-semibold text-gray-900">Error Loading Specification</h3>
-                        <p className="text-red-600 text-sm mt-1">{error}</p>
+                        <h3 className="font-semibold text-gray-900 mb-2">Error Loading API Specification</h3>
+                        <p className="text-red-600 text-sm">{error}</p>
+                        <div className="mt-4 space-x-2">
+                            <Button variant="outline" size="sm" onClick={() => loadSwaggerUI()}>
+                                Retry
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={handleCopy}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Copy Spec
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -315,260 +233,165 @@ const SwaggerViewer: React.FC<SwaggerViewerProps> = ({
     }
 
     return (
-        <div className={`h-full bg-gray-50 ${className}`}>
+        <div className={`h-full bg-white ${className}`}>
             {/* Header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between p-4">
                     <div className="flex items-center space-x-4">
-                        <Code className="w-8 h-8 text-green-600" />
+                        <Code className="w-6 h-6 text-green-600" />
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
-                                {parsedSpec?.info?.title || 'API Documentation'}
+                            <h1 className="text-lg font-bold text-gray-900">
+                                {parsedSpec?.info?.title || 'REST API Documentation'}
                             </h1>
                             <div className="flex items-center space-x-4 text-sm text-gray-600">
                                 <span>Version {parsedSpec?.info?.version || '1.0.0'}</span>
                                 <span>•</span>
                                 <span>OpenAPI {parsedSpec?.openapi || '3.0.0'}</span>
-                                {parsedSpec?.info?.contact?.email && (
-                                    <>
-                                        <span>•</span>
-                                        <a
-                                            href={`mailto:${parsedSpec.info.contact.email}`}
-                                            className="text-blue-600 hover:underline"
-                                        >
-                                            {parsedSpec.info.contact.email}
-                                        </a>
-                                    </>
-                                )}
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
                         <Button
                             variant="outline"
                             size="sm"
+                            onClick={handleCopy}
+                            leftIcon={<Copy className="w-4 h-4" />}
+                        >
+                            Copy
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleDownload}
+                            leftIcon={<Download className="w-4 h-4" />}
+                        >
+                            Download
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={openInSwaggerEditor}
                             leftIcon={<ExternalLink className="w-4 h-4" />}
                         >
-                            Try in Swagger Editor
+                            Open in Editor
                         </Button>
                         {isFullscreen && onClose && (
                             <Button variant="ghost" size="sm" onClick={onClose}>
-                                <span className="sr-only">Close</span>
-                                ×
+                                <Minimize2 className="w-4 h-4" />
                             </Button>
                         )}
                     </div>
                 </div>
-
-                {/* Controls */}
-                <div className="flex items-center justify-between p-4 bg-gray-50">
-                    <div className="flex items-center space-x-4">
-                        <Input
-                            placeholder="Search endpoints..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            leftIcon={<Search className="w-4 h-4" />}
-                            className="w-64"
-                        />
-                        <select
-                            value={selectedTag}
-                            onChange={(e) => setSelectedTag(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                        >
-                            <option value="all">All Tags</option>
-                            {parsedSpec?.tags?.map((tag: any) => (
-                                <option key={tag.name} value={tag.name}>{tag.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setExpandedEndpoints(new Set(Object.keys(parsedSpec?.paths || {})))}
-                        >
-                            Expand All
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setExpandedEndpoints(new Set())}
-                        >
-                            Collapse All
-                        </Button>
-                    </div>
-                </div>
             </div>
 
-            {/* Content */}
-            <div className="overflow-y-auto" style={{ height: isFullscreen ? 'calc(100vh - 200px)' : '60vh' }}>
-                <div className="max-w-6xl mx-auto p-6">
-                    {/* API Info */}
-                    {parsedSpec?.info?.description && (
-                        <div className="mb-8 p-6 bg-white rounded-lg border border-gray-200">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
-                            <p className="text-gray-700 leading-relaxed">{parsedSpec.info.description}</p>
-                        </div>
-                    )}
+            {/* Swagger UI Container - NO SCROLLBARS, FULL HEIGHT */}
+            <div
+                ref={containerRef}
+                className="swagger-ui-container"
+                style={{
+                    height: isFullscreen ? 'calc(100vh - 80px)' : '600px',
+                    overflow: 'hidden' // Remove scrollbars as requested
+                }}
+            />
 
-                    {/* Servers */}
-                    {parsedSpec?.servers && parsedSpec.servers.length > 0 && (
-                        <div className="mb-8 p-6 bg-white rounded-lg border border-gray-200">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">Servers</h2>
-                            <div className="space-y-3">
-                                {parsedSpec.servers.map((server: any, index: number) => (
-                                    <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                                        <div>
-                                            <code className="text-sm font-mono text-blue-800 bg-blue-100 px-2 py-1 rounded">
-                                                {server.url}
-                                            </code>
-                                            {server.description && (
-                                                <p className="text-sm text-blue-700 mt-1">{server.description}</p>
-                                            )}
-                                        </div>
-                                        <Button variant="outline" size="sm">
-                                            <Copy className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Endpoints */}
-                    <div className="space-y-4">
-                        <h2 className="text-lg font-semibold text-gray-900">API Endpoints</h2>
-
-                        {Object.entries(filteredPaths()).map(([path, methods]: [string, any]) => (
-                            <div key={path} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                                <button
-                                    onClick={() => toggleEndpoint(path)}
-                                    className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            {expandedEndpoints.has(path) ? (
-                                                <ChevronDown className="w-5 h-5 text-gray-400" />
-                                            ) : (
-                                                <ChevronRight className="w-5 h-5 text-gray-400" />
-                                            )}
-                                            <code className="font-mono text-sm text-gray-900">{path}</code>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            {Object.keys(methods).map(method => (
-                                                <span
-                                                    key={method}
-                                                    className={`px-2 py-1 text-xs font-semibold rounded uppercase ${
-                                                        methodColors[method] || 'bg-gray-500 text-white'
-                                                    }`}
-                                                >
-                                                    {method}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </button>
-
-                                {expandedEndpoints.has(path) && (
-                                    <div className="border-t border-gray-200">
-                                        {Object.entries(methods).map(([method, details]: [string, any]) => (
-                                            <div key={method} className="p-6 border-b border-gray-100 last:border-b-0">
-                                                <div className="flex items-start space-x-4 mb-4">
-                                                    <span className={`px-3 py-1 text-sm font-semibold rounded uppercase ${
-                                                        methodColors[method] || 'bg-gray-500 text-white'
-                                                    }`}>
-                                                        {method}
-                                                    </span>
-                                                    <div className="flex-1">
-                                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                                            {details.summary || `${method.toUpperCase()} ${path}`}
-                                                        </h3>
-                                                        {details.description && (
-                                                            <p className="text-gray-600 mb-4">{details.description}</p>
-                                                        )}
-                                                    </div>
-                                                    <Button variant="outline" size="sm" leftIcon={<Eye className="w-4 h-4" />}>
-                                                        Try it out
-                                                    </Button>
-                                                </div>
-
-                                                {/* Parameters */}
-                                                {details.parameters && details.parameters.length > 0 && (
-                                                    <div className="mb-6">
-                                                        <h4 className="font-semibold text-gray-900 mb-3">Parameters</h4>
-                                                        <div className="overflow-x-auto">
-                                                            <table className="min-w-full divide-y divide-gray-200">
-                                                                <thead className="bg-gray-50">
-                                                                <tr>
-                                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">In</th>
-                                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Required</th>
-                                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody className="bg-white divide-y divide-gray-200">
-                                                                {details.parameters.map((param: any, idx: number) => (
-                                                                    <tr key={idx}>
-                                                                        <td className="px-4 py-2 text-sm font-mono text-gray-900">{param.name}</td>
-                                                                        <td className="px-4 py-2 text-sm text-gray-600">{param.in}</td>
-                                                                        <td className="px-4 py-2 text-sm text-gray-600">{param.schema?.type}</td>
-                                                                        <td className="px-4 py-2 text-sm">
-                                                                            {param.required ? (
-                                                                                <span className="text-red-600 font-semibold">Required</span>
-                                                                            ) : (
-                                                                                <span className="text-gray-500">Optional</span>
-                                                                            )}
-                                                                        </td>
-                                                                        <td className="px-4 py-2 text-sm text-gray-600">{param.description}</td>
-                                                                    </tr>
-                                                                ))}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* Responses */}
-                                                {details.responses && (
-                                                    <div>
-                                                        <h4 className="font-semibold text-gray-900 mb-3">Responses</h4>
-                                                        <div className="space-y-3">
-                                                            {Object.entries(details.responses).map(([code, response]: [string, any]) => (
-                                                                <div key={code} className="border border-gray-200 rounded-lg p-4">
-                                                                    <div className="flex items-center space-x-3 mb-2">
-                                                                        <span className={`px-2 py-1 text-sm font-mono rounded ${
-                                                                            code.startsWith('2') ? 'bg-green-100 text-green-800' :
-                                                                                code.startsWith('4') ? 'bg-yellow-100 text-yellow-800' :
-                                                                                    code.startsWith('5') ? 'bg-red-100 text-red-800' :
-                                                                                        'bg-gray-100 text-gray-800'
-                                                                        }`}>
-                                                                            {code}
-                                                                        </span>
-                                                                        <span className="text-gray-700">{response.description}</span>
-                                                                    </div>
-                                                                    {response.content && (
-                                                                        <div className="mt-3">
-                                                                            <h5 className="text-sm font-medium text-gray-900 mb-2">Response Schema</h5>
-                                                                            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
-                                                                                {JSON.stringify(response.content, null, 2)}
-                                                                            </pre>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+            {/* Custom Swagger UI Styles */}
+            <style>{`
+                .swagger-ui-container :global(.swagger-ui) {
+                    font-family: inherit;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .wrapper) {
+                    padding: 0;
+                    max-width: none;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .info) {
+                    margin: 20px 0;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .scheme-container) {
+                    background: #fafafa;
+                    padding: 10px 20px;
+                    border-bottom: 1px solid #ebebeb;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .opblock-tag) {
+                    border-bottom: 1px solid #ebebeb;
+                    margin-bottom: 0;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .opblock) {
+                    margin: 0 0 10px 0;
+                    border: 1px solid #d9d9d9;
+                    border-radius: 4px;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .opblock.opblock-get .opblock-summary) {
+                    background: rgba(97, 175, 254, 0.1);
+                    border-color: #61affe;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .opblock.opblock-post .opblock-summary) {
+                    background: rgba(73, 204, 144, 0.1);
+                    border-color: #49cc90;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .opblock.opblock-put .opblock-summary) {
+                    background: rgba(252, 161, 48, 0.1);
+                    border-color: #fca130;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .opblock.opblock-delete .opblock-summary) {
+                    background: rgba(249, 62, 62, 0.1);
+                    border-color: #f93e3e;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .tab li:first-of-type:after) {
+                    display: none;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .response-col_status) {
+                    min-width: 6em;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .response-col_description) {
+                    min-width: 12em;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .model-box) {
+                    background: #f7f7f7;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .model .model-title) {
+                    color: #3b4151;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .parameter__name) {
+                    color: #3b4151;
+                    font-weight: 600;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .parameter__type) {
+                    color: #3b4151;
+                    font-weight: 600;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .parameter__in) {
+                    color: #888;
+                    font-style: italic;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .btn.authorize) {
+                    background-color: #49cc90;
+                    color: #fff;
+                    border-color: #49cc90;
+                }
+                
+                .swagger-ui-container :global(.swagger-ui .btn.authorize:hover) {
+                    background-color: #3cbf87;
+                    border-color: #3cbf87;
+                }
+            `}</style>
         </div>
     );
 };
