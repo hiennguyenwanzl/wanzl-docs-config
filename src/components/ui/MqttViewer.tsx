@@ -26,11 +26,19 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [parsedSpec, setParsedSpec] = useState<any>(null);
+    const [copied, setCopied] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const asyncAPIRef = useRef<any>(null);
 
     useEffect(() => {
         loadAsyncAPIViewer();
+
+        // Cleanup function to prevent memory leaks
+        return () => {
+            if (containerRef.current) {
+                containerRef.current.innerHTML = '';
+            }
+        };
     }, [spec]);
 
     const loadAsyncAPIViewer = async () => {
@@ -88,6 +96,230 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
                 return;
             }
 
+            // Add custom CSS for AsyncAPI styling
+            const styleElement = document.createElement('style');
+            styleElement.textContent = `
+                .asyncapi-component {
+                    --primary-color: #8b5cf6;
+                    --primary-light-color: #ede9fe;
+                    --primary-dark-color: #7c3aed;
+                    --secondary-color: #60a5fa;
+                    --text-color: #1f2937;
+                    --heading-font-weight: 600;
+                    --heading-color: #111827;
+                    --heading-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    --body-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    --border-radius: 0.5rem;
+                    --border-color: #e5e7eb;
+                    font-family: var(--body-font-family);
+                }
+                
+                .asyncapi-component .header {
+                    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                    padding: 1.5rem;
+                    border-radius: var(--border-radius) var(--border-radius) 0 0;
+                }
+                
+                .asyncapi-component .header h1 {
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                    color: white;
+                    margin: 0;
+                }
+                
+                .asyncapi-component .header .version {
+                    background: rgba(255,255,255,0.2);
+                    color: white;
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 0.25rem;
+                    font-size: 0.875rem;
+                    margin-left: 0.5rem;
+                }
+                
+                .asyncapi-component .info-section {
+                    padding: 1.5rem;
+                }
+                
+                .asyncapi-component .card {
+                    border: 1px solid var(--border-color);
+                    border-radius: var(--border-radius);
+                    margin-bottom: 1rem;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    background: white;
+                }
+                
+                .asyncapi-component .card-header {
+                    padding: 1rem 1.5rem;
+                    border-bottom: 1px solid var(--border-color);
+                    display: flex;
+                    align-items: center;
+                    background: #f9fafb;
+                    border-radius: var(--border-radius) var(--border-radius) 0 0;
+                }
+                
+                .asyncapi-component .card-header h3 {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    margin: 0;
+                    color: var(--heading-color);
+                }
+                
+                .asyncapi-component .card-body {
+                    padding: 1.5rem;
+                }
+                
+                .asyncapi-component .server-item {
+                    padding: 1rem;
+                    background: var(--primary-light-color);
+                    border: 1px solid rgba(139, 92, 246, 0.2);
+                    border-radius: var(--border-radius);
+                    margin-bottom: 1rem;
+                }
+                
+                .asyncapi-component .server-item h4 {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: var(--primary-dark-color);
+                    margin: 0 0 0.5rem 0;
+                }
+                
+                .asyncapi-component .server-url {
+                    font-family: monospace;
+                    background: rgba(255,255,255,0.5);
+                    padding: 0.5rem;
+                    border-radius: 0.25rem;
+                    word-break: break-all;
+                }
+                
+                .asyncapi-component .channel-item {
+                    margin-bottom: 1.5rem;
+                }
+                
+                .asyncapi-component .channel-name {
+                    font-family: monospace;
+                    font-weight: 600;
+                    color: var(--heading-color);
+                    margin-bottom: 0.5rem;
+                    word-break: break-all;
+                }
+                
+                .asyncapi-component .operation {
+                    padding: 1rem;
+                    border-radius: var(--border-radius);
+                    margin-bottom: 1rem;
+                }
+                
+                .asyncapi-component .operation.publish {
+                    background: #fff7ed;
+                    border-left: 4px solid #f59e0b;
+                }
+                
+                .asyncapi-component .operation.subscribe {
+                    background: #ede9fe;
+                    border-left: 4px solid #8b5cf6;
+                }
+                
+                .asyncapi-component .operation-header {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .asyncapi-component .operation-type {
+                    font-size: 0.75rem;
+                    text-transform: uppercase;
+                    font-weight: 700;
+                    border-radius: 0.25rem;
+                    padding: 0.25rem 0.5rem;
+                    margin-right: 0.5rem;
+                }
+                
+                .asyncapi-component .operation-type.publish {
+                    background: #f59e0b;
+                    color: white;
+                }
+                
+                .asyncapi-component .operation-type.subscribe {
+                    background: #8b5cf6;
+                    color: white;
+                }
+                
+                .asyncapi-component .schema {
+                    background: #f9fafb;
+                    padding: 1rem;
+                    border-radius: 0.25rem;
+                    font-family: monospace;
+                    font-size: 0.875rem;
+                    overflow-x: auto;
+                }
+                
+                .asyncapi-component .schema-property {
+                    margin-bottom: 0.5rem;
+                    padding-bottom: 0.5rem;
+                    border-bottom: 1px dashed #e5e7eb;
+                }
+                
+                .asyncapi-component .schema-property:last-child {
+                    margin-bottom: 0;
+                    padding-bottom: 0;
+                    border-bottom: none;
+                }
+                
+                .asyncapi-component .property-name {
+                    font-weight: 600;
+                    color: #4b5563;
+                }
+                
+                .asyncapi-component .property-type {
+                    font-size: 0.75rem;
+                    background: #e5e7eb;
+                    padding: 0.125rem 0.375rem;
+                    border-radius: 0.25rem;
+                    margin-left: 0.25rem;
+                }
+                
+                .asyncapi-component .required {
+                    color: #ef4444;
+                    margin-left: 0.25rem;
+                }
+                
+                .asyncapi-component .property-description {
+                    margin-top: 0.25rem;
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                    font-family: var(--body-font-family);
+                }
+                
+                .asyncapi-component .tags {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.25rem;
+                    margin-top: 0.5rem;
+                }
+                
+                .asyncapi-component .tag {
+                    font-size: 0.75rem;
+                    background: #e5e7eb;
+                    color: #4b5563;
+                    padding: 0.125rem 0.375rem;
+                    border-radius: 0.25rem;
+                }
+                
+                .asyncapi-component pre {
+                    background: #1f2937;
+                    color: #f9fafb;
+                    padding: 1rem;
+                    border-radius: 0.25rem;
+                    overflow-x: auto;
+                    font-size: 0.875rem;
+                }
+                
+                .asyncapi-component code {
+                    font-family: monospace;
+                }
+            `;
+            document.head.appendChild(styleElement);
+
             // Load AsyncAPI Web Component
             const script = document.createElement('script');
             script.src = 'https://unpkg.com/@asyncapi/web-component@1.0.0-next.54/lib/asyncapi-web-component.js';
@@ -127,20 +359,51 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
                         errors: false
                     },
                     expand: {
-                        messageExamples: false,
-                        schemaExamples: false
+                        messageExamples: true,
+                        schemaExamples: true
                     },
                     sidebar: {
                         showServers: true,
                         showOperations: true
+                    },
+                    theme: {
+                        bg: {
+                            primary: '#faf5ff',
+                            secondary: '#ffffff'
+                        },
+                        fg: {
+                            primary: '#1f2937',
+                            secondary: '#4b5563'
+                        },
+                        primary: {
+                            main: '#8b5cf6',
+                            light: '#ede9fe',
+                            dark: '#7c3aed',
+                            contrastText: '#ffffff'
+                        },
+                        success: {
+                            main: '#10b981',
+                            light: '#d1fae5',
+                            dark: '#059669',
+                            contrastText: '#ffffff'
+                        },
+                        error: {
+                            main: '#ef4444',
+                            light: '#fee2e2',
+                            dark: '#b91c1c',
+                            contrastText: '#ffffff'
+                        }
                     }
                 }));
 
                 // Set full height to container
                 asyncAPIElement.style.height = '100%';
                 asyncAPIElement.style.width = '100%';
+                asyncAPIElement.style.display = 'block';
+                asyncAPIElement.style.border = 'none';
 
                 containerRef.current.appendChild(asyncAPIElement);
+                asyncAPIRef.current = asyncAPIElement;
             } else {
                 // Fallback to custom renderer
                 renderCustomAsyncAPI(specObject);
@@ -157,32 +420,40 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
 
         const container = containerRef.current;
         container.innerHTML = '';
-        container.className = 'h-full overflow-auto bg-gray-50';
+        container.className = 'h-full overflow-auto bg-purple-50';
 
         // Create custom AsyncAPI viewer
         const viewer = document.createElement('div');
-        viewer.className = 'max-w-6xl mx-auto p-6 space-y-8';
+        viewer.className = 'max-w-6xl mx-auto p-6 space-y-8 asyncapi-component';
 
         // API Info Section
         if (specObject.info) {
             const infoSection = document.createElement('div');
-            infoSection.className = 'bg-white rounded-lg border border-gray-200 p-6';
+            infoSection.className = 'card';
             infoSection.innerHTML = `
-                <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">${specObject.info.title || 'MQTT API'}</h1>
-                    <div class="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-                        <span>Version ${specObject.info.version || '1.0.0'}</span>
-                        <span>•</span>
-                        <span>AsyncAPI ${specObject.asyncapi || '2.6.0'}</span>
-                        <span>•</span>
-                        <span class="flex items-center space-x-1">
-                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
-                            </svg>
-                            <span>MQTT Protocol</span>
-                        </span>
+                <div class="header">
+                    <h1>${specObject.info.title || 'MQTT API'} <span class="version">${specObject.info.version || '1.0.0'}</span></h1>
+                    <p class="mt-2 text-white text-opacity-90">${specObject.info.description || 'MQTT API Documentation'}</p>
+                </div>
+                <div class="info-section">
+                    <div class="mb-4">
+                        <span class="text-sm text-gray-500">AsyncAPI Version:</span>
+                        <span class="text-sm font-medium">${specObject.asyncapi || '2.6.0'}</span>
                     </div>
-                    ${specObject.info.description ? `<p class="text-gray-700 leading-relaxed">${specObject.info.description}</p>` : ''}
+                    ${specObject.info.contact ? `
+                        <div class="mb-4">
+                            <h3 class="text-sm font-medium mb-1">Contact</h3>
+                            <p class="text-sm">${specObject.info.contact.name || ''} ${specObject.info.contact.email ? `(${specObject.info.contact.email})` : ''}</p>
+                            ${specObject.info.contact.url ? `<a href="${specObject.info.contact.url}" target="_blank" class="text-sm text-purple-600 hover:text-purple-800">${specObject.info.contact.url}</a>` : ''}
+                        </div>
+                    ` : ''}
+                    ${specObject.info.license ? `
+                        <div class="mb-4">
+                            <h3 class="text-sm font-medium mb-1">License</h3>
+                            <p class="text-sm">${specObject.info.license.name || ''}</p>
+                            ${specObject.info.license.url ? `<a href="${specObject.info.license.url}" target="_blank" class="text-sm text-purple-600 hover:text-purple-800">${specObject.info.license.url}</a>` : ''}
+                        </div>
+                    ` : ''}
                 </div>
             `;
             viewer.appendChild(infoSection);
@@ -191,29 +462,32 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
         // Servers Section
         if (specObject.servers && Object.keys(specObject.servers).length > 0) {
             const serversSection = document.createElement('div');
-            serversSection.className = 'bg-white rounded-lg border border-gray-200 p-6';
+            serversSection.className = 'card';
             serversSection.innerHTML = `
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">MQTT Brokers</h2>
-                <div class="space-y-3">
-                    ${Object.entries(specObject.servers).map(([name, server]: [string, any]) => `
-                        <div class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-2 mb-2">
-                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
-                                    </svg>
-                                    <span class="font-medium text-purple-900">${name}</span>
-                                    <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded uppercase">
+                <div class="card-header">
+                    <h3>MQTT Brokers</h3>
+                </div>
+                <div class="card-body">
+                    <div class="space-y-4">
+                        ${Object.entries(specObject.servers).map(([name, server]: [string, any]) => `
+                            <div class="server-item">
+                                <h4>${name}</h4>
+                                <div class="mb-2">
+                                    <span class="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
                                         ${server.protocol || 'mqtt'}
                                     </span>
                                 </div>
-                                <code class="text-sm font-mono text-purple-800 bg-purple-100 px-2 py-1 rounded">
-                                    ${server.url}
-                                </code>
-                                ${server.description ? `<p class="text-sm text-purple-700 mt-2">${server.description}</p>` : ''}
+                                <div class="server-url">${server.url}</div>
+                                ${server.description ? `<p class="mt-2 text-sm text-gray-700">${server.description}</p>` : ''}
+                                ${server.security ? `
+                                    <div class="mt-2">
+                                        <span class="text-xs font-medium text-gray-500">Security:</span>
+                                        <span class="text-xs px-2 py-0.5 bg-red-100 text-red-800 rounded">${Array.isArray(server.security) ? server.security.map(s => Object.keys(s)[0]).join(', ') : 'Protected'}</span>
+                                    </div>
+                                ` : ''}
                             </div>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
             `;
             viewer.appendChild(serversSection);
@@ -222,76 +496,50 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
         // Channels Section
         if (specObject.channels && Object.keys(specObject.channels).length > 0) {
             const channelsSection = document.createElement('div');
-            channelsSection.className = 'space-y-4';
-
-            const channelsTitle = document.createElement('h2');
-            channelsTitle.className = 'text-xl font-semibold text-gray-900';
-            channelsTitle.textContent = 'MQTT Channels';
-            channelsSection.appendChild(channelsTitle);
-
-            Object.entries(specObject.channels).forEach(([channelName, channel]: [string, any]) => {
-                const channelCard = document.createElement('div');
-                channelCard.className = 'bg-white rounded-lg border border-gray-200 p-6';
-
+            channelsSection.className = 'card';
+            channelsSection.innerHTML = `
+                <div class="card-header">
+                    <h3>MQTT Channels</h3>
+                </div>
+                <div class="card-body">
+                    <div class="space-y-6">
+                        ${Object.entries(specObject.channels).map(([channelName, channel]: [string, any]) => {
                 const operations = [];
-                if (channel.subscribe) operations.push({ type: 'subscribe', data: channel.subscribe, color: 'purple' });
-                if (channel.publish) operations.push({ type: 'publish', data: channel.publish, color: 'orange' });
+                if (channel.subscribe) operations.push({ type: 'subscribe', data: channel.subscribe });
+                if (channel.publish) operations.push({ type: 'publish', data: channel.publish });
 
-                channelCard.innerHTML = `
-                    <div class="mb-6">
-                        <div class="flex items-center space-x-3 mb-3">
-                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
-                            </svg>
-                            <h3 class="text-lg font-semibold text-gray-900 font-mono break-all">${channelName}</h3>
-                        </div>
-                        ${channel.description ? `<p class="text-gray-600 mb-4">${channel.description}</p>` : ''}
-                        <div class="flex items-center space-x-2">
-                            ${operations.map(op => `
-                                <span class="bg-${op.color}-500 text-white px-3 py-1 text-xs rounded font-medium uppercase">
-                                    ${op.type}
-                                </span>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    ${operations.map(operation => `
-                        <div class="mb-6 p-4 bg-${operation.color}-50 rounded-lg border border-${operation.color}-200">
-                            <h4 class="font-semibold text-${operation.color}-900 mb-3 flex items-center">
-                                <span class="w-2 h-2 bg-${operation.color}-500 rounded-full mr-2"></span>
-                                ${operation.type.charAt(0).toUpperCase() + operation.type.slice(1)} Operation
-                            </h4>
-                            <p class="text-sm text-${operation.color}-700 mb-3">
-                                ${operation.type === 'subscribe' ? 'Listen for messages on this channel' : 'Send messages to this channel'}
-                            </p>
-                            ${operation.data.message ? `
-                                <div class="bg-white p-4 rounded border">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <h5 class="text-sm font-medium text-gray-900">
-                                            ${operation.data.message.name || 'Message Schema'}
-                                        </h5>
-                                        ${operation.data.message.title ? `
-                                            <span class="text-xs text-gray-500">${operation.data.message.title}</span>
-                                        ` : ''}
+                return `
+                                <div class="channel-item">
+                                    <h4 class="channel-name">${channelName}</h4>
+                                    ${channel.description ? `<p class="text-sm text-gray-700 mb-2">${channel.description}</p>` : ''}
+                                    <div class="space-y-2">
+                                        ${operations.map(operation => `
+                                            <div class="operation ${operation.type}">
+                                                <div class="operation-header">
+                                                    <span class="operation-type ${operation.type}">${operation.type}</span>
+                                                    <span class="text-sm font-medium">${operation.data.summary || (operation.type === 'subscribe' ? 'Subscribe to messages' : 'Publish messages')}</span>
+                                                </div>
+                                                ${operation.data.description ? `<p class="text-sm text-gray-700 mb-2">${operation.data.description}</p>` : ''}
+                                                ${operation.data.message ? `
+                                                    <div class="mt-2">
+                                                        <div class="text-sm font-medium mb-1">Message: ${operation.data.message.name || 'Message'}</div>
+                                                        ${operation.data.message.summary ? `<p class="text-sm text-gray-700 mb-2">${operation.data.message.summary}</p>` : ''}
+                                                        ${operation.data.message.payload ? `
+                                                            <div class="schema">
+                                                                <pre><code>${JSON.stringify(operation.data.message.payload, null, 2)}</code></pre>
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        `).join('')}
                                     </div>
-                                    ${operation.data.message.summary ? `
-                                        <p class="text-sm text-gray-600 mb-3">${operation.data.message.summary}</p>
-                                    ` : ''}
-                                    ${operation.data.message.payload ? `
-                                        <div class="bg-gray-50 p-3 rounded">
-                                            <h6 class="text-xs font-medium text-gray-700 mb-2">Payload Schema:</h6>
-                                            <pre class="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">${JSON.stringify(operation.data.message.payload, null, 2)}</pre>
-                                        </div>
-                                    ` : ''}
                                 </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                `;
-
-                channelsSection.appendChild(channelCard);
-            });
-
+                            `;
+            }).join('')}
+                    </div>
+                </div>
+            `;
             viewer.appendChild(channelsSection);
         }
 
@@ -301,7 +549,8 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(spec);
-            // You could add a toast notification here
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
         } catch (error) {
             console.error('Failed to copy spec:', error);
         }
@@ -311,8 +560,12 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
         const blob = new Blob([spec], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
+
+        // Determine file extension based on content
+        const fileExtension = spec.trim().startsWith('{') ? 'json' : 'yaml';
+
         link.href = url;
-        link.download = 'asyncapi-spec.yaml';
+        link.download = `asyncapi-spec.${fileExtension}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -334,7 +587,7 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
             <div className={`flex items-center justify-center h-96 ${className}`}>
                 <div className="flex flex-col items-center space-y-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-                    <p className="text-gray-600">Loading AsyncAPI Viewer...</p>
+                    <p className="text-gray-600">Loading MQTT Documentation...</p>
                 </div>
             </div>
         );
@@ -390,7 +643,7 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
                             onClick={handleCopy}
                             leftIcon={<Copy className="w-4 h-4" />}
                         >
-                            Copy
+                            {copied ? 'Copied!' : 'Copy'}
                         </Button>
                         <Button
                             variant="outline"
@@ -417,136 +670,18 @@ const MqttViewer: React.FC<MqttViewerProps> = ({
                 </div>
             </div>
 
-            {/* AsyncAPI Container - NO SCROLLBARS, FULL HEIGHT */}
+            {/* AsyncAPI Container - Full height without scrollbars */}
             <div
                 ref={containerRef}
-                className="asyncapi-container"
+                className="asyncapi-container w-full"
                 style={{
-                    height: isFullscreen ? 'calc(100vh - 80px)' : '600px',
-                    overflow: 'hidden' // Remove scrollbars as requested
+                    height: 'calc(100% - 72px)',
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden'
                 }}
             />
-
-            {/* Custom AsyncAPI Styles */}
-            <style>{`
-                .asyncapi-container :global(asyncapi-component) {
-                    height: 100%;
-                    width: 100%;
-                    display: block;
-                }
-                
-                .asyncapi-container :global(.asyncapi) {
-                    font-family: inherit;
-                    height: 100%;
-                }
-                
-                .asyncapi-container :global(.asyncapi .container) {
-                    max-width: none;
-                    padding: 0;
-                }
-                
-                .asyncapi-container :global(.asyncapi .header) {
-                    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-                    color: white;
-                    padding: 2rem;
-                }
-                
-                .asyncapi-container :global(.asyncapi .content) {
-                    padding: 1.5rem;
-                }
-                
-                .asyncapi-container :global(.asyncapi .channel) {
-                    border: 1px solid #e5e7eb;
-                    border-radius: 0.5rem;
-                    margin-bottom: 1rem;
-                    overflow: hidden;
-                }
-                
-                .asyncapi-container :global(.asyncapi .channel-header) {
-                    background: #f9fafb;
-                    padding: 1rem;
-                    border-bottom: 1px solid #e5e7eb;
-                }
-                
-                .asyncapi-container :global(.asyncapi .channel-name) {
-                    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-                    font-weight: 600;
-                    color: #1f2937;
-                }
-                
-                .asyncapi-container :global(.asyncapi .operation) {
-                    padding: 1rem;
-                    border-bottom: 1px solid #f3f4f6;
-                }
-                
-                .asyncapi-container :global(.asyncapi .operation.subscribe) {
-                    background: linear-gradient(to right, #faf5ff, #ffffff);
-                    border-left: 4px solid #8b5cf6;
-                }
-                
-                .asyncapi-container :global(.asyncapi .operation.publish) {
-                    background: linear-gradient(to right, #fff7ed, #ffffff);
-                    border-left: 4px solid #f59e0b;
-                }
-                
-                .asyncapi-container :global(.asyncapi .message-schema) {
-                    background: #f9fafb;
-                    border: 1px solid #e5e7eb;
-                    border-radius: 0.375rem;
-                    padding: 1rem;
-                    margin-top: 1rem;
-                }
-                
-                .asyncapi-container :global(.asyncapi .schema-property) {
-                    padding: 0.5rem 0;
-                    border-bottom: 1px solid #f3f4f6;
-                }
-                
-                .asyncapi-container :global(.asyncapi .schema-property:last-child) {
-                    border-bottom: none;
-                }
-                
-                .asyncapi-container :global(.asyncapi .property-name) {
-                    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-                    font-weight: 600;
-                    color: #374151;
-                }
-                
-                .asyncapi-container :global(.asyncapi .property-type) {
-                    color: #6b7280;
-                    font-size: 0.875rem;
-                }
-                
-                .asyncapi-container :global(.asyncapi .property-description) {
-                    color: #4b5563;
-                    font-size: 0.875rem;
-                    margin-top: 0.25rem;
-                }
-                
-                .asyncapi-container :global(.asyncapi .servers-section) {
-                    background: #faf5ff;
-                    border: 1px solid #e9d5ff;
-                    border-radius: 0.5rem;
-                    padding: 1.5rem;
-                    margin-bottom: 2rem;
-                }
-                
-                .asyncapi-container :global(.asyncapi .server-card) {
-                    background: white;
-                    border: 1px solid #d1d5db;
-                    border-radius: 0.375rem;
-                    padding: 1rem;
-                    margin-bottom: 1rem;
-                }
-                
-                .asyncapi-container :global(.asyncapi .server-url) {
-                    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-                    background: #f3f4f6;
-                    padding: 0.25rem 0.5rem;
-                    border-radius: 0.25rem;
-                    font-size: 0.875rem;
-                }
-            `}</style>
         </div>
     );
 };

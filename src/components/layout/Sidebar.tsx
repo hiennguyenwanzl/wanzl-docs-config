@@ -12,7 +12,6 @@ import {
     Plus
 } from 'lucide-react';
 import Button from '../ui/Button';
-import DefaultIcon from '../ui/DefaultIcon';
 import DefaultServiceIcon from '../ui/DefaultServiceIcon';
 
 interface SidebarProps {
@@ -59,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         setIsMobileOpen(!isMobileOpen);
     };
 
-    // Handle clicking anywhere on sidebar when collapsed to expand - FIXED
+    // Handle clicking anywhere on sidebar when collapsed to expand
     const handleSidebarClick = (e: React.MouseEvent) => {
         if (isCollapsed) {
             // Only expand if clicking on the sidebar background, not on specific buttons/content
@@ -117,11 +116,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                     >
                         {getVersionIcon(version)}
                     </button>
-                    {/* FIXED: Tooltip positioning */}
+                    {/* Tooltip positioning */}
                     <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg pointer-events-none top-0">
                         <div className="font-medium">v{version.version}</div>
                         <div className="text-xs text-gray-300">{version.status}</div>
-                        {/* FIXED: Arrow positioning */}
+                        {/* Arrow positioning */}
                         <div className="absolute right-full top-1/2 transform translate-x-0 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900"></div>
                     </div>
                 </div>
@@ -180,33 +179,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                             {serviceIcon}
                         </div>
                     </button>
-                    {/* FIXED: Tooltip positioning */}
+                    {/* Tooltip positioning */}
                     <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px] pointer-events-none top-0">
                         <div className="font-medium">{service.display_name || service.name}</div>
                         <div className="text-xs text-gray-300">{serviceVersions.length} versions</div>
                         <div className="text-xs text-gray-300 mt-1">{service.protocol_type || 'REST'} API</div>
-                        {/* FIXED: Arrow positioning */}
+                        {/* Arrow positioning */}
                         <div className="absolute right-full top-1/2 transform translate-x-0 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900"></div>
                     </div>
-                    {/* Show collapsed versions when expanded */}
-                    {isServiceExpanded && serviceVersions.length > 0 && (
-                        <div className="mt-1 space-y-1">
-                            {serviceVersions
-                                .sort((a, b) => {
-                                    const aParts = a.version.split('.').map(Number);
-                                    const bParts = b.version.split('.').map(Number);
-                                    for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-                                        const aPart = aParts[i] || 0;
-                                        const bPart = bParts[i] || 0;
-                                        if (aPart !== bPart) {
-                                            return bPart - aPart;
-                                        }
-                                    }
-                                    return 0;
-                                })
-                                .map(version => renderVersion(version, productId, service.id))}
-                        </div>
-                    )}
                 </div>
             );
         }
@@ -306,20 +286,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                             {productIcon}
                         </div>
                     </button>
-                    {/* FIXED: Tooltip positioning */}
+                    {/* Tooltip positioning */}
                     <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px] pointer-events-none top-0">
                         <div className="font-medium">{product.display_name || product.name}</div>
                         <div className="text-xs text-gray-300">{servicesCount} services</div>
                         <div className="text-xs text-gray-300 mt-1">{product.category || 'Other'}</div>
-                        {/* FIXED: Arrow positioning */}
+                        {/* Arrow positioning */}
                         <div className="absolute right-full top-1/2 transform translate-x-0 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900"></div>
                     </div>
-                    {/* Show collapsed services when expanded */}
-                    {isExpanded && productServices.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                            {productServices.map(service => renderService(service, product.id))}
-                        </div>
-                    )}
                 </div>
             );
         }
@@ -450,9 +424,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </div>
 
-                {/* Products List - FIXED: Removed bottom space when collapsed */}
+                {/* Products List - Removed bottom space when collapsed */}
                 <div className={`flex-1 overflow-y-auto custom-scrollbar ${isCollapsed ? 'pb-0' : ''}`}>
                     <div className="p-4">
+                        {/* When collapsed, only show empty state when there are no products */}
                         {products.length === 0 ? (
                             !isCollapsed && (
                                 <div className="text-center py-12">
@@ -484,10 +459,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </div>
 
-                {/* FIXED: Footer spacing when collapsed */}
+                {/* Footer spacing when collapsed */}
                 <div className={`p-4 border-t border-gray-200 flex-shrink-0 bg-gray-50 ${isCollapsed ? 'py-2' : ''}`}>
                     {isCollapsed ? (
-                        // Collapsed: Larger icons with better tooltips - FIXED spacing
+                        // Collapsed: Larger icons with better tooltips - Fixed spacing
                         <div className="space-y-2 flex flex-col items-center w-full">
                             <div className="relative group w-full">
                                 <button

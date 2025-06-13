@@ -22,7 +22,7 @@ import {
     EMPTY_PROJECT_DATA,
     initializeProjectWithTemplates
 } from './data/defaultData';
-import { generateId, formatDate } from './utils/helpers';
+
 import type { ProjectData, FileData, Product, Service, ApiVersion } from './types';
 
 // File Upload Component for Import

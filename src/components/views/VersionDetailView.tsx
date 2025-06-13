@@ -80,7 +80,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
     const getApiTypeIcon = () => {
         const hasSwagger = version.api_specs?.openapi;
         const hasMqtt = version.api_specs?.mqtt;
-        const protocolType = version.service_protocol_type;
+        const protocolType = hasMqtt ? 'MQTT' : 'REST';
 
         if (protocolType === 'MQTT' || hasMqtt) {
             return <Wifi className="w-8 h-8 text-purple-600" />;
@@ -93,7 +93,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
 
     const hasSwaggerSpec = version.api_specs?.openapi;
     const hasMqttSpec = version.api_specs?.mqtt;
-    const protocolType = version.service_protocol_type || 'REST';
+    const protocolType = hasMqttSpec ? 'MQTT' : 'REST';
 
     // Build tabs based on protocol type and available specs
     const tabs = [
@@ -368,7 +368,8 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                     </div>
                 )}
 
-                {/* REST API Tab - FIXED: Full Width, No Scrollbars */}
+
+                {/* REST API Tab - Full Width, No Scrollbars */}
                 {activeTab === 'swagger' && hasSwaggerSpec && (
                     <div className="w-full -mx-6">
                         <div className="px-6 mb-6">
@@ -376,24 +377,32 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                             <p className="text-gray-600">
                                 Interactive API documentation powered by OpenAPI specification.
                             </p>
+                            {version.api_specs?.openapi && (
+                                <div className="flex items-center mt-2">
+                                    <span className="text-sm text-gray-500 mr-2">File:</span>
+                                    <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                        {typeof version.api_specs.openapi === 'string'
+                            ? 'OpenAPI Specification'
+                            : version.api_specs.openapi?.name || 'openapi.yaml'}
+                    </span>
+                                </div>
+                            )}
                         </div>
 
-                        {/* FIXED: Full-width API Spec Viewer with NO scrollbars, proper height */}
-                        <SwaggerViewer
-                            spec={typeof version.api_specs.openapi === 'string'
-                                ? version.api_specs.openapi
-                                : version.api_specs.openapi?.content || ''}
-                            isFullscreen={false}
-                            className="w-full"
-                            style={{
-                                height: '800px',
-                                overflow: 'hidden'
-                            }}
-                        />
+                        {/* Full-width API Spec Viewer with NO scrollbars, proper height */}
+                        <div className="w-full bg-white border-t border-gray-200">
+                            <SwaggerViewer
+                                spec={typeof version.api_specs.openapi === 'string'
+                                    ? version.api_specs.openapi
+                                    : version.api_specs.openapi?.content || ''}
+                                isFullscreen={false}
+                                className="w-full"
+                            />
+                        </div>
                     </div>
                 )}
 
-                {/* MQTT API Tab - FIXED: Full Width, No Scrollbars */}
+                {/* MQTT API Tab - Full Width, No Scrollbars */}
                 {activeTab === 'mqtt' && hasMqttSpec && (
                     <div className="w-full -mx-6">
                         <div className="px-6 mb-6">
@@ -401,20 +410,28 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                             <p className="text-gray-600">
                                 Event-driven API documentation for MQTT messaging.
                             </p>
+                            {version.api_specs?.mqtt && (
+                                <div className="flex items-center mt-2">
+                                    <span className="text-sm text-gray-500 mr-2">File:</span>
+                                    <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                        {typeof version.api_specs.mqtt === 'string'
+                            ? 'AsyncAPI Specification'
+                            : version.api_specs.mqtt?.name || 'asyncapi.yaml'}
+                    </span>
+                                </div>
+                            )}
                         </div>
 
-                        {/* FIXED: Full-width API Spec Viewer with NO scrollbars, proper height */}
-                        <MqttViewer
-                            spec={typeof version.api_specs.mqtt === 'string'
-                                ? version.api_specs.mqtt
-                                : version.api_specs.mqtt?.content || ''}
-                            isFullscreen={false}
-                            className="w-full"
-                            style={{
-                                height: '800px',
-                                overflow: 'hidden'
-                            }}
-                        />
+                        {/* Full-width API Spec Viewer with NO scrollbars, proper height */}
+                        <div className="w-full bg-white border-t border-gray-200">
+                            <MqttViewer
+                                spec={typeof version.api_specs.mqtt === 'string'
+                                    ? version.api_specs.mqtt
+                                    : version.api_specs.mqtt?.content || ''}
+                                isFullscreen={false}
+                                className="w-full"
+                            />
+                        </div>
                     </div>
                 )}
 

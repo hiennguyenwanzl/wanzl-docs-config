@@ -100,7 +100,7 @@ const ApiSpecViewer: React.FC<ApiSpecViewerProps> = ({
                     spec={spec.content}
                     onClose={isFullscreen ? () => setShowModal(false) : undefined}
                     isFullscreen={isFullscreen}
-                    className={isFullscreen ? 'h-full' : 'h-96'}
+                    className={isFullscreen ? 'h-full' : 'h-full'}
                 />
             );
         } else {
@@ -109,7 +109,7 @@ const ApiSpecViewer: React.FC<ApiSpecViewerProps> = ({
                     spec={spec.content}
                     onClose={isFullscreen ? () => setShowModal(false) : undefined}
                     isFullscreen={isFullscreen}
-                    className={isFullscreen ? 'h-full' : 'h-96'}
+                    className={isFullscreen ? 'h-full' : 'h-full'}
                 />
             );
         }
@@ -181,14 +181,21 @@ const ApiSpecViewer: React.FC<ApiSpecViewerProps> = ({
                     </div>
                 </CardHeader>
 
-                <CardContent className="p-0">
+                <CardContent className="p-0 h-[600px]">
                     {viewMode === 'ui' ? (
-                        <div className="h-96 overflow-hidden">
+                        <div className="h-full overflow-hidden">
                             {renderViewer(false)}
                         </div>
                     ) : (
-                        <div className="h-96 overflow-hidden">
-                            <pre className="bg-gray-900 text-gray-100 p-4 text-sm overflow-auto h-full">
+                        <div className="h-full overflow-hidden">
+                            <pre
+                                className="bg-gray-900 text-gray-100 p-4 text-sm h-full"
+                                style={{
+                                    overflow: 'hidden',
+                                    height: '100%',
+                                    margin: 0
+                                }}
+                            >
                                 <code className={`language-${getLanguage()}`}>
                                     {spec.content}
                                 </code>
