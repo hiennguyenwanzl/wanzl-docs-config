@@ -187,6 +187,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                             value={formData.display_name || ''}
                             onChange={(e) => updateField('display_name', e.target.value)}
                             error={errors.display_name}
+                            required
                             placeholder="e.g., Transaction Processing Service"
                             helperText="How the name appears in the UI (optional)"
                         />
@@ -224,6 +225,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                         <Select
                             label="Status"
                             value={formData.status || ''}
+                            required
                             onChange={(e) => updateField('status', e.target.value)}
                             options={STATUS_OPTIONS}
                         />

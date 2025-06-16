@@ -11,6 +11,7 @@ interface ServiceCardProps {
         display_name?: string;
         short_description: string;
         category?: string;
+        status?: string;
         icon?: string | null;
         protocol_type?: 'REST' | 'MQTT'; // Updated to match single protocol
     };
@@ -88,6 +89,16 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                             <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold text-gray-900 leading-tight truncate">
                                     {service.display_name || service.name}
+                                    <span>   </span>
+                                    {service.status && (
+                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                            service.status === 'active'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-100 text-gray-700'
+                                        }`}>
+                                            {service.status}
+                                </span>
+                                    )}
                                 </h3>
                                 <div className="flex items-center space-x-2 mt-1">
                                     <span className="text-xs text-gray-500 font-medium">
@@ -142,14 +153,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                             </div>
                         </div>
 
-
-                        <div className="flex items-center justify-between">
-                            {/* Status indicator */}
-                            <div className="flex items-center space-x-1">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span className="text-xs text-gray-500">Active</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

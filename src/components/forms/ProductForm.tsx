@@ -199,6 +199,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                             value={formData.display_name || ''}
                             onChange={(e) => updateField('display_name', e.target.value)}
                             error={errors.display_name}
+                            required
                             placeholder="e.g., Fast Laner"
                             helperText="How the name appears in the UI (optional)"
                         />
@@ -226,6 +227,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                         />
                         <Select
                             label="Status"
+                            required
                             value={formData.status || ''}
                             onChange={(e) => updateField('status', e.target.value)}
                             options={STATUS_OPTIONS}

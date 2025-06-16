@@ -23,7 +23,7 @@ interface VersionFormProps {
     version?: any;
     productId: string;
     serviceId: string;
-    serviceProtocolType: 'REST' | 'MQTT'; // Make this required
+    serviceProtocolType: 'REST' | 'MQTT';
     onSave: (versionData: any) => Promise<void>;
     onCancel: () => void;
     onPreview?: (version: any) => void;
@@ -34,7 +34,7 @@ const VersionForm: React.FC<VersionFormProps> = ({
                                                      version,
                                                      productId,
                                                      serviceId,
-                                                     serviceProtocolType, // Now required, no default
+                                                     serviceProtocolType,
                                                      onSave,
                                                      onCancel,
                                                      onPreview,
@@ -58,7 +58,7 @@ const VersionForm: React.FC<VersionFormProps> = ({
         code_examples: version?.code_examples || {},
         service_id: serviceId,
         product_id: productId,
-        service_protocol_type: serviceProtocolType // Set from service
+        service_protocol_type: serviceProtocolType
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -76,7 +76,7 @@ const VersionForm: React.FC<VersionFormProps> = ({
                 tutorials: [],
                 introduction: '',
                 getting_started: '',
-                service_protocol_type: serviceProtocolType // Ensure it matches service
+                service_protocol_type: serviceProtocolType
             }));
         }
     }, [isEditing, version, serviceProtocolType]);
@@ -161,7 +161,7 @@ const VersionForm: React.FC<VersionFormProps> = ({
                 supports_swagger: serviceProtocolType === 'REST',
                 supports_mqtt: serviceProtocolType === 'MQTT',
                 supported_apis: [serviceProtocolType.toLowerCase()],
-                service_protocol_type: serviceProtocolType // Ensure consistency
+                service_protocol_type: serviceProtocolType
             };
 
             await onSave(versionData);
@@ -201,15 +201,15 @@ const VersionForm: React.FC<VersionFormProps> = ({
     const protocolInfo = getProtocolInfo();
 
     return (
-        <div className="w-full max-w-4xl mx-auto">
-            <div className="space-y-6">
+        <div className="w-full max-w-5xl mx-auto">
+            <div className="space-y-8">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-bold text-gray-900">
                             {isEditing ? 'Edit API Version' : 'Create New API Version'}
                         </h2>
-                        <p className="text-gray-600 mt-1 text-sm">
+                        <p className="text-gray-600 mt-2">
                             {isEditing ? 'Update version information' : `Add a new ${serviceProtocolType} API version to this service`}
                         </p>
                     </div>
@@ -235,42 +235,84 @@ const VersionForm: React.FC<VersionFormProps> = ({
                             type="button"
                             onClick={handleSubmit}
                             disabled={isSubmitting}
+                            className={`${
+                                serviceProtocolType === 'REST'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : 'bg-purple-600 hover:bg-purple-700'
+                            } text-white`}
                         >
                             {isSubmitting ? 'Saving...' : (isEditing ? 'Update Version' : 'Create Version')}
                         </Button>
                     </div>
                 </div>
 
-                {/* Protocol Type Info - Enhanced with better styling */}
-                <div className={`bg-white rounded-lg border-2 ${protocolInfo.borderColor} ${protocolInfo.bgColor} p-6`}>
-                    <div className="flex items-center space-x-3 mb-4">
-                        {protocolInfo.icon}
-                        <div>
-                            <h3 className={`text-lg font-semibold ${protocolInfo.textColor}`}>
-                                {protocolInfo.title}
-                            </h3>
-                            <p className={`${protocolInfo.textColor} text-sm opacity-80`}>
-                                {protocolInfo.description}
-                            </p>
+                {/* API Specification Upload */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">
+                        {protocolInfo.fileType}
+                        <span className="text-red-500 ml-1">*</span>
+                    </h3>
+
+                    {serviceProtocolType === 'REST' && (
+                        <div className="space-y-6">
+                            <div className={`p-6 rounded-xl border-l-4 ${protocolInfo.borderColor} ${protocolInfo.bgColor}`}>
+                                <div className="flex items-start space-x-4">
+                                    <Code className={`w-6 h-6 mt-1 ${protocolInfo.color === 'green' ? 'text-green-600' : 'text-purple-600'}`} />
+                                    <div>
+                                        <h4 className={`font-bold ${protocolInfo.textColor} text-lg`}>OpenAPI/Swagger Specification</h4>
+                                        <p className={`${protocolInfo.textColor} opacity-80 mt-2`}>
+                                            Upload your OpenAPI 3.0+ or Swagger 2.0 specification file (YAML or JSON format)
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <FileUpload
+                                accept=".yaml,.yml,.json"
+                                currentFile={formData.api_specs.openapi}
+                                onFileUpload={(file) => updateApiSpec('openapi', file)}
+                                allowedTypes={['.yaml', '.yml', '.json']}
+                            />
+                            {errors.openapi && (
+                                <p className="text-sm text-red-600 flex items-center mt-2">
+                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                    {errors.openapi}
+                                </p>
+                            )}
                         </div>
-                    </div>
-                    <div className={`flex items-start space-x-2 p-3 ${protocolInfo.bgColor} rounded-md border ${protocolInfo.borderColor}`}>
-                        <AlertCircle className={`w-4 h-4 mt-0.5 ${protocolInfo.color === 'green' ? 'text-green-600' : 'text-purple-600'}`} />
-                        <div className="text-sm">
-                            <p className={`font-medium ${protocolInfo.textColor}`}>
-                                Service Protocol: {serviceProtocolType}
-                            </p>
-                            <p className={`${protocolInfo.textColor} opacity-80 mt-1`}>
-                                This API version will inherit the {serviceProtocolType} protocol from the parent service.
-                                {serviceProtocolType === 'REST' ? ' Upload an OpenAPI/Swagger specification file.' : ' Upload an AsyncAPI specification file.'}
-                            </p>
+                    )}
+
+                    {serviceProtocolType === 'MQTT' && (
+                        <div className="space-y-6">
+                            <div className={`p-6 rounded-xl border-l-4 ${protocolInfo.borderColor} ${protocolInfo.bgColor}`}>
+                                <div className="flex items-start space-x-4">
+                                    <Wifi className={`w-6 h-6 mt-1 ${protocolInfo.color === 'green' ? 'text-green-600' : 'text-purple-600'}`} />
+                                    <div>
+                                        <h4 className={`font-bold ${protocolInfo.textColor} text-lg`}>AsyncAPI Specification</h4>
+                                        <p className={`${protocolInfo.textColor} opacity-80 mt-2`}>
+                                            Upload your AsyncAPI 2.0+ specification file for MQTT message definitions (YAML or JSON format)
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <FileUpload
+                                accept=".yaml,.yml,.json"
+                                currentFile={formData.api_specs.mqtt}
+                                onFileUpload={(file) => updateApiSpec('mqtt', file)}
+                                allowedTypes={['.yaml', '.yml', '.json']}
+                            />
+                            {errors.mqtt && (
+                                <p className="text-sm text-red-600 flex items-center mt-2">
+                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                    {errors.mqtt}
+                                </p>
+                            )}
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Basic Information */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-6">Basic Information</h3>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <Input
                             label="Version Number"
@@ -309,98 +351,34 @@ const VersionForm: React.FC<VersionFormProps> = ({
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-6">
-                        <label className="flex items-center">
+                        <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                             <input
                                 type="checkbox"
                                 checked={formData.deprecated}
                                 onChange={(e) => updateField('deprecated', e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
                             />
-                            <span className="ml-2 text-sm text-gray-700">Deprecated</span>
+                            <span className="text-sm font-medium text-gray-700">Deprecated</span>
                         </label>
-                        <label className="flex items-center">
+                        <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                             <input
                                 type="checkbox"
                                 checked={formData.beta}
                                 onChange={(e) => updateField('beta', e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                className="w-4 h-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
                             />
-                            <span className="ml-2 text-sm text-gray-700">Beta Version</span>
+                            <span className="text-sm font-medium text-gray-700">Beta Version</span>
                         </label>
-                        <label className="flex items-center">
+                        <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                             <input
                                 type="checkbox"
                                 checked={formData.breaking_changes}
                                 onChange={(e) => updateField('breaking_changes', e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                             />
-                            <span className="ml-2 text-sm text-gray-700">Breaking Changes</span>
+                            <span className="text-sm font-medium text-gray-700">Breaking Changes</span>
                         </label>
                     </div>
-                </div>
-
-                {/* API Specification Upload - Protocol specific */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        {protocolInfo.fileType}
-                        <span className="text-red-500 ml-1">*</span>
-                    </h3>
-
-                    {serviceProtocolType === 'REST' && (
-                        <div className="space-y-4">
-                            <div className={`p-4 rounded-lg border-l-4 ${protocolInfo.borderColor} ${protocolInfo.bgColor}`}>
-                                <div className="flex items-start space-x-3">
-                                    <Code className={`w-5 h-5 mt-0.5 ${protocolInfo.color === 'green' ? 'text-green-600' : 'text-purple-600'}`} />
-                                    <div>
-                                        <h4 className={`font-medium ${protocolInfo.textColor}`}>OpenAPI/Swagger Specification</h4>
-                                        <p className={`text-sm ${protocolInfo.textColor} opacity-80 mt-1`}>
-                                            Upload your OpenAPI 3.0+ or Swagger 2.0 specification file (YAML or JSON format)
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <FileUpload
-                                label="OpenAPI Specification File"
-                                description="Upload OpenAPI/Swagger YAML or JSON file"
-                                accept=".yaml,.yml,.json"
-                                currentFile={formData.api_specs.openapi}
-                                onFileUpload={(file) => updateApiSpec('openapi', file)}
-                                allowedTypes={['.yaml', '.yml', '.json']}
-                            />
-                            {errors.openapi && <p className="text-sm text-red-600 flex items-center mt-2">
-                                <AlertCircle className="w-4 h-4 mr-1" />
-                                {errors.openapi}
-                            </p>}
-                        </div>
-                    )}
-
-                    {serviceProtocolType === 'MQTT' && (
-                        <div className="space-y-4">
-                            <div className={`p-4 rounded-lg border-l-4 ${protocolInfo.borderColor} ${protocolInfo.bgColor}`}>
-                                <div className="flex items-start space-x-3">
-                                    <Wifi className={`w-5 h-5 mt-0.5 ${protocolInfo.color === 'green' ? 'text-green-600' : 'text-purple-600'}`} />
-                                    <div>
-                                        <h4 className={`font-medium ${protocolInfo.textColor}`}>AsyncAPI Specification</h4>
-                                        <p className={`text-sm ${protocolInfo.textColor} opacity-80 mt-1`}>
-                                            Upload your AsyncAPI 2.0+ specification file for MQTT message definitions (YAML or JSON format)
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <FileUpload
-                                label="AsyncAPI Specification File"
-                                description="Upload AsyncAPI YAML or JSON file for MQTT endpoints"
-                                accept=".yaml,.yml,.json"
-                                currentFile={formData.api_specs.mqtt}
-                                onFileUpload={(file) => updateApiSpec('mqtt', file)}
-                                allowedTypes={['.yaml', '.yml', '.json']}
-                            />
-                            {errors.mqtt && <p className="text-sm text-red-600 flex items-center mt-2">
-                                <AlertCircle className="w-4 h-4 mr-1" />
-                                {errors.mqtt}
-                            </p>}
-                        </div>
-                    )}
                 </div>
 
                 {/* Documentation */}

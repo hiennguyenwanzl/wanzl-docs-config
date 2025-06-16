@@ -2,6 +2,8 @@ import React from 'react';
 import { Package, Search, FileText, Upload, Download, Save } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import logoUrl from '@/assests/logo.svg';
+
 
 interface HeaderProps {
     onSearch: (searchTerm: string) => void;
@@ -25,16 +27,15 @@ const Header: React.FC<HeaderProps> = ({
                                            hasProjects = false
                                        }) => {
     return (
+        /*<header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">*/
+
         <header className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
                 {/* Logo and Title */}
                 <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
-                        <Package className="w-6 h-6 text-white" />
-                    </div>
+                    <img src={logoUrl} alt="Logo" className="w-32 h-auto" />
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900">API Docs CMS</h1>
-                        <p className="text-sm text-gray-500">Manage your documentation content</p>
+                        <h1 className="text-2xl font-bold text-gray-900">API Docs Config</h1>
                     </div>
                 </div>
 

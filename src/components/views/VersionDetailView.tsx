@@ -163,27 +163,6 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                 </div>
             </div>
 
-            {/* Version Status Indicators */}
-            {(version.breaking_changes || version.deprecated || version.beta) && (
-                <div className="flex items-center space-x-2 mb-6">
-                    {version.breaking_changes && (
-                        <span className="text-sm bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-medium">
-                            Breaking Changes
-                        </span>
-                    )}
-                    {version.deprecated && (
-                        <span className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded-full font-medium">
-                            Deprecated
-                        </span>
-                    )}
-                    {version.beta && (
-                        <span className="text-sm bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-medium">
-                            Beta Version
-                        </span>
-                    )}
-                </div>
-            )}
-
             {/* Navigation Tabs */}
             <div className="bg-white border-b border-gray-200 mb-6">
                 <nav className="flex space-x-8">

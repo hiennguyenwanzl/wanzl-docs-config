@@ -76,12 +76,12 @@ const ServiceDetailView: React.FC<EnhancedServiceDetailViewProps> = ({
             <div className="flex items-start justify-between mb-6">
                 <div className="flex items-start space-x-4">
                     {/* Service Icon */}
-                    <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-gray-200 shadow-sm">
+                    <div className="flex-shrink-0 w-24 h-24 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-gray-200 shadow-sm">
                         {service.icon ? (
                             <img
                                 src={service.icon}
                                 alt={service.name}
-                                className="w-12 h-12 object-contain rounded-lg"
+                                className="w-18 h-18 object-contain rounded-lg"
                             />
                         ) : (
                             <div className="w-10 h-10 rounded-lg bg-blue-200 flex items-center justify-center">

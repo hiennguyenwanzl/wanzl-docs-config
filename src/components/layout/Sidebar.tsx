@@ -61,7 +61,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     // Handle clicking anywhere on sidebar when collapsed to expand
     const handleSidebarClick = (e: React.MouseEvent) => {
         if (isCollapsed) {
-            // Only expand if clicking on the sidebar background, not on specific buttons/content
             const target = e.target as HTMLElement;
             const isDirectSidebarClick = target.classList.contains('sidebar-background') ||
                 target.closest('.sidebar-background');
@@ -116,11 +115,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                     >
                         {getVersionIcon(version)}
                     </button>
-                    {/* Tooltip positioning */}
+                    {/* Tooltip */}
                     <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg pointer-events-none top-0">
                         <div className="font-medium">v{version.version}</div>
                         <div className="text-xs text-gray-300">{version.status}</div>
-                        {/* Arrow positioning */}
                         <div className="absolute right-full top-1/2 transform translate-x-0 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900"></div>
                     </div>
                 </div>
@@ -179,12 +177,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                             {serviceIcon}
                         </div>
                     </button>
-                    {/* Tooltip positioning */}
+                    {/* Tooltip */}
                     <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px] pointer-events-none top-0">
                         <div className="font-medium">{service.display_name || service.name}</div>
                         <div className="text-xs text-gray-300">{serviceVersions.length} versions</div>
                         <div className="text-xs text-gray-300 mt-1">{service.protocol_type || 'REST'} API</div>
-                        {/* Arrow positioning */}
                         <div className="absolute right-full top-1/2 transform translate-x-0 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900"></div>
                     </div>
                 </div>
@@ -233,7 +230,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </div>
                     </button>
 
-                    {isServiceExpanded && serviceVersions.length > 0 && (
+                    {/* Only show versions when expanded AND not collapsed */}
+                    {!isCollapsed && isServiceExpanded && serviceVersions.length > 0 && (
                         <div className="ml-4 mt-1 space-y-1">
                             {serviceVersions
                                 .sort((a, b) => {
@@ -286,12 +284,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                             {productIcon}
                         </div>
                     </button>
-                    {/* Tooltip positioning */}
+                    {/* Tooltip */}
                     <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px] pointer-events-none top-0">
                         <div className="font-medium">{product.display_name || product.name}</div>
                         <div className="text-xs text-gray-300">{servicesCount} services</div>
                         <div className="text-xs text-gray-300 mt-1">{product.category || 'Other'}</div>
-                        {/* Arrow positioning */}
                         <div className="absolute right-full top-1/2 transform translate-x-0 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900"></div>
                     </div>
                 </div>
@@ -339,7 +336,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </button>
 
-                {isExpanded && productServices.length > 0 && (
+                {/* Only show services when expanded AND not collapsed */}
+                {!isCollapsed && isExpanded && productServices.length > 0 && (
                     <div className="mt-2 ml-2 space-y-1">
                         {productServices.map(service => renderService(service, product.id))}
                     </div>
@@ -396,12 +394,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <div className="flex items-center justify-between">
                         {!isCollapsed && (
                             <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                                    <Package className="w-5 h-5 text-white" />
-                                </div>
                                 <div>
-                                    <h2 className="font-bold text-gray-900">Products</h2>
-                                    <p className="text-xs text-gray-500">Manage your APIs</p>
+                                    <h2 className="font-bold text-gray-900">Data Schemas</h2>
                                 </div>
                             </div>
                         )}
@@ -424,45 +418,47 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </div>
 
-                {/* Products List - Removed bottom space when collapsed */}
+                {/* Products List */}
                 <div className={`flex-1 overflow-y-auto custom-scrollbar ${isCollapsed ? 'pb-0' : ''}`}>
-                    <div className="p-4">
-                        {/* When collapsed, only show empty state when there are no products */}
-                        {products.length === 0 ? (
-                            !isCollapsed && (
-                                <div className="text-center py-12">
-                                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                                        <Package className="w-8 h-8 text-gray-400" />
+                    {!isCollapsed && (
+                        <div className="p-4">
+                            {products.length === 0 ? (
+                                    !isCollapsed && (
+                                        <div className="text-center py-12">
+                                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                                                <Package className="w-8 h-8 text-gray-400" />
+                                            </div>
+                                            <h3 className="text-sm font-semibold text-gray-900 mb-2">No products yet</h3>
+                                            <p className="text-sm text-gray-500 mb-6 px-4">
+                                                Get started by creating your first product
+                                            </p>
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onAddProduct();
+                                                }}
+                                                leftIcon={<Plus className="w-4 h-4" />}
+                                            >
+                                                Create Product
+                                            </Button>
+                                        </div>
+                                    )
+                                ) :
+                                (
+                                    <div className="space-y-1">
+                                        {products.map(renderProduct)}
                                     </div>
-                                    <h3 className="text-sm font-semibold text-gray-900 mb-2">No products yet</h3>
-                                    <p className="text-sm text-gray-500 mb-6 px-4">
-                                        Get started by creating your first product
-                                    </p>
-                                    <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onAddProduct();
-                                        }}
-                                        leftIcon={<Plus className="w-4 h-4" />}
-                                    >
-                                        Create Product
-                                    </Button>
-                                </div>
-                            )
-                        ) : (
-                            <div className="space-y-1">
-                                {products.map(renderProduct)}
-                            </div>
-                        )}
-                    </div>
+                                )}
+                        </div>
+                    )}
+
                 </div>
 
-                {/* Footer spacing when collapsed */}
+                {/* Footer */}
                 <div className={`p-4 border-t border-gray-200 flex-shrink-0 bg-gray-50 ${isCollapsed ? 'py-2' : ''}`}>
                     {isCollapsed ? (
-                        // Collapsed: Larger icons with better tooltips - Fixed spacing
                         <div className="space-y-2 flex flex-col items-center w-full">
                             <div className="relative group w-full">
                                 <button
@@ -500,7 +496,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </div>
                         </div>
                     ) : (
-                        // Expanded: Full buttons with improved styling
                         <div className="space-y-2">
                             <button
                                 onClick={(e) => {

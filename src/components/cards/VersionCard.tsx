@@ -138,25 +138,6 @@ const VersionCard: React.FC<VersionCardProps> = ({
                             </p>
                         )}
                     </div>
-
-                    {/* Tags */}
-                    <div className="flex items-center space-x-2 mt-3">
-                        {version.breaking_changes && (
-                            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
-                                Breaking Changes
-                            </span>
-                        )}
-                        {version.deprecated && (
-                            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded font-medium">
-                                Deprecated
-                            </span>
-                        )}
-                        {version.beta && (
-                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded font-medium">
-                                Beta
-                            </span>
-                        )}
-                    </div>
                 </div>
             </div>
         </Card>
