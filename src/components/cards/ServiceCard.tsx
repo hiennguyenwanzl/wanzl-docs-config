@@ -1,8 +1,8 @@
+// src/components/cards/ServiceCard.tsx
 import React from 'react';
 import { Edit2, Trash2, Code, Wifi } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
-import DefaultServiceIcon from '../ui/DefaultServiceIcon';
 
 interface ServiceCardProps {
     service: {
@@ -13,7 +13,7 @@ interface ServiceCardProps {
         category?: string;
         status?: string;
         icon?: string | null;
-        protocol_type?: 'REST' | 'MQTT'; // Updated to match single protocol
+        protocol_type?: 'REST' | 'MQTT';
     };
     versionsCount: number;
     onClick: () => void;
@@ -30,7 +30,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                                  }) => {
     // Get protocol-specific styling and info
     const getProtocolInfo = () => {
-        const protocolType = service.protocol_type || 'REST'; // Default to REST for backward compatibility
+        const protocolType = service.protocol_type || 'REST';
 
         if (protocolType === 'MQTT') {
             return {
@@ -56,7 +56,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
     const protocolInfo = getProtocolInfo();
 
     return (
-        <Card hover className="cursor-pointer group transition-all duration-200 hover:shadow-lg" onClick={onClick}>
+        <Card hover animate className="cursor-pointer group" onClick={onClick}>
             <div className="flex h-36">
                 {/* Enhanced Icon Section with Protocol-specific Styling */}
                 <div className={`w-36 h-full flex items-center justify-center bg-gradient-to-br ${protocolInfo.bgColor} rounded-l-lg border-r border-gray-200 relative overflow-hidden`}>
@@ -64,11 +64,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                         <img
                             src={service.icon}
                             alt={service.name}
-                            className="w-20 h-20 object-contain z-10 rounded-lg shadow-sm"
+                            className="w-20 h-20 object-contain z-10 rounded-lg shadow-sm transition-transform duration-300 group-hover:scale-105"
                         />
                     ) : (
-                        <div className={`w-16 h-16 rounded-lg ${protocolInfo.iconBgColor} flex items-center justify-center z-10 shadow-inner`}>
-                            <DefaultServiceIcon className={`w-10 h-10 ${protocolInfo.iconTextColor}`} size={40} />
+                        <div className={`w-16 h-16 rounded-lg ${protocolInfo.iconBgColor} flex items-center justify-center z-10 shadow-inner transition-transform duration-300 group-hover:scale-105`}>
+                            <span className={`text-xl font-bold ${protocolInfo.iconTextColor}`}>S</span>
                         </div>
                     )}
 
@@ -87,17 +87,16 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                     <div>
                         <div className="flex justify-between items-start mb-2">
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 leading-tight truncate">
+                                <h3 className="font-semibold text-gray-900 leading-tight truncate group-hover:text-blue-600 transition-colors duration-200">
                                     {service.display_name || service.name}
-                                    <span>   </span>
                                     {service.status && (
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                        <span className={`ml-2 px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
                                             service.status === 'active'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-700'
+                                                ? 'bg-green-100 text-green-700 group-hover:bg-green-200'
+                                                : 'bg-gray-100 text-gray-700 group-hover:bg-gray-200'
                                         }`}>
                                             {service.status}
-                                </span>
+                                        </span>
                                     )}
                                 </h3>
                                 <div className="flex items-center space-x-2 mt-1">
@@ -105,13 +104,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                         {service.category || 'General'}
                                     </span>
                                     <span className="text-xs text-gray-400">•</span>
-                                    <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${protocolInfo.badgeColor}`}>
+                                    <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-all duration-200 ${protocolInfo.badgeColor} group-hover:scale-105`}>
                                         {protocolInfo.icon}
                                         <span>{service.protocol_type || 'REST'}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
+                            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-2 flex-shrink-0">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -119,7 +118,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                         e.stopPropagation();
                                         onEdit(service);
                                     }}
-                                    className="hover:bg-blue-50 hover:text-blue-600"
+                                    className="hover:bg-blue-50 hover:text-blue-600 transform hover:scale-105 transition-all duration-200"
                                 >
                                     <Edit2 className="w-4 h-4" />
                                 </Button>
@@ -130,7 +129,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                         e.stopPropagation();
                                         onDelete(service.id);
                                     }}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 transform hover:scale-105 transition-all duration-200"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -144,7 +143,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-medium">
+                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-medium transition-all duration-200 group-hover:bg-gray-200">
                                     {service.category || 'General'}
                                 </span>
                                 <span className="text-xs text-gray-500 font-medium">
@@ -152,7 +151,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                                 </span>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-// Import types from constants to avoid circular dependency
+// src/types/index.ts - Simplified for single project
 import type {
     ProductCategory,
     EntityStatus,
@@ -8,7 +8,21 @@ import type {
     ViewMode
 } from '@/constants';
 
-// Core Data Types
+// Info Card for landing page content
+export interface InfoCard {
+    id: string;
+    headline_title: string;
+    brief_description: string;
+    image_id?: string | null;
+    image_url?: string | null;
+    url: string;
+    display_type: 'imageLeft' | 'imageRight' | 'custom1' | 'custom2';
+    sort_order: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
+// Core Data Types (simplified - no project_id since there's only one project)
 export interface Product {
     id: string;
     name: string;
@@ -24,6 +38,7 @@ export interface Product {
     key_features: string[];
     use_cases: UseCase[];
     gallery_images?: string[];
+    info_cards?: InfoCard[]; // Product-level info cards
     services_count?: number;
     sort_order: number;
     created_at?: string;
@@ -42,7 +57,7 @@ export interface Service {
     icon?: string | null;
     overview?: string;
     key_features: string[];
-    protocol_type: 'REST' | 'MQTT'; // Single protocol per service
+    protocol_type: 'REST' | 'MQTT';
     integration_guide?: string;
     versions_count?: number;
     latest_version?: string;
@@ -84,7 +99,6 @@ export interface Tutorial {
     content: string;
 }
 
-// Fixed ApiSpecs interface - unified type for both cases
 export interface ApiSpecs {
     openapi?: string | FileData | null;
     mqtt?: string | FileData | null;
@@ -119,7 +133,7 @@ export interface Feature {
 export interface SearchIndexItem {
     id: string;
     display_name: string;
-    type: 'product' | 'service' | 'api' | 'release_note';
+    type: 'product' | 'service' | 'api' | 'release_note' | 'info_card';
     link: string;
     parent_id?: string | null;
     content: string;
@@ -134,16 +148,19 @@ export interface Manifest {
     products_count: number;
     services_count: number;
     versions_count: number;
+    info_cards_count: number;
     last_updated: {
         products: string;
         services: string;
         api_specs: string;
+        info_cards: string;
     };
 }
 
 export interface ProjectAssets {
     images: Record<string, ProductImages>;
     examples: Record<string, any>;
+    info_card_images: Record<string, string>; // For info card images
 }
 
 export interface ProductImages {
@@ -157,12 +174,23 @@ export interface ServiceImages {
     icon?: string;
 }
 
+// Simplified ProjectData structure (single project)
 export interface ProjectData {
+    // Project-level info (single project)
+    project: {
+        name: string;
+        display_name?: string;
+        title?: string;
+        description?: string;
+        status: EntityStatus;
+    };
+    // Content structure
+    info_cards: InfoCard[]; // Landing page cards
     products: Product[];
-    services: Record<string, Service[]>;
-    versions: Record<string, Record<string, ApiVersion[]>>;
-    releaseNotes: Record<string, Record<string, Record<string, ReleaseNote>>>;
-    apiSpecs: Record<string, Record<string, Record<string, ApiSpecs>>>;
+    services: Record<string, Service[]>; // [product_id]
+    versions: Record<string, Record<string, ApiVersion[]>>; // [product_id][service_id]
+    releaseNotes: Record<string, Record<string, Record<string, ReleaseNote>>>; // [product_id][service_id][version]
+    apiSpecs: Record<string, Record<string, Record<string, ApiSpecs>>>; // [product_id][service_id][version]
     assets: ProjectAssets;
     manifest: Manifest;
 }
@@ -223,9 +251,18 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
     rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
     hover?: boolean;
+    animate?: boolean;
 }
 
 // Form Component Props
+export interface InfoCardFormProps {
+    infoCard?: InfoCard | null;
+    onSave: (infoCard: InfoCard) => void | Promise<void>;
+    onCancel: () => void;
+    onPreview?: (infoCard: InfoCard) => void;
+    isEditing?: boolean;
+}
+
 export interface ProductFormProps {
     product?: Product | null;
     onSave: (product: Product) => void | Promise<void>;
@@ -243,6 +280,17 @@ export interface ServiceFormProps {
     isEditing?: boolean;
 }
 
+export interface VersionFormProps {
+    version?: ApiVersion | null;
+    productId: string;
+    serviceId: string;
+    serviceProtocolType: 'REST' | 'MQTT';
+    onSave: (version: ApiVersion) => void | Promise<void>;
+    onCancel: () => void;
+    onPreview?: (version: ApiVersion) => void;
+    isEditing?: boolean;
+}
+
 // File Upload Types
 export interface FileData {
     name: string;
@@ -250,16 +298,6 @@ export interface FileData {
     size?: number;
     type?: string;
     lastModified?: number;
-}
-
-export interface VersionFormProps {
-    version?: ApiVersion | null;
-    productId: string;
-    serviceId: string;
-    onSave: (version: ApiVersion) => void | Promise<void>;
-    onCancel: () => void;
-    onPreview?: (version: ApiVersion) => void;
-    isEditing?: boolean;
 }
 
 export interface ImageUploadProps {
@@ -285,70 +323,34 @@ export interface FileUploadProps {
     allowedTypes?: string[];
 }
 
-// Hook Types
-export interface UseProjectDataReturn {
-    projectData: ProjectData;
-    addProduct: (productData: Partial<Product>) => Product;
-    updateProduct: (productId: string, updates: Partial<Product>) => void;
-    deleteProduct: (productId: string) => void;
-    getProduct: (productId: string) => Product | undefined;
-    addService: (productId: string, serviceData: Partial<Service>) => Service;
-    updateService: (productId: string, serviceId: string, updates: Partial<Service>) => void;
-    deleteService: (productId: string, serviceId: string) => void;
-    getService: (productId: string, serviceId: string) => Service | undefined;
-    addVersion: (productId: string, serviceId: string, versionData: Partial<ApiVersion>) => ApiVersion;
-    updateVersion: (productId: string, serviceId: string, versionId: string, updates: Partial<ApiVersion>) => void;
-    deleteVersion: (productId: string, serviceId: string, versionId: string) => void;
-    getVersion: (productId: string, serviceId: string, versionId: string) => ApiVersion | undefined;
-    updateAsset: (path: string, data: any) => void;
-    loadProjectData: (data: Partial<ProjectData>) => void;
-    resetProjectData: () => void;
-}
-
-// Validation Types
-export interface ValidationResult {
-    isValid: boolean;
-    errors: Record<string, string>;
-}
-
-export interface ValidationRules {
-    REQUIRED_FIELDS: {
-        PRODUCT: (keyof Product)[];
-        SERVICE: (keyof Service)[];
-        VERSION: (keyof ApiVersion)[];
-    };
-    MIN_LENGTHS: Record<string, number>;
-    MAX_LENGTHS: Record<string, number>;
-}
-
-// Export/Import Types
-export interface ExportOptions {
-    filename?: string;
-    includeAssets?: boolean;
-    compressed?: boolean;
-}
-
-export interface StaticSiteData {
-    manifest: Manifest;
-    productsList: Product[];
-    searchIndex: { indexItems: SearchIndexItem[] };
-    productDetails: Record<string, Product>;
-    serviceDetails: Record<string, Record<string, Service>>;
-    versionDetails: Record<string, Record<string, Record<string, ApiVersion>>>;
-    releaseNotes: Record<string, Record<string, Record<string, ReleaseNote>>>;
-    apiSpecs: Record<string, Record<string, Record<string, ApiSpecs>>>;
-    assets: ProjectAssets;
-}
-
-// Navigation Types
+// Navigation Types (simplified)
 export interface NavigationState {
     currentView: ViewMode;
     selectedProduct: string | null;
     selectedService: string | null;
     selectedVersion: string | null;
+    selectedInfoCard: string | null;
     searchTerm: string;
     expandedProducts: string[];
 }
+
+// View Modes (updated)
+export const VIEW_MODES = {
+    OVERVIEW: 'overview', // Landing page with info cards
+    PRODUCTS: 'products',
+    PRODUCT_DETAIL: 'product_detail',
+    SERVICE_DETAIL: 'service_detail',
+    VERSION_DETAIL: 'version_detail',
+    INFO_CARD_DETAIL: 'info_card_detail'
+} as const;
+
+// Protocol Types
+export const PROTOCOL_TYPES = {
+    REST: 'REST',
+    MQTT: 'MQTT'
+} as const;
+
+export type ProtocolType = typeof PROTOCOL_TYPES[keyof typeof PROTOCOL_TYPES];
 
 // Error Types
 export interface AppError {
@@ -357,42 +359,8 @@ export interface AppError {
     details?: any;
 }
 
-// Constants Types
-export interface FileLimit {
-    MAX_IMAGE_SIZE: number;
-    MAX_FILE_SIZE: number;
-    SUPPORTED_IMAGE_TYPES: string[];
-    SUPPORTED_SPEC_TYPES: string[];
+// Validation Types
+export interface ValidationResult {
+    isValid: boolean;
+    errors: Record<string, string>;
 }
-
-export interface NavItem {
-    id: string;
-    label: string;
-    icon: string;
-}
-
-export interface ExportStructure {
-    DATA_FOLDER: string;
-    FOLDERS: {
-        PRODUCTS: string;
-        SERVICES: string;
-        VERSIONS: string;
-        RELEASE_NOTES: string;
-        API_SPECS: string;
-        ASSETS: string;
-    };
-    FILES: {
-        MANIFEST: string;
-        PRODUCTS_LIST: string;
-        SEARCH_INDEX: string;
-    };
-}
-
-
-// Protocol Types - Single protocol per service
-export const PROTOCOL_TYPES = {
-    REST: 'REST',
-    MQTT: 'MQTT'
-} as const;
-
-export type ProtocolType = typeof PROTOCOL_TYPES[keyof typeof PROTOCOL_TYPES];

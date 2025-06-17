@@ -1,3 +1,4 @@
+// src/components/layout/Sidebar.tsx
 import React from 'react';
 import {
     Package,
@@ -12,19 +13,25 @@ import {
     Plus
 } from 'lucide-react';
 import Button from '../ui/Button';
-import DefaultServiceIcon from '../ui/DefaultServiceIcon';
 
 interface SidebarProps {
-    products: any[];
-    services: Record<string, any[]>;
-    versions: Record<string, Record<string, any[]>>;
+    // Single project structure - simplified
+    projectData: {
+        info_cards: any[];
+        products: any[];
+        services: Record<string, any[]>;
+        versions: Record<string, Record<string, any[]>>;
+    };
     selectedProduct: string | null;
     selectedService: string | null;
     selectedVersion: string | null;
+    selectedInfoCard: string | null;
     onSelectProduct: (productId: string) => void;
     onSelectService: (productId: string, serviceId: string) => void;
     onSelectVersion: (productId: string, serviceId: string, versionId: string) => void;
+    onSelectInfoCard: (infoCardId: string) => void;
     onAddProduct: () => void;
+    onAddInfoCard: () => void;
     expandedProducts: string[];
     onToggleProduct: (productId: string) => void;
     onPreviewProject?: () => void;
@@ -32,16 +39,17 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-                                             products,
-                                             services,
-                                             versions,
+                                             projectData,
                                              selectedProduct,
                                              selectedService,
                                              selectedVersion,
+                                             selectedInfoCard,
                                              onSelectProduct,
                                              onSelectService,
                                              onSelectVersion,
+                                             onSelectInfoCard,
                                              onAddProduct,
+                                             onAddInfoCard,
                                              expandedProducts,
                                              onToggleProduct,
                                              onPreviewProject,
@@ -49,6 +57,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                                          }) => {
     const [isCollapsed, setIsCollapsed] = React.useState(false);
     const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+
+    const { info_cards = [], products = [], services = {}, versions = {} } = projectData || {};
 
     const toggleCollapse = () => {
         setIsCollapsed(!isCollapsed);
@@ -58,7 +68,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         setIsMobileOpen(!isMobileOpen);
     };
 
-    // Handle clicking anywhere on sidebar when collapsed to expand
     const handleSidebarClick = (e: React.MouseEvent) => {
         if (isCollapsed) {
             const target = e.target as HTMLElement;
@@ -155,11 +164,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         const isServiceExpanded = expandedProducts.includes(`${productId}-${service.id}`);
         const isServiceSelected = selectedService === service.id && selectedProduct === productId;
 
-        // Get service icon with fallback
         const serviceIcon = service.icon ? (
             <img src={service.icon} alt={service.name} className="w-6 h-6 object-contain rounded" />
         ) : (
-            <DefaultServiceIcon className="w-6 h-6 text-blue-600" />
+            <div className="w-6 h-6 bg-blue-200 rounded flex items-center justify-center">
+                <span className="text-blue-700 text-xs font-bold">S</span>
+            </div>
         );
 
         if (isCollapsed) {
@@ -230,7 +240,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </div>
                     </button>
 
-                    {/* Only show versions when expanded AND not collapsed */}
+                    {/* Versions */}
                     {!isCollapsed && isServiceExpanded && serviceVersions.length > 0 && (
                         <div className="ml-4 mt-1 space-y-1">
                             {serviceVersions
@@ -254,27 +264,80 @@ const Sidebar: React.FC<SidebarProps> = ({
         );
     };
 
+    const renderInfoCard = (infoCard: any) => {
+        const isInfoCardSelected = selectedInfoCard === infoCard.id;
+
+        if (isCollapsed) {
+            return (
+                <div key={infoCard.id} className="relative group mb-1">
+                    <button
+                        onClick={() => onSelectInfoCard(infoCard.id)}
+                        className={`w-full text-left px-2 py-2 text-sm transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center justify-center rounded-md mx-1 relative ${
+                            isInfoCardSelected
+                                ? 'bg-green-100 text-green-900 border-l-2 border-green-500'
+                                : 'text-gray-700 hover:text-green-600'
+                        }`}
+                    >
+                        <div className="w-4 h-4 bg-green-200 rounded flex items-center justify-center">
+                            <span className="text-green-700 text-xs font-bold">C</span>
+                        </div>
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-lg min-w-[200px] pointer-events-none top-0">
+                        <div className="font-medium">{infoCard.headline_title}</div>
+                        <div className="text-xs text-gray-300">{infoCard.display_type}</div>
+                        <div className="absolute right-full top-1/2 transform translate-x-0 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900"></div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div key={infoCard.id} className="relative mb-1">
+                <div className="mx-2">
+                    <button
+                        onClick={() => onSelectInfoCard(infoCard.id)}
+                        className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 flex items-center group hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md relative ${
+                            isInfoCardSelected
+                                ? 'bg-green-100 text-green-900 border-l-2 border-green-500'
+                                : 'text-gray-700 hover:text-green-600'
+                        }`}
+                    >
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            <div className="flex-shrink-0 w-4 h-4 bg-green-200 rounded flex items-center justify-center">
+                                <span className="text-green-700 text-xs font-bold">C</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="truncate font-medium text-sm">{infoCard.headline_title}</div>
+                                <div className="text-xs text-gray-500 truncate">{infoCard.display_type}</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     const renderProduct = (product: any) => {
         const productServices = services[product.id] || [];
         const isExpanded = expandedProducts.includes(product.id);
         const servicesCount = productServices.length;
         const isProductSelected = selectedProduct === product.id;
 
-        // Get product icon with fallback
         const productIcon = product.icon ? (
             <img src={product.icon} alt={product.name} className="w-8 h-8 object-contain rounded-lg" />
         ) : (
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-blue-200 flex items-center justify-center">
+                <span className="text-blue-700 text-lg font-bold">P</span>
             </div>
         );
 
         if (isCollapsed) {
             return (
-                <div key={product.id} className="mb-2 relative group">
+                <div key={product.id} className="mb-1 relative group">
                     <button
                         onClick={() => onSelectProduct(product.id)}
-                        className={`w-full text-left px-2 py-4 transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center rounded-lg mx-1 relative ${
+                        className={`w-full text-left px-2 py-3 transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center rounded-md mx-1 relative ${
                             isProductSelected
                                 ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
                                 : 'text-gray-800 hover:text-blue-600'
@@ -296,10 +359,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         }
 
         return (
-            <div key={product.id} className="mb-2">
+            <div key={product.id} className="mb-1">
                 <button
                     onClick={() => onSelectProduct(product.id)}
-                    className={`w-full text-left px-3 py-4 transition-all duration-200 flex items-center group hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg mx-2 relative ${
+                    className={`w-full text-left px-3 py-3 transition-all duration-200 flex items-center group hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md mx-2 relative ${
                         isProductSelected
                             ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500 ml-2'
                             : 'text-gray-800 hover:text-blue-600'
@@ -310,11 +373,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                             {productIcon}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="truncate font-semibold text-base">{product.display_name || product.name}</div>
+                            <div className="truncate font-semibold">{product.display_name || product.name}</div>
                             <div className="text-xs text-gray-500 truncate">{product.category || 'Other'}</div>
                         </div>
                         <div className="flex items-center space-x-2 ml-auto flex-shrink-0">
-                            <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full font-semibold">
+                            <span className="text-xs text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded-full font-medium">
                                 {servicesCount}
                             </span>
                             {productServices.length > 0 && (
@@ -323,12 +386,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         e.stopPropagation();
                                         onToggleProduct(product.id);
                                     }}
-                                    className="p-1 hover:bg-indigo-200 rounded transition-colors duration-200"
+                                    className="p-0.5 hover:bg-indigo-200 rounded transition-colors duration-200"
                                 >
                                     {isExpanded ? (
-                                        <ChevronDown className="w-4 h-4" />
+                                        <ChevronDown className="w-3 h-3" />
                                     ) : (
-                                        <ChevronRight className="w-4 h-4" />
+                                        <ChevronRight className="w-3 h-3" />
                                     )}
                                 </button>
                             )}
@@ -336,9 +399,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </button>
 
-                {/* Only show services when expanded AND not collapsed */}
+                {/* Services */}
                 {!isCollapsed && isExpanded && productServices.length > 0 && (
-                    <div className="mt-2 ml-2 space-y-1">
+                    <div className="mt-1 ml-2 space-y-1">
                         {productServices.map(service => renderService(service, product.id))}
                     </div>
                 )}
@@ -353,6 +416,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={toggleMobile}
         />
     );
+
+    const hasContent = info_cards.length > 0 || products.length > 0;
 
     return (
         <>
@@ -395,7 +460,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         {!isCollapsed && (
                             <div className="flex items-center space-x-3">
                                 <div>
-                                    <h2 className="font-bold text-gray-900">Data Schemas</h2>
+                                    <h2 className="font-bold text-gray-900">Content Structure</h2>
                                 </div>
                             </div>
                         )}
@@ -418,42 +483,101 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </div>
 
-                {/* Products List */}
+                {/* Content List */}
                 <div className={`flex-1 overflow-y-auto custom-scrollbar ${isCollapsed ? 'pb-0' : ''}`}>
                     {!isCollapsed && (
                         <div className="p-4">
-                            {products.length === 0 ? (
-                                    !isCollapsed && (
-                                        <div className="text-center py-12">
-                                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <Package className="w-8 h-8 text-gray-400" />
-                                            </div>
-                                            <h3 className="text-sm font-semibold text-gray-900 mb-2">No products yet</h3>
-                                            <p className="text-sm text-gray-500 mb-6 px-4">
-                                                Get started by creating your first product
-                                            </p>
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onAddProduct();
-                                                }}
-                                                leftIcon={<Plus className="w-4 h-4" />}
-                                            >
-                                                Create Product
-                                            </Button>
-                                        </div>
-                                    )
-                                ) :
-                                (
-                                    <div className="space-y-1">
-                                        {products.map(renderProduct)}
+                            {!hasContent ? (
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <Package className="w-8 h-8 text-gray-400" />
                                     </div>
-                                )}
+                                    <h3 className="text-sm font-semibold text-gray-900 mb-2">No content yet</h3>
+                                    <p className="text-sm text-gray-500 mb-6 px-4">
+                                        Get started by creating info cards and products
+                                    </p>
+                                    <div className="space-y-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onAddInfoCard();
+                                            }}
+                                            leftIcon={<Plus className="w-4 h-4" />}
+                                            className="w-full"
+                                        >
+                                            Add Info Card
+                                        </Button>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onAddProduct();
+                                            }}
+                                            leftIcon={<Plus className="w-4 h-4" />}
+                                            className="w-full"
+                                        >
+                                            Add Product
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {/* Info Cards Section */}
+                                    {info_cards.length > 0 && (
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                                    Landing Page Cards ({info_cards.length})
+                                                </h3>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="xs"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onAddInfoCard();
+                                                    }}
+                                                    className="text-green-600 hover:text-green-700"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </Button>
+                                            </div>
+                                            <div className="space-y-1">
+                                                {info_cards.map(infoCard => renderInfoCard(infoCard))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Products Section */}
+                                    {products.length > 0 && (
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                                    Products ({products.length})
+                                                </h3>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="xs"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onAddProduct();
+                                                    }}
+                                                    className="text-blue-600 hover:text-blue-700"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </Button>
+                                            </div>
+                                            <div className="space-y-1">
+                                                {products.map(renderProduct)}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
-
                 </div>
 
                 {/* Footer */}

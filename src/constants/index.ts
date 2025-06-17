@@ -1,4 +1,4 @@
-// API Types
+// src/constants/index.ts
 import {ProtocolType} from "@/types";
 
 export const API_TYPES = {
@@ -39,6 +39,16 @@ export const PRODUCT_CATEGORIES = [
 
 export type ProductCategory = typeof PRODUCT_CATEGORIES[number];
 
+// Info Card Display Types
+export const INFO_CARD_DISPLAY_TYPES = [
+    'imageLeft',
+    'imageRight',
+    'custom1',
+    'custom2'
+] as const;
+
+export type InfoCardDisplayType = typeof INFO_CARD_DISPLAY_TYPES[number];
+
 // Protocols (kept for compatibility)
 export const PROTOCOLS = [
     'REST',
@@ -50,12 +60,14 @@ export const PROTOCOLS = [
 
 export type Protocol = typeof PROTOCOLS[number];
 
-// View Modes
+// View Modes (updated with new views)
 export const VIEW_MODES = {
-    PRODUCTS: 'products',
+    PROJECTS: 'projects',
+    PROJECT_DETAIL: 'project_detail',
     PRODUCT_DETAIL: 'product_detail',
     SERVICE_DETAIL: 'service_detail',
-    VERSION_DETAIL: 'version_detail'
+    VERSION_DETAIL: 'version_detail',
+    INFO_CARD_DETAIL: 'info_card_detail'
 } as const;
 
 export type ViewMode = typeof VIEW_MODES[keyof typeof VIEW_MODES];
@@ -68,16 +80,34 @@ export const FILE_LIMITS = {
     SUPPORTED_SPEC_TYPES: ['.yaml', '.yml', '.json']
 } as const;
 
-// Navigation Items
+// Navigation Items (updated)
 export const NAV_ITEMS = [
-    { id: 'products', label: 'Products', icon: 'Package' },
+    { id: 'projects', label: 'Projects', icon: 'Package' },
     { id: 'export', label: 'Export', icon: 'Download' },
     { id: 'import', label: 'Import', icon: 'Upload' },
     { id: 'settings', label: 'Settings', icon: 'Settings' }
 ] as const;
 
-// Default Values
+// Default Values (updated with new entities)
 export const DEFAULTS = {
+    PROJECT: {
+        name: '',
+        display_name: '',
+        title: '',
+        description: '',
+        status: 'active' as EntityStatus,
+        sort_order: 1
+    },
+
+    INFO_CARD: {
+        headline_title: '',
+        brief_description: '',
+        image_url: null,
+        url: '',
+        display_type: 'imageLeft' as InfoCardDisplayType,
+        sort_order: 1
+    },
+
     PRODUCT: {
         name: '',
         display_name: '',
@@ -98,7 +128,7 @@ export const DEFAULTS = {
         category: 'general',
         overview: '',
         key_features: [''],
-        protocol_type: 'REST' as ProtocolType, // Single protocol per service
+        protocol_type: 'REST' as ProtocolType,
         integration_guide: '',
         status: 'active' as EntityStatus,
         sort_order: 1
@@ -117,39 +147,48 @@ export const DEFAULTS = {
     }
 };
 
-// Validation Rules
+// Validation Rules (updated)
 export const VALIDATION = {
     REQUIRED_FIELDS: {
+        PROJECT: ['name', 'display_name'],
+        INFO_CARD: ['headline_title', 'brief_description', 'url'],
         PRODUCT: ['name', 'display_name', 'short_description'],
         SERVICE: ['name', 'display_name', 'short_description', 'protocol_type'],
         VERSION: ['version']
     },
     MIN_LENGTHS: {
         name: 2,
+        headline_title: 3,
+        brief_description: 10,
         short_description: 10,
         overview: 20
     },
     MAX_LENGTHS: {
         name: 100,
         display_name: 150,
+        headline_title: 200,
+        brief_description: 300,
         short_description: 200,
         overview: 1000
     }
 } as const;
 
-// Export Structure
+// Export Structure (updated)
 export const EXPORT_STRUCTURE = {
     DATA_FOLDER: 'data',
     FOLDERS: {
+        PROJECTS: 'projects',
         PRODUCTS: 'products',
         SERVICES: 'services',
         VERSIONS: 'versions',
+        INFO_CARDS: 'info-cards',
         RELEASE_NOTES: 'release-notes',
         API_SPECS: 'api-specs',
         ASSETS: 'assets'
     },
     FILES: {
         MANIFEST: 'manifest.json',
+        PROJECTS_LIST: 'projects.json',
         PRODUCTS_LIST: 'products.json',
         SEARCH_INDEX: 'search-index.json'
     }
@@ -159,6 +198,14 @@ export const EXPORT_STRUCTURE = {
 export const PROTOCOL_TYPE_OPTIONS = [
     { value: 'REST', label: 'REST API (Swagger/OpenAPI)' },
     { value: 'MQTT', label: 'MQTT (AsyncAPI)' }
+];
+
+// Info Card Display Type Options
+export const INFO_CARD_DISPLAY_TYPE_OPTIONS = [
+    { value: 'imageLeft', label: 'Image Left' },
+    { value: 'imageRight', label: 'Image Right' },
+    { value: 'custom1', label: 'Custom Layout 1' },
+    { value: 'custom2', label: 'Custom Layout 2' }
 ];
 
 // Protocol Options for Forms (kept for compatibility)
@@ -198,20 +245,32 @@ export const SERVICE_CATEGORY_OPTIONS = [
     { value: 'integration', label: 'Integration' }
 ];
 
-// Error Messages
+// Error Messages (updated)
 export const ERROR_MESSAGES = {
     REQUIRED_FIELD: 'This field is required',
     INVALID_EMAIL: 'Please enter a valid email address',
+    INVALID_URL: 'Please enter a valid URL',
     FILE_TOO_LARGE: 'File size exceeds the maximum allowed limit',
     INVALID_FILE_TYPE: 'File type is not supported',
     NETWORK_ERROR: 'Network error occurred. Please try again.',
     SAVE_ERROR: 'Failed to save. Please try again.',
     LOAD_ERROR: 'Failed to load data. Please refresh the page.',
-    DELETE_CONFIRMATION: 'Are you sure you want to delete this item?'
+    DELETE_CONFIRMATION: 'Are you sure you want to delete this item?',
+    PROJECT_DELETE_CONFIRMATION: 'Are you sure you want to delete this project? This will also delete all its products, services, and versions.',
+    PRODUCT_DELETE_CONFIRMATION: 'Are you sure you want to delete this product? This will also delete all its services and versions.',
+    SERVICE_DELETE_CONFIRMATION: 'Are you sure you want to delete this service? This will also delete all its versions.',
+    VERSION_DELETE_CONFIRMATION: 'Are you sure you want to delete this version?',
+    INFO_CARD_DELETE_CONFIRMATION: 'Are you sure you want to delete this info card?'
 } as const;
 
-// Success Messages
+// Success Messages (updated)
 export const SUCCESS_MESSAGES = {
+    PROJECT_CREATED: 'Project created successfully',
+    PROJECT_UPDATED: 'Project updated successfully',
+    PROJECT_DELETED: 'Project deleted successfully',
+    INFO_CARD_CREATED: 'Info card created successfully',
+    INFO_CARD_UPDATED: 'Info card updated successfully',
+    INFO_CARD_DELETED: 'Info card deleted successfully',
     PRODUCT_CREATED: 'Product created successfully',
     PRODUCT_UPDATED: 'Product updated successfully',
     PRODUCT_DELETED: 'Product deleted successfully',
@@ -229,6 +288,8 @@ export const SUCCESS_MESSAGES = {
 // UI Constants
 export const UI_CONSTANTS = {
     ANIMATION_DURATION: 200,
+    ANIMATION_SCALE: 1.02,
+    ANIMATION_TRANSLATE: -4, // pixels
     DEBOUNCE_DELAY: 300,
     SEARCH_MIN_LENGTH: 2,
     PAGINATION_PAGE_SIZE: 20,
@@ -236,14 +297,17 @@ export const UI_CONSTANTS = {
     MODAL_Z_INDEX: 1000,
     HEADER_HEIGHT: 70,
     SIDEBAR_WIDTH: 320,
+    SIDEBAR_COLLAPSED_WIDTH: 64,
     MOBILE_BREAKPOINT: 768
 } as const;
 
 // API Endpoints (for future use)
 export const API_ENDPOINTS = {
+    PROJECTS: '/api/projects',
     PRODUCTS: '/api/products',
     SERVICES: '/api/services',
     VERSIONS: '/api/versions',
+    INFO_CARDS: '/api/info-cards',
     UPLOAD: '/api/upload',
     EXPORT: '/api/export',
     IMPORT: '/api/import'

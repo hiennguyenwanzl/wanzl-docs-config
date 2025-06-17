@@ -5,9 +5,9 @@ import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
 import Select from '../ui/Select';
 import ImageUpload from '../ui/ImageUpload';
-import { DEFAULTS, CATEGORY_OPTIONS, STATUS_OPTIONS, VALIDATION } from '../../constants';
-import { validateRequired, generateId } from '../../utils/helpers';
-import type { ProductFormProps, Product, UseCase, ValidationResult } from '../../types';
+import { DEFAULTS, CATEGORY_OPTIONS, STATUS_OPTIONS, VALIDATION } from '@/constants';
+import { validateRequired, generateId } from '@/utils/helpers.ts';
+import type { ProductFormProps, Product, UseCase, ValidationResult } from '@/types';
 
 const ProductForm: React.FC<ProductFormProps> = ({
                                                      product,

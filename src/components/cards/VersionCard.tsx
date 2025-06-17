@@ -1,5 +1,6 @@
+// src/components/cards/VersionCard.tsx
 import React from 'react';
-import { Edit2, Trash2, Code, FileText, Wifi } from 'lucide-react';
+import { Edit2, Trash2, Code, Wifi } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 
@@ -31,10 +32,10 @@ const VersionCard: React.FC<VersionCardProps> = ({
                                                  }) => {
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'stable': return 'bg-green-100 text-green-700';
-            case 'beta': return 'bg-yellow-100 text-yellow-700';
-            case 'deprecated': return 'bg-red-100 text-red-700';
-            default: return 'bg-gray-100 text-gray-700';
+            case 'stable': return 'bg-green-100 text-green-700 group-hover:bg-green-200';
+            case 'beta': return 'bg-yellow-100 text-yellow-700 group-hover:bg-yellow-200';
+            case 'deprecated': return 'bg-red-100 text-red-700 group-hover:bg-red-200';
+            default: return 'bg-gray-100 text-gray-700 group-hover:bg-gray-200';
         }
     };
 
@@ -44,15 +45,15 @@ const VersionCard: React.FC<VersionCardProps> = ({
 
         if (hasSwagger && hasMqtt) {
             return (
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-1 transition-transform duration-300 group-hover:scale-105">
                     <Code className="w-4 h-4 text-green-600" />
                     <Wifi className="w-4 h-4 text-purple-600" />
                 </div>
             );
         } else if (hasMqtt) {
-            return <Wifi className="w-8 h-8 text-purple-600" />;
+            return <Wifi className="w-8 h-8 text-purple-600 transition-transform duration-300 group-hover:scale-105" />;
         } else {
-            return <Code className="w-8 h-8 text-green-600" />;
+            return <Code className="w-8 h-8 text-green-600 transition-transform duration-300 group-hover:scale-105" />;
         }
     };
 
@@ -69,14 +70,29 @@ const VersionCard: React.FC<VersionCardProps> = ({
         }
     };
 
+    const getBgGradient = () => {
+        const hasSwagger = version.api_specs?.openapi || version.supported_apis?.includes('swagger');
+        const hasMqtt = version.api_specs?.mqtt || version.supported_apis?.includes('mqtt');
+
+        if (hasSwagger && hasMqtt) {
+            return 'from-indigo-50 to-purple-50';
+        } else if (hasMqtt) {
+            return 'from-purple-50 to-purple-100';
+        } else {
+            return 'from-green-50 to-green-100';
+        }
+    };
+
     return (
-        <Card hover className="cursor-pointer group" onClick={onClick}>
+        <Card hover animate className="cursor-pointer group" onClick={onClick}>
             <div className="flex h-28">
                 {/* Icon Section */}
-                <div className="w-28 h-full flex items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-l-lg border-r border-gray-200 relative overflow-hidden">
+                <div className={`w-28 h-full flex items-center justify-center bg-gradient-to-br ${getBgGradient()} rounded-l-lg border-r border-gray-200 relative overflow-hidden`}>
                     <div className="z-10 flex flex-col items-center">
                         {getApiTypeIcon()}
-                        <span className="text-xs text-indigo-600 mt-1 font-medium">
+                        <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${
+                            version.api_specs?.mqtt ? 'text-purple-600' : 'text-green-600'
+                        } group-hover:text-blue-600`}>
                             {getApiTypeLabel()}
                         </span>
                     </div>
@@ -94,7 +110,7 @@ const VersionCard: React.FC<VersionCardProps> = ({
                     <div>
                         <div className="flex justify-between items-start mb-2">
                             <div>
-                                <h3 className="font-semibold text-gray-900 text-lg">
+                                <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors duration-200">
                                     Version {version.version}
                                 </h3>
                                 <p className="text-sm text-gray-500">
@@ -102,10 +118,10 @@ const VersionCard: React.FC<VersionCardProps> = ({
                                 </p>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(version.status)}`}>
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium transition-all duration-200 ${getStatusColor(version.status)}`}>
                                     {version.status}
                                 </span>
-                                <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -113,7 +129,7 @@ const VersionCard: React.FC<VersionCardProps> = ({
                                             e.stopPropagation();
                                             onEdit(version);
                                         }}
-                                        className="hover:bg-indigo-50 hover:text-indigo-600"
+                                        className="hover:bg-indigo-50 hover:text-indigo-600 transform hover:scale-105 transition-all duration-200"
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </Button>
@@ -124,7 +140,7 @@ const VersionCard: React.FC<VersionCardProps> = ({
                                             e.stopPropagation();
                                             onDelete(version.version);
                                         }}
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        className="text-red-600 hover:text-red-700 hover:bg-red-50 transform hover:scale-105 transition-all duration-200"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
@@ -137,6 +153,25 @@ const VersionCard: React.FC<VersionCardProps> = ({
                                 {version.introduction}
                             </p>
                         )}
+
+                        {/* Version badges */}
+                        <div className="flex items-center space-x-2 mt-2">
+                            {version.beta && (
+                                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-medium transition-all duration-200 group-hover:bg-yellow-200">
+                                    Beta
+                                </span>
+                            )}
+                            {version.deprecated && (
+                                <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium transition-all duration-200 group-hover:bg-red-200">
+                                    Deprecated
+                                </span>
+                            )}
+                            {version.breaking_changes && (
+                                <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium transition-all duration-200 group-hover:bg-orange-200">
+                                    Breaking Changes
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

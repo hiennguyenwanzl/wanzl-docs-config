@@ -1,3 +1,4 @@
+// src/components/ui/Card.tsx
 import React, { forwardRef } from 'react';
 import type { CardProps } from '@/types';
 
@@ -8,6 +9,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
          shadow = 'md',
          rounded = 'md',
          hover = false,
+         animate = false,
          className = '',
          ...props
      }, ref) => {
@@ -37,11 +39,12 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         };
 
         const cardClasses = [
-            'bg-white border border-gray-200',
+            'bg-white border border-gray-200 transition-all duration-300 ease-in-out',
             paddingClasses[padding],
             shadowClasses[shadow],
             roundedClasses[rounded],
-            hover && 'transition-all duration-200 hover:shadow-lg hover:border-gray-300 cursor-pointer',
+            hover && 'cursor-pointer hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50',
+            animate && 'hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98] active:translate-y-0',
             className
         ].filter(Boolean).join(' ');
 
@@ -49,6 +52,9 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
             <div
                 ref={ref}
                 className={cardClasses}
+                style={{
+                    transformOrigin: 'center',
+                }}
                 {...props}
             >
                 {children}
