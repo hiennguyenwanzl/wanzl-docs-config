@@ -5,14 +5,7 @@ import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
 import Select from '../ui/Select';
 import FileUpload from '../ui/FileUpload';
-
-interface FileData {
-    name: string;
-    content: string;
-    size: number;
-    type: string;
-    lastModified: number;
-}
+import type { FileData } from '@/types';
 
 interface Tutorial {
     title: string;

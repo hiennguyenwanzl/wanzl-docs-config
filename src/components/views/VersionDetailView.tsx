@@ -23,10 +23,12 @@ import type { ApiVersion } from '@/types';
 interface VersionDetailViewProps {
     version: ApiVersion;
     productId: string;
+    productName?: string;
     serviceId: string;
+    serviceName?: string;
     onGoToService: () => void;
     onGoToProduct: () => void;
-    onGoToProductsList: () => void;
+    onGoToLandingPage: () => void;
     onEditVersion: (version: ApiVersion) => void;
     onEditReleaseNotes?: () => void;
     onViewApiSpec?: (spec: any, type: 'swagger' | 'mqtt', title: string) => void;
@@ -35,10 +37,12 @@ interface VersionDetailViewProps {
 const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                                                  version,
                                                                  productId,
+                                                                 productName,
                                                                  serviceId,
+                                                                 serviceName,
                                                                  onGoToService,
                                                                  onGoToProduct,
-                                                                 onGoToProductsList,
+                                                                 onGoToLandingPage,
                                                                  onEditVersion,
                                                                  onEditReleaseNotes,
                                                                  onViewApiSpec
@@ -48,17 +52,17 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
     const breadcrumbItems = [
         {
             key: 'home',
-            label: 'Products',
-            onClick: onGoToProductsList
+            label: 'Landing Page',
+            onClick: onGoToLandingPage
         },
         {
             key: 'product',
-            label: productId,
+            label: productName || productId,
             onClick: onGoToProduct
         },
         {
             key: 'service',
-            label: serviceId,
+            label: serviceName || serviceId,
             onClick: onGoToService
         },
         {

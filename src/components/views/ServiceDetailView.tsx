@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Plus, Eye, ArrowLeft, Package } from 'lucide-react';
+import { Edit2, Plus, Eye, ArrowLeft, Package, Code, Wifi } from 'lucide-react';
 import Button from '../ui/Button';
 import Breadcrumb from '../ui/Breadcrumb';
 import Card, { CardHeader, CardTitle, CardContent } from '../ui/Card';
@@ -20,11 +20,13 @@ interface EnhancedServiceDetailViewProps {
         key_features?: string[];
         supported_protocols?: string[];
         integration_guide?: string;
+        protocol_type?: 'REST' | 'MQTT';
     };
     versions: any[];
     productId: string;
+    productName?: string;
     onGoToProduct: () => void;
-    onGoToProductsList: () => void;
+    onGoToLandingPage: () => void;
     onEditService: (service: any) => void;
     onAddVersion: () => void;
     onEditVersion: (version: any) => void;
@@ -33,26 +35,55 @@ interface EnhancedServiceDetailViewProps {
 }
 
 const ServiceDetailView: React.FC<EnhancedServiceDetailViewProps> = ({
-                                                                                 service,
-                                                                                 versions,
-                                                                                 productId,
-                                                                                 onGoToProduct,
-                                                                                 onGoToProductsList,
-                                                                                 onEditService,
-                                                                                 onAddVersion,
-                                                                                 onEditVersion,
-                                                                                 onDeleteVersion,
-                                                                                 onSelectVersion
-                                                                             }) => {
+                                                                         service,
+                                                                         versions,
+                                                                         productId,
+                                                                         productName,
+                                                                         onGoToProduct,
+                                                                         onGoToLandingPage,
+                                                                         onEditService,
+                                                                         onAddVersion,
+                                                                         onEditVersion,
+                                                                         onDeleteVersion,
+                                                                         onSelectVersion
+                                                                     }) => {
+
+    // Get protocol-specific styling and info
+    const getProtocolInfo = () => {
+        const protocolType = service.protocol_type || 'REST';
+
+        if (protocolType === 'MQTT') {
+            return {
+                icon: <Wifi className="w-4 h-4 text-purple-600" />,
+                label: 'MQTT API',
+                bgColor: 'from-purple-50 to-purple-100',
+                badgeColor: 'bg-purple-100 text-purple-700',
+                iconBgColor: 'bg-purple-200',
+                iconTextColor: 'text-purple-600'
+            };
+        } else {
+            return {
+                icon: <Code className="w-4 h-4 text-green-600" />,
+                label: 'REST API',
+                bgColor: 'from-green-50 to-green-100',
+                badgeColor: 'bg-green-100 text-green-700',
+                iconBgColor: 'bg-green-200',
+                iconTextColor: 'text-green-600'
+            };
+        }
+    };
+
+    const protocolInfo = getProtocolInfo();
+
     const breadcrumbItems = [
         {
             key: 'home',
-            label: 'Products',
-            onClick: onGoToProductsList
+            label: 'Landing Page',
+            onClick: onGoToLandingPage
         },
         {
             key: 'product',
-            label: productId,
+            label: productName || productId,
             onClick: onGoToProduct
         },
         {
@@ -69,7 +100,7 @@ const ServiceDetailView: React.FC<EnhancedServiceDetailViewProps> = ({
     };
 
     return (
-        <div className="p-6">
+        <div className="p-6 main-content" style={{ overflowY: 'auto', height: '100%' }}>
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Enhanced Header with Service Icon */}
@@ -115,6 +146,12 @@ const ServiceDetailView: React.FC<EnhancedServiceDetailViewProps> = ({
                                     <span className="font-medium">Category:</span> {service.category}
                                 </span>
                             )}
+                            <span className="text-xs text-gray-400">•</span>
+                            <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-all duration-200 ${protocolInfo.badgeColor}`}>
+                                {protocolInfo.icon}
+                                <span>{service.protocol_type || 'REST'}</span>
+                            </div>
+                            <span className="text-xs text-gray-400">•</span>
                             <span className="text-sm text-gray-500">
                                 <span className="font-medium">Versions:</span> {versions.length}
                             </span>
@@ -211,6 +248,16 @@ const ServiceDetailView: React.FC<EnhancedServiceDetailViewProps> = ({
                             <div>
                                 <span className="text-sm font-medium text-gray-500">Category</span>
                                 <p className="text-gray-900">{service.category || 'General'}</p>
+                            </div>
+
+                            <div>
+                                <span className="text-sm font-medium text-gray-500">Protocol Type</span>
+                                <div className="mt-1">
+                                    <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${protocolInfo.badgeColor}`}>
+                                        {protocolInfo.icon}
+                                        <span>{service.protocol_type || 'REST'}</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div>

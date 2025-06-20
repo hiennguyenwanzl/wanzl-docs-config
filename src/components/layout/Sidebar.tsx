@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.tsx
+// src/components/layout/Sidebar.tsx - Fixed for single project structure
 import React from 'react';
 import {
     Package,
@@ -13,15 +13,11 @@ import {
     Plus
 } from 'lucide-react';
 import Button from '../ui/Button';
+import type { ProjectData } from '@/types';
 
 interface SidebarProps {
     // Single project structure - simplified
-    projectData: {
-        info_cards: any[];
-        products: any[];
-        services: Record<string, any[]>;
-        versions: Record<string, Record<string, any[]>>;
-    };
+    projectData: ProjectData;
     selectedProduct: string | null;
     selectedService: string | null;
     selectedVersion: string | null;
@@ -58,7 +54,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     const [isCollapsed, setIsCollapsed] = React.useState(false);
     const [isMobileOpen, setIsMobileOpen] = React.useState(false);
 
-    const { info_cards = [], products = [], services = {}, versions = {} } = projectData || {};
+    // Destructure project data with safe defaults
+    const {
+        info_cards = [],
+        products = [],
+        services = {},
+        versions = {}
+    } = projectData || {};
 
     const toggleCollapse = () => {
         setIsCollapsed(!isCollapsed);
@@ -164,11 +166,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         const isServiceExpanded = expandedProducts.includes(`${productId}-${service.id}`);
         const isServiceSelected = selectedService === service.id && selectedProduct === productId;
 
-        const serviceIcon = service.icon ? (
-            <img src={service.icon} alt={service.name} className="w-6 h-6 object-contain rounded" />
-        ) : (
-            <div className="w-6 h-6 bg-blue-200 rounded flex items-center justify-center">
-                <span className="text-blue-700 text-xs font-bold">S</span>
+        const serviceIcon = (
+            <div className="w-6 h-6 bg-orange-200 rounded flex items-center justify-center">
+                <span className="text-orange-700 text-xs font-bold">S</span>
             </div>
         );
 
@@ -177,10 +177,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div key={service.id} className="relative group mb-1">
                     <button
                         onClick={() => onSelectService(productId, service.id)}
-                        className={`w-full text-left px-2 py-3 text-sm transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center rounded-md mx-1 relative ${
+                        className={`w-full text-left px-2 py-3 text-sm transition-all duration-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center justify-center rounded-md mx-1 relative ${
                             isServiceSelected
-                                ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
-                                : 'text-gray-700 hover:text-blue-600'
+                                ? 'bg-orange-100 text-orange-900 border-l-2 border-orange-500'
+                                : 'text-gray-700 hover:text-orange-600'
                         }`}
                     >
                         <div className="w-6 h-6 flex items-center justify-center">
@@ -203,10 +203,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="mx-2">
                     <button
                         onClick={() => onSelectService(productId, service.id)}
-                        className={`w-full text-left px-3 py-3 text-sm transition-all duration-200 flex items-center group hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md relative ${
+                        className={`w-full text-left px-3 py-3 text-sm transition-all duration-200 flex items-center group hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-md relative ${
                             isServiceSelected
-                                ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
-                                : 'text-gray-700 hover:text-blue-600'
+                                ? 'bg-orange-100 text-orange-900 border-l-2 border-orange-500'
+                                : 'text-gray-700 hover:text-orange-600'
                         }`}
                     >
                         <div className="flex items-center space-x-3 flex-1 min-w-0">
@@ -218,7 +218,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 <div className="text-xs text-gray-500 truncate">{service.protocol_type || 'REST'} API</div>
                             </div>
                             <div className="flex items-center space-x-2 ml-auto flex-shrink-0">
-                                <span className="text-xs text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full font-medium">
+                                <span className="text-xs text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full font-medium">
                                     {serviceVersions.length}
                                 </span>
                                 {serviceVersions.length > 0 && (
@@ -227,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                             e.stopPropagation();
                                             onToggleProduct(`${productId}-${service.id}`);
                                         }}
-                                        className="p-0.5 hover:bg-blue-200 rounded transition-colors duration-200"
+                                        className="p-0.5 hover:bg-orange-200 rounded transition-colors duration-200"
                                     >
                                         {isServiceExpanded ? (
                                             <ChevronDown className="w-3 h-3" />
@@ -324,9 +324,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         const servicesCount = productServices.length;
         const isProductSelected = selectedProduct === product.id;
 
-        const productIcon = product.icon ? (
-            <img src={product.icon} alt={product.name} className="w-8 h-8 object-contain rounded-lg" />
-        ) : (
+        const productIcon = (
             <div className="w-8 h-8 rounded-lg bg-blue-200 flex items-center justify-center">
                 <span className="text-blue-700 text-lg font-bold">P</span>
             </div>
@@ -492,22 +490,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                                         <Package className="w-8 h-8 text-gray-400" />
                                     </div>
-                                    <h3 className="text-sm font-semibold text-gray-900 mb-2">No content yet</h3>
+                                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Start Creating</h3>
                                     <p className="text-sm text-gray-500 mb-6 px-4">
-                                        Get started by creating info cards and products
+                                        Build your documentation by adding landing page cards and API products
                                     </p>
                                     <div className="space-y-2">
                                         <Button
-                                            variant="outline"
+                                            variant="primary"
                                             size="sm"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onAddInfoCard();
                                             }}
                                             leftIcon={<Plus className="w-4 h-4" />}
-                                            className="w-full"
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white"
                                         >
-                                            Add Info Card
+                                            Add Landing Card
                                         </Button>
                                         <Button
                                             variant="primary"
@@ -519,18 +517,35 @@ const Sidebar: React.FC<SidebarProps> = ({
                                             leftIcon={<Plus className="w-4 h-4" />}
                                             className="w-full"
                                         >
-                                            Add Product
+                                            Add Your First Product
                                         </Button>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
+                                    {/* Add Info Card Button when no cards exist */}
+                                    {products.length > 0 && info_cards.length === 0 && (
+                                        <div className="mb-6 pb-4 border-b border-gray-200">
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onAddInfoCard();
+                                                }}
+                                                leftIcon={<Plus className="w-4 h-4" />}
+                                                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                            >
+                                                Add Landing Card
+                                            </Button>
+                                        </div>
+                                    )}
                                     {/* Info Cards Section */}
                                     {info_cards.length > 0 && (
                                         <div>
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                                    Landing Page Cards ({info_cards.length})
+                                                    Landing Cards ({info_cards.length})
                                                 </h3>
                                                 <Button
                                                     variant="ghost"
@@ -552,7 +567,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                                     {/* Products Section */}
                                     {products.length > 0 && (
-                                        <div>
+                                        <div className={info_cards.length > 0 ? 'mt-6' : ''}>
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                                                     Products ({products.length})
@@ -572,6 +587,24 @@ const Sidebar: React.FC<SidebarProps> = ({
                                             <div className="space-y-1">
                                                 {products.map(renderProduct)}
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {/* Show add buttons when only one section has content */}
+                                    {info_cards.length > 0 && products.length === 0 && (
+                                        <div className="mt-6 pt-4 border-t border-gray-200">
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onAddProduct();
+                                                }}
+                                                leftIcon={<Plus className="w-4 h-4" />}
+                                                className="w-full"
+                                            >
+                                                Add Your First Product
+                                            </Button>
                                         </div>
                                     )}
                                 </div>

@@ -153,25 +153,6 @@ const VersionCard: React.FC<VersionCardProps> = ({
                                 {version.introduction}
                             </p>
                         )}
-
-                        {/* Version badges */}
-                        <div className="flex items-center space-x-2 mt-2">
-                            {version.beta && (
-                                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-medium transition-all duration-200 group-hover:bg-yellow-200">
-                                    Beta
-                                </span>
-                            )}
-                            {version.deprecated && (
-                                <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium transition-all duration-200 group-hover:bg-red-200">
-                                    Deprecated
-                                </span>
-                            )}
-                            {version.breaking_changes && (
-                                <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium transition-all duration-200 group-hover:bg-orange-200">
-                                    Breaking Changes
-                                </span>
-                            )}
-                        </div>
                     </div>
                 </div>
             </div>

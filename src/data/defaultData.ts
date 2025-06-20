@@ -2,6 +2,13 @@
 import type { ProjectData, Product, Service, InfoCard } from '@/types';
 import { formatDate } from '../utils/helpers';
 
+// Helper function to generate unique ID
+const generateId = (name: string): string => {
+    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+    const timestamp = Date.now().toString(36);
+    return `${cleanName}-${timestamp}`;
+};
+
 // Empty project data structure (single project)
 export const EMPTY_PROJECT_DATA: ProjectData = {
     project: {
@@ -352,6 +359,68 @@ export const TEMPLATE_VERSIONS: Record<string, Record<string, any[]>> = {
                 status: 'deprecated',
                 release_date: '2024-10-01T00:00:00Z',
                 deprecated: true,
+                beta: false,
+                breaking_changes: false,
+                introduction: 'Initial release of the Transaction Service API for processing payments.',
+                getting_started: 'To get started with Transaction Service v1.0.0:\n1. Obtain API credentials\n2. Set up authentication\n3. Make your first transaction API call',
+                service_protocol_type: 'REST',
+                supports_swagger: true,
+                supports_mqtt: false,
+                supported_apis: ['rest'],
+                tutorials: [
+                    {
+                        title: 'Basic Integration',
+                        content: 'Learn how to integrate the Transaction Service with your POS system.'
+                    }
+                ],
+                code_examples: {
+                    curl: 'curl -X POST https://api.example.com/v1.0.0/transactions -H "Authorization: Bearer YOUR_TOKEN" -d \'{"amount": 100.50, "currency": "EUR"}\'',
+                    javascript: 'const response = await fetch("/api/transactions", {\n  method: "POST",\n  headers: { "Authorization": "Bearer " + token },\n  body: JSON.stringify({ amount: 100.50, currency: "EUR" })\n});'
+                },
+                created_at: formatDate(),
+                updated_at: formatDate()
+            },
+            {
+                version: '1.0.1',
+                service_id: 'transaction-service',
+                product_id: 'fastlaner',
+                status: 'stable',
+                release_date: '2024-12-15T00:00:00Z',
+                deprecated: false,
+                beta: false,
+                breaking_changes: true,
+                introduction: 'Transaction Service API v1.0.1 includes important bug fixes and performance improvements.',
+                getting_started: 'To get started with Transaction Service v1.0.1:\n1. Update your API endpoints\n2. Review breaking changes\n3. Test your integration',
+                service_protocol_type: 'REST',
+                supports_swagger: true,
+                supports_mqtt: false,
+                supported_apis: ['rest'],
+                tutorials: [
+                    {
+                        title: 'Migration from v1.0.0',
+                        content: 'Step-by-step guide to migrate from v1.0.0 to v1.0.1'
+                    },
+                    {
+                        title: 'Advanced Features',
+                        content: 'Learn about new features in v1.0.1'
+                    }
+                ],
+                code_examples: {
+                    curl: 'curl -X POST https://api.example.com/v1.0.1/transactions -H "Authorization: Bearer YOUR_TOKEN" -d \'{"amount": 100.50, "currency": "EUR", "payment_method": "card"}\'',
+                    javascript: 'const response = await fetch("/api/v1.0.1/transactions", {\n  method: "POST",\n  headers: { "Authorization": "Bearer " + token },\n  body: JSON.stringify({ amount: 100.50, currency: "EUR", payment_method: "card" })\n});'
+                },
+                created_at: formatDate(),
+                updated_at: formatDate()
+            }
+        ],
+        'notification-service': [
+            {
+                version: '2.1.0',
+                service_id: 'notification-service',
+                product_id: 'fastlaner',
+                status: 'stable',
+                release_date: '2024-12-20T00:00:00Z',
+                deprecated: false,
                 beta: false,
                 breaking_changes: false,
                 introduction: 'Notification Service v2.1.0 provides real-time MQTT-based notifications for transaction events.',
@@ -803,70 +872,3 @@ export const createNewService = (data: Partial<Service>): Service => {
     };
 };
 
-// Helper function to generate unique ID
-const generateId = (name: string): string => {
-    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
-    const timestamp = Date.now().toString(36);
-    return `${cleanName}-${timestamp}`;
-};
-introduction: 'Initial release of the Transaction Service API for processing payments.',
-    getting_started: 'To get started with Transaction Service v1.0.0:\n1. Obtain API credentials\n2. Set up authentication\n3. Make your first transaction API call',
-    service_protocol_type: 'REST',
-    supports_swagger: true,
-    supports_mqtt: false,
-    supported_apis: ['rest'],
-    tutorials: [
-    {
-        title: 'Basic Integration',
-        content: 'Learn how to integrate the Transaction Service with your POS system.'
-    }
-],
-    code_examples: {
-    curl: 'curl -X POST https://api.example.com/v1.0.0/transactions -H "Authorization: Bearer YOUR_TOKEN" -d \'{"amount": 100.50, "currency": "EUR"}\'',
-        javascript: 'const response = await fetch("/api/transactions", {\n  method: "POST",\n  headers: { "Authorization": "Bearer " + token },\n  body: JSON.stringify({ amount: 100.50, currency: "EUR" })\n});'
-},
-created_at: formatDate(),
-    updated_at: formatDate()
-},
-{
-    version: '1.0.1',
-        service_id: 'transaction-service',
-    product_id: 'fastlaner',
-    status: 'stable',
-    release_date: '2024-12-15T00:00:00Z',
-    deprecated: false,
-    beta: false,
-    breaking_changes: true,
-    introduction: 'Transaction Service API v1.0.1 includes important bug fixes and performance improvements.',
-    getting_started: 'To get started with Transaction Service v1.0.1:\n1. Update your API endpoints\n2. Review breaking changes\n3. Test your integration',
-    service_protocol_type: 'REST',
-    supports_swagger: true,
-    supports_mqtt: false,
-    supported_apis: ['rest'],
-    tutorials: [
-    {
-        title: 'Migration from v1.0.0',
-        content: 'Step-by-step guide to migrate from v1.0.0 to v1.0.1'
-    },
-    {
-        title: 'Advanced Features',
-        content: 'Learn about new features in v1.0.1'
-    }
-],
-    code_examples: {
-    curl: 'curl -X POST https://api.example.com/v1.0.1/transactions -H "Authorization: Bearer YOUR_TOKEN" -d \'{"amount": 100.50, "currency": "EUR", "payment_method": "card"}\'',
-        javascript: 'const response = await fetch("/api/v1.0.1/transactions", {\n  method: "POST",\n  headers: { "Authorization": "Bearer " + token },\n  body: JSON.stringify({ amount: 100.50, currency: "EUR", payment_method: "card" })\n});'
-},
-    created_at: formatDate(),
-        updated_at: formatDate()
-}
-],
-'notification-service': [
-    {
-        version: '2.1.0',
-        service_id: 'notification-service',
-        product_id: 'fastlaner',
-        status: 'stable',
-        release_date: '2024-12-20T00:00:00Z',
-        deprecated: false,
-        beta: false,

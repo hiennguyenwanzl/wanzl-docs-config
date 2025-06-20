@@ -56,7 +56,7 @@ export const PROTOCOLS = [
     'GraphQL',
     'WebSocket',
     'gRPC'
-] as const;
+];
 
 export type Protocol = typeof PROTOCOLS[number];
 
@@ -68,7 +68,7 @@ export const VIEW_MODES = {
     SERVICE_DETAIL: 'service_detail',
     VERSION_DETAIL: 'version_detail',
     INFO_CARD_DETAIL: 'info_card_detail'
-} as const;
+};
 
 export type ViewMode = typeof VIEW_MODES[keyof typeof VIEW_MODES];
 
@@ -78,7 +78,7 @@ export const FILE_LIMITS = {
     MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
     SUPPORTED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'],
     SUPPORTED_SPEC_TYPES: ['.yaml', '.yml', '.json']
-} as const;
+};
 
 // Navigation Items (updated)
 export const NAV_ITEMS = [
@@ -86,7 +86,7 @@ export const NAV_ITEMS = [
     { id: 'export', label: 'Export', icon: 'Download' },
     { id: 'import', label: 'Import', icon: 'Upload' },
     { id: 'settings', label: 'Settings', icon: 'Settings' }
-] as const;
+];
 
 // Default Values (updated with new entities)
 export const DEFAULTS = {
@@ -147,7 +147,7 @@ export const DEFAULTS = {
     }
 };
 
-// Validation Rules (updated)
+// Validation Rules
 export const VALIDATION = {
     REQUIRED_FIELDS: {
         PROJECT: ['name', 'display_name'],
@@ -171,7 +171,7 @@ export const VALIDATION = {
         short_description: 200,
         overview: 1000
     }
-} as const;
+};
 
 // Export Structure (updated)
 export const EXPORT_STRUCTURE = {
@@ -192,7 +192,7 @@ export const EXPORT_STRUCTURE = {
         PRODUCTS_LIST: 'products.json',
         SEARCH_INDEX: 'search-index.json'
     }
-} as const;
+};
 
 // Protocol Type Options for Forms
 export const PROTOCOL_TYPE_OPTIONS = [

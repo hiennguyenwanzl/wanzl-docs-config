@@ -1,4 +1,4 @@
-// src/components/forms/InfoCardForm.tsx
+// src/components/forms/InfoCardForm.tsx - Fixed version
 import React, { useState, useEffect } from 'react';
 import { Eye, ExternalLink } from 'lucide-react';
 import Button from '../ui/Button';
@@ -7,7 +7,7 @@ import Textarea from '../ui/Textarea';
 import Select from '../ui/Select';
 import ImageUpload from '../ui/ImageUpload';
 import { validateRequired, generateId } from '@/utils/helpers.ts';
-import type { InfoCardFormProps, InfoCard, ValidationResult } from '@/types';
+import type { InfoCard, ValidationResult } from '@/types';
 
 const DISPLAY_TYPE_OPTIONS = [
     { value: 'imageLeft', label: 'Image Left' },
@@ -16,10 +16,18 @@ const DISPLAY_TYPE_OPTIONS = [
     { value: 'custom2', label: 'Custom Layout 2' }
 ];
 
+interface InfoCardFormProps {
+    infoCard?: InfoCard | null;
+    productId?: string; // Optional - for product-level info cards
+    onSave: (infoCard: InfoCard) => void | Promise<void>;
+    onCancel: () => void;
+    onPreview?: (infoCard: InfoCard) => void;
+    isEditing?: boolean;
+}
+
 const InfoCardForm: React.FC<InfoCardFormProps> = ({
                                                        infoCard,
-                                                       projectId,
-                                                       productId,
+                                                       productId, // Optional - used for product-specific cards
                                                        onSave,
                                                        onCancel,
                                                        onPreview,
@@ -32,7 +40,6 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
         url: '',
         display_type: 'imageLeft',
         sort_order: 1,
-        project_id: projectId || '',
         ...infoCard
     });
 
@@ -49,11 +56,10 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                 url: '',
                 display_type: 'imageLeft',
                 sort_order: 1,
-                project_id: projectId || '',
                 ...infoCard
             });
         }
-    }, [infoCard, projectId]);
+    }, [infoCard]);
 
     const updateField = (field: keyof InfoCard, value: any): void => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -109,7 +115,6 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
             const infoCardData: InfoCard = {
                 ...formData,
                 id: formData.id || generateId(formData.headline_title || ''),
-                project_id: projectId || formData.project_id || '',
                 headline_title: formData.headline_title || '',
                 brief_description: formData.brief_description || '',
                 url: formData.url || '',
@@ -220,7 +225,12 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                             {isEditing ? 'Edit Info Card' : 'Create New Info Card'}
                         </h2>
                         <p className="text-gray-600 mt-1 text-sm">
-                            {isEditing ? 'Update your info card information' : 'Add a new info card for the landing page'}
+                            {isEditing
+                                ? 'Update your info card information'
+                                : productId
+                                    ? 'Add a new info card for this product'
+                                    : 'Add a new info card for the landing page'
+                            }
                         </p>
                     </div>
                     <div className="flex space-x-3">
