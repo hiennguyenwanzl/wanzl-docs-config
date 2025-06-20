@@ -11,6 +11,7 @@ import VersionForm from './components/forms/VersionForm';
 import Modal from './components/ui/Modal';
 import Button from './components/ui/Button';
 import Card, { CardContent } from './components/ui/Card';
+import InfoCardForm from './components/forms/InfoCardForm';
 
 // Import utilities and types
 import {
@@ -23,7 +24,7 @@ import {
     initializeProjectWithTemplates
 } from './data/defaultData';
 
-import type { ProjectData, FileData, Product, Service, ApiVersion } from './types';
+import type {ProjectData, FileData, Product, Service, ApiVersion, InfoCard} from './types';
 
 // File Upload Component for Import
 const FileUpload: React.FC<{ onFileUpload: (data: Partial<ProjectData>) => void }> = ({ onFileUpload }) => {
@@ -66,11 +67,17 @@ const FileUpload: React.FC<{ onFileUpload: (data: Partial<ProjectData>) => void 
 
 // Main App Component
 function App() {
+    // Info cards state management
+    const [selectedInfoCard, setSelectedInfoCard] = useState<string | null>(null);
+    const [showInfoCardForm, setShowInfoCardForm] = useState(false);
+    const [editingInfoCard, setEditingInfoCard] = useState<InfoCard | null>(null);
+    const [editingProductId, setEditingProductId] = useState<string | null>(null); // For product-level info cards
+
     // Use empty project data as default
     const [projectData, setProjectData] = useState<ProjectData>(EMPTY_PROJECT_DATA);
 
     // UI State
-    const [currentView, setCurrentView] = useState('products');
+    const [currentView, setCurrentView] = useState('landing');
     const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
     const [selectedService, setSelectedService] = useState<string | null>(null);
     const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
@@ -93,6 +100,10 @@ function App() {
     const [isExporting, setIsExporting] = useState(false);
 
     // Helper functions
+    const formatDate = (): string => {
+        return new Date().toISOString();
+    };
+
     const getServicesCount = useCallback((productId: string) => {
         return projectData.services[productId]?.length || 0;
     }, [projectData.services]);
@@ -111,16 +122,18 @@ function App() {
 
     // Navigation functions - Enhanced with automatic expansion
     const navigationHandlers = {
-        goToProductsList: () => {
-            setCurrentView('products');
+        goToLandingPage: () => {
+            setCurrentView('landing');
             setSelectedProduct(null);
             setSelectedService(null);
             setSelectedVersion(null);
+            setSelectedInfoCard(null);
         },
         goToProductDetail: (productId: string) => {
             setSelectedProduct(productId);
             setSelectedService(null);
             setSelectedVersion(null);
+            setSelectedInfoCard(null);
             setCurrentView('product_detail');
 
             // Auto-expand the product in sidebar
@@ -132,6 +145,7 @@ function App() {
             setSelectedProduct(productId);
             setSelectedService(serviceId);
             setSelectedVersion(null);
+            setSelectedInfoCard(null);
             setCurrentView('service_detail');
 
             // Auto-expand the product and service in sidebar
@@ -148,6 +162,7 @@ function App() {
             setSelectedProduct(productId);
             setSelectedService(serviceId);
             setSelectedVersion(versionId);
+            setSelectedInfoCard(null);
             setCurrentView('version_detail');
 
             // Auto-expand the product and service in sidebar
@@ -159,6 +174,21 @@ function App() {
             if (!serviceExpanded) newExpanded.push(`${productId}-${serviceId}`);
 
             setExpandedProducts(newExpanded);
+        },
+        goToInfoCardDetail: (infoCardId: string) => {
+            setSelectedInfoCard(infoCardId);
+            setCurrentView('info_card_detail');
+            setSelectedProduct(null);
+            setSelectedService(null);
+            setSelectedVersion(null);
+        },
+        // Add the missing method
+        goToInfoCardsGrid: () => {
+            setCurrentView('info_cards_grid');
+            setSelectedProduct(null);
+            setSelectedService(null);
+            setSelectedVersion(null);
+            setSelectedInfoCard(null);
         }
     };
 
@@ -182,7 +212,7 @@ function App() {
 
             // Clear selection if deleted product was selected
             if (selectedProduct === productId) {
-                navigationHandlers.goToProductsList();
+                navigationHandlers.goToLandingPage();
             }
         },
         handleAddService: () => {
@@ -256,6 +286,53 @@ function App() {
         },
         handlePreviewVersion: (version: ApiVersion) => {
             // This will be handled by MainContentRouter
+        },
+        // Landing page info cards
+        handleAddInfoCard: () => {
+            setEditingInfoCard(null);
+            setEditingProductId(null);
+            setShowInfoCardForm(true);
+        },
+        handleEditInfoCard: (infoCard: InfoCard) => {
+            setEditingInfoCard(infoCard);
+            setEditingProductId(null);
+            setShowInfoCardForm(true);
+        },
+        handleDeleteInfoCard: (infoCardId: string) => {
+            const updatedData = { ...projectData };
+            updatedData.info_cards = updatedData.info_cards.filter(card => card.id !== infoCardId);
+            setProjectData(updatedData);
+
+            // Clear selection if deleted info card was selected
+            if (selectedInfoCard === infoCardId) {
+                navigationHandlers.goToLandingPage();
+            }
+        },
+
+        // Product-level info cards
+        handleAddProductInfoCard: (productId: string) => {
+            setEditingInfoCard(null);
+            setEditingProductId(productId);
+            setShowInfoCardForm(true);
+        },
+        handleEditProductInfoCard: (productId: string, infoCard: InfoCard) => {
+            setEditingInfoCard(infoCard);
+            setEditingProductId(productId);
+            setShowInfoCardForm(true);
+        },
+        handleDeleteProductInfoCard: (productId: string, infoCardId: string) => {
+            const updatedData = { ...projectData };
+            const productIndex = updatedData.products.findIndex(p => p.id === productId);
+            if (productIndex >= 0 && updatedData.products[productIndex].info_cards) {
+                updatedData.products[productIndex].info_cards =
+                    updatedData.products[productIndex].info_cards!.filter(card => card.id !== infoCardId);
+            }
+            setProjectData(updatedData);
+
+            // Clear selection if deleted info card was selected
+            if (selectedInfoCard === infoCardId) {
+                navigationHandlers.goToProductDetail(productId);
+            }
         }
     };
 
@@ -428,6 +505,8 @@ function App() {
             setProjectData(EMPTY_PROJECT_DATA);
         }
         setShowQuickStartModal(false);
+        // Navigate to landing page after setup
+        navigationHandlers.goToLandingPage();
     };
 
     // Template handler - NEW
@@ -446,12 +525,61 @@ function App() {
         actionHandlers.handlePreviewProducts();
     };
 
+    // Handle submission handler of Info card
+    const handleSaveInfoCard = async (infoCardData: InfoCard) => {
+        const updatedData = { ...projectData };
+
+        if (editingProductId) {
+            // Save to specific product
+            const productIndex = updatedData.products.findIndex(p => p.id === editingProductId);
+            if (productIndex >= 0) {
+                if (!updatedData.products[productIndex].info_cards) {
+                    updatedData.products[productIndex].info_cards = [];
+                }
+
+                if (editingInfoCard) {
+                    // Update existing product info card
+                    const cardIndex = updatedData.products[productIndex].info_cards!.findIndex(c => c.id === editingInfoCard.id);
+                    if (cardIndex >= 0) {
+                        updatedData.products[productIndex].info_cards![cardIndex] = infoCardData;
+                    }
+                } else {
+                    // Add new product info card
+                    updatedData.products[productIndex].info_cards!.push(infoCardData);
+                }
+            }
+        } else {
+            // Save to project-level info cards
+            if (editingInfoCard) {
+                // Update existing project info card
+                const cardIndex = updatedData.info_cards.findIndex(c => c.id === editingInfoCard.id);
+                if (cardIndex >= 0) {
+                    updatedData.info_cards[cardIndex] = infoCardData;
+                }
+            } else {
+                // Add new project info card
+                updatedData.info_cards.push(infoCardData);
+            }
+        }
+
+        setProjectData(updatedData);
+        setShowInfoCardForm(false);
+        setEditingInfoCard(null);
+        setEditingProductId(null);
+
+        // Navigate to the new/edited info card
+        navigationHandlers.goToInfoCardDetail(infoCardData.id);
+    };
+
     // Show quick start modal on first load if no products exist
     React.useEffect(() => {
-        if (projectData.products.length === 0) {
+        if (projectData.products.length === 0 && projectData.info_cards.length === 0) {
             setShowQuickStartModal(true);
+        } else {
+            // Start on landing page if there's content
+            setCurrentView('landing');
         }
-    }, []);
+    }, [projectData.products.length, projectData.info_cards.length]);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -468,16 +596,17 @@ function App() {
 
             <div className="flex flex-1 relative">
                 <Sidebar
-                    products={projectData.products}
-                    services={projectData.services}
-                    versions={projectData.versions}
+                    projectData={projectData}
                     selectedProduct={selectedProduct}
                     selectedService={selectedService}
                     selectedVersion={selectedVersion}
+                    selectedInfoCard={selectedInfoCard}
                     onSelectProduct={navigationHandlers.goToProductDetail}
                     onSelectService={navigationHandlers.goToServiceDetail}
                     onSelectVersion={navigationHandlers.goToVersionDetail}
+                    onSelectInfoCard={navigationHandlers.goToInfoCardDetail}
                     onAddProduct={actionHandlers.handleAddProduct}
+                    onAddInfoCard={actionHandlers.handleAddInfoCard}
                     expandedProducts={expandedProducts}
                     onToggleProduct={handleToggleProduct}
                     onPreviewProject={handlePreviewProject}
@@ -491,6 +620,7 @@ function App() {
                         selectedProduct={selectedProduct}
                         selectedService={selectedService}
                         selectedVersion={selectedVersion}
+                        selectedInfoCard={selectedInfoCard}
                         onNavigate={navigationHandlers}
                         onActions={actionHandlers}
                         getServicesCount={getServicesCount}
@@ -585,6 +715,30 @@ function App() {
                         setEditingService(null);
                     }}
                     isEditing={!!editingService}
+                />
+            </Modal>
+
+            {/* Info card Modal */}
+            <Modal
+                isOpen={showInfoCardForm}
+                onClose={() => {
+                    setShowInfoCardForm(false);
+                    setEditingInfoCard(null);
+                    setEditingProductId(null);
+                }}
+                title={editingInfoCard ? 'Edit Info Card' : 'Create New Info Card'}
+                size="xl"
+            >
+                <InfoCardForm
+                    infoCard={editingInfoCard}
+                    productId={editingProductId}
+                    onSave={handleSaveInfoCard}
+                    onCancel={() => {
+                        setShowInfoCardForm(false);
+                        setEditingInfoCard(null);
+                        setEditingProductId(null);
+                    }}
+                    isEditing={!!editingInfoCard}
                 />
             </Modal>
 
