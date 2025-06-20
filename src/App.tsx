@@ -1,3 +1,4 @@
+// src/App.tsx
 import React, { useState, useCallback } from 'react';
 import { Upload, Download, Package, X } from 'lucide-react';
 

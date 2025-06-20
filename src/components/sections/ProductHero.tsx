@@ -1,3 +1,4 @@
+// src/components/sections/ProductHero.tsx
 import React from 'react';
 import Card, { CardContent } from '../ui/Card';
 import DefaultIcon from '../ui/DefaultIcon';

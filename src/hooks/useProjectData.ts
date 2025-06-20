@@ -1,3 +1,4 @@
+// src/hooks/useProjectData.ts
 import { useState, useCallback } from 'react';
 import { generateId, formatDate } from '../utils/helpers.js';
 import { DEFAULTS } from '@/constants';

@@ -1,4 +1,4 @@
-// src/data/defaultData.ts - Simplified for single project
+// src/data/defaultData.ts
 import type { ProjectData, Product, Service, InfoCard } from '@/types';
 import { formatDate } from '../utils/helpers';
 
@@ -66,28 +66,6 @@ export const TEMPLATE_INFO_CARDS: InfoCard[] = [
         url: '/developer-resources',
         display_type: 'imageRight',
         sort_order: 2,
-        created_at: formatDate(),
-        updated_at: formatDate()
-    },
-    {
-        id: 'api-reference',
-        headline_title: 'Complete API Reference',
-        brief_description: 'Explore detailed documentation for all our APIs including REST endpoints, MQTT topics, authentication methods, and response formats.',
-        image_url: null,
-        url: '/api-reference',
-        display_type: 'custom1',
-        sort_order: 3,
-        created_at: formatDate(),
-        updated_at: formatDate()
-    },
-    {
-        id: 'support-community',
-        headline_title: 'Support & Community',
-        brief_description: 'Join our developer community, get support, and stay updated with the latest API improvements and new features.',
-        image_url: null,
-        url: '/support',
-        display_type: 'custom2',
-        sort_order: 4,
         created_at: formatDate(),
         updated_at: formatDate()
     }
@@ -194,17 +172,6 @@ export const TEMPLATE_PRODUCTS: Product[] = [
             }
         ],
         info_cards: [
-            {
-                id: 'wuca-overview',
-                headline_title: 'WUCA Analytics',
-                brief_description: 'Advanced customer analytics platform providing insights into shopping behavior and movement patterns.',
-                image_url: null,
-                url: '/products/wuca',
-                display_type: 'custom1',
-                sort_order: 1,
-                created_at: formatDate(),
-                updated_at: formatDate()
-            }
         ],
         sort_order: 3,
         created_at: formatDate(),

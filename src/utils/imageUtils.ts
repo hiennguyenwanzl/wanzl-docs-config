@@ -1,3 +1,4 @@
+// src/utils/imageUtils.ts
 import { FILE_LIMITS } from '@/constants';
 
 export interface ImageProcessingOptions {

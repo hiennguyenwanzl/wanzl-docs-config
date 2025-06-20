@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.tsx - Fixed for single project structure
+// src/components/layout/Sidebar.tsx
 import React from 'react';
 import {
     Package,
@@ -86,14 +86,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         if (protocolType === 'MQTT') {
             return (
-                <div className="w-3 h-3 rounded-sm bg-purple-500 flex items-center justify-center">
-                    <Wifi className="w-2 h-2 text-white" />
+                <div className="w-5 h-5 rounded-sm bg-purple-500 flex items-center justify-center">
+                    <Wifi className="w-3 h-3 text-white" />
                 </div>
             );
         } else {
             return (
-                <div className="w-3 h-3 rounded-sm bg-green-500 flex items-center justify-center">
-                    <Code className="w-2 h-2 text-white" />
+                <div className="w-5 h-5 rounded-sm bg-green-500 flex items-center justify-center">
+                    <Code className="w-3 h-3 text-white" />
                 </div>
             );
         }
@@ -118,10 +118,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div key={version.version} className="relative group">
                     <button
                         onClick={() => onSelectVersion(productId, serviceId, version.version)}
-                        className={`w-full text-left px-2 py-2 text-sm transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center rounded-md mx-1 relative ${
+                        className={`w-full text-left px-2 py-2 text-sm transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center justify-center rounded-md mx-1 relative ${
                             isSelected
-                                ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500'
-                                : 'text-gray-600 hover:text-blue-600'
+                                ? 'bg-green-100 text-green-900 border-l-2 border-green-500'
+                                : 'text-gray-600 hover:text-green-600'
                         }`}
                     >
                         {getVersionIcon(version)}
@@ -140,10 +140,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div key={version.version} className="relative">
                 <button
                     onClick={() => onSelectVersion(productId, serviceId, version.version)}
-                    className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 group hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center space-x-2 rounded-md mx-2 relative ${
+                    className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 group hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center space-x-2 rounded-md mx-2 relative ${
                         isSelected
-                            ? 'bg-blue-100 text-blue-900 border-l-2 border-blue-500 ml-2'
-                            : 'text-gray-600 hover:text-blue-600'
+                            ? 'bg-green-100 text-green-900 border-l-2 border-green-500 ml-2'
+                            : 'text-gray-600 hover:text-green-600'
                     }`}
                 >
                     <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -167,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         const isServiceSelected = selectedService === service.id && selectedProduct === productId;
 
         const serviceIcon = (
-            <div className="w-6 h-6 bg-orange-200 rounded flex items-center justify-center">
+            <div className="w-7 h-7 bg-orange-200 rounded flex items-center justify-center">
                 <span className="text-orange-700 text-xs font-bold">S</span>
             </div>
         );
@@ -458,7 +458,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         {!isCollapsed && (
                             <div className="flex items-center space-x-3">
                                 <div>
-                                    <h2 className="font-bold text-gray-900">Content Structure</h2>
+                                    <h2 className="font-bold text-gray-900">Docs Content</h2>
                                 </div>
                             </div>
                         )}

@@ -1,3 +1,4 @@
+// src/components/views/ServiceDetailView.tsx
 import React from 'react';
 import { Edit2, Plus, Eye, ArrowLeft, Package, Code, Wifi } from 'lucide-react';
 import Button from '../ui/Button';
@@ -5,7 +6,6 @@ import Breadcrumb from '../ui/Breadcrumb';
 import Card, { CardHeader, CardTitle, CardContent } from '../ui/Card';
 import VersionCard from '../cards/VersionCard';
 import EmptyState from '../ui/EmptyState';
-import DefaultIcon from '../ui/DefaultIcon';
 
 interface EnhancedServiceDetailViewProps {
     service: {

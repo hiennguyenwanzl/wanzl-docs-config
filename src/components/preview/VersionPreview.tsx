@@ -1,3 +1,4 @@
+// src/components/preview/VersionPreview.tsx
 import React, { useState } from 'react';
 import { ArrowLeft, Code, FileText, ExternalLink, Copy, Eye } from 'lucide-react';
 

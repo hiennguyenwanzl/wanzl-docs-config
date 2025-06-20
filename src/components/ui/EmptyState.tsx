@@ -1,3 +1,4 @@
+// src/components/ui/EmptyState.tsx
 import React from 'react';
 import { Package, Plus } from 'lucide-react';
 import Button from './Button';

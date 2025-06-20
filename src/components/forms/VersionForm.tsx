@@ -1,3 +1,4 @@
+// src/components/forms/VersionForm.tsx
 import React, { useState, useEffect } from 'react';
 import { Eye, Upload, Trash2, FileText, Code, Plus, AlertCircle, Wifi } from 'lucide-react';
 import Button from '../ui/Button';

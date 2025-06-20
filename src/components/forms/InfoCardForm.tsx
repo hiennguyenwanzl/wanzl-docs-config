@@ -1,4 +1,4 @@
-// src/components/forms/InfoCardForm.tsx - Fixed version
+// src/components/forms/InfoCardForm.tsx
 import React, { useState, useEffect } from 'react';
 import { Eye, ExternalLink } from 'lucide-react';
 import Button from '../ui/Button';
@@ -11,9 +11,7 @@ import type { InfoCard, ValidationResult } from '@/types';
 
 const DISPLAY_TYPE_OPTIONS = [
     { value: 'imageLeft', label: 'Image Left' },
-    { value: 'imageRight', label: 'Image Right' },
-    { value: 'custom1', label: 'Custom Layout 1' },
-    { value: 'custom2', label: 'Custom Layout 2' }
+    { value: 'imageRight', label: 'Image Right' }
 ];
 
 interface InfoCardFormProps {
@@ -21,7 +19,6 @@ interface InfoCardFormProps {
     productId?: string; // Optional - for product-level info cards
     onSave: (infoCard: InfoCard) => void | Promise<void>;
     onCancel: () => void;
-    onPreview?: (infoCard: InfoCard) => void;
     isEditing?: boolean;
 }
 
@@ -30,7 +27,6 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                                                        productId, // Optional - used for product-specific cards
                                                        onSave,
                                                        onCancel,
-                                                       onPreview,
                                                        isEditing = false
                                                    }) => {
     const [formData, setFormData] = useState<Partial<InfoCard>>({
@@ -81,13 +77,6 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
         }
         if (!formData.url?.trim()) {
             newErrors.url = 'URL is required';
-        } else {
-            // URL format validation
-            try {
-                new URL(formData.url);
-            } catch {
-                newErrors.url = 'Please enter a valid URL';
-            }
         }
 
         // Length validations
@@ -127,12 +116,6 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
             console.error('Failed to save info card:', error);
         } finally {
             setIsSubmitting(false);
-        }
-    };
-
-    const handlePreview = (): void => {
-        if (onPreview) {
-            onPreview(formData as InfoCard);
         }
     };
 
@@ -236,14 +219,6 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                     <div className="flex space-x-3">
                         <Button
                             type="button"
-                            variant="outline"
-                            onClick={handlePreview}
-                            leftIcon={<Eye className="w-4 h-4" />}
-                        >
-                            Preview
-                        </Button>
-                        <Button
-                            type="button"
                             variant="secondary"
                             onClick={onCancel}
                         >
@@ -288,7 +263,7 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
 
                                 <Input
                                     label="URL"
-                                    type="url"
+                                    type="text"
                                     value={formData.url || ''}
                                     onChange={(e) => updateField('url', e.target.value)}
                                     error={errors.url}
@@ -328,17 +303,6 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                         <div className="bg-white rounded-lg border border-gray-200 p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Preview</h3>
                             {renderPreview()}
-                        </div>
-
-                        {/* Display Type Examples */}
-                        <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
-                            <h4 className="font-medium text-blue-900 mb-2">Display Types</h4>
-                            <div className="text-sm text-blue-800 space-y-1">
-                                <p>• <strong>Image Left:</strong> Image on the left, content on the right</p>
-                                <p>• <strong>Image Right:</strong> Content on the left, image on the right</p>
-                                <p>• <strong>Custom Layout 1:</strong> Image on top, content below</p>
-                                <p>• <strong>Custom Layout 2:</strong> Centered layout with circular image</p>
-                            </div>
                         </div>
                     </div>
                 </div>

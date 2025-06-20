@@ -203,9 +203,7 @@ export const PROTOCOL_TYPE_OPTIONS = [
 // Info Card Display Type Options
 export const INFO_CARD_DISPLAY_TYPE_OPTIONS = [
     { value: 'imageLeft', label: 'Image Left' },
-    { value: 'imageRight', label: 'Image Right' },
-    { value: 'custom1', label: 'Custom Layout 1' },
-    { value: 'custom2', label: 'Custom Layout 2' }
+    { value: 'imageRight', label: 'Image Right' }
 ];
 
 // Protocol Options for Forms (kept for compatibility)

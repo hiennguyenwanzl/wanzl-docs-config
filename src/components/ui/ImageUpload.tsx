@@ -1,3 +1,4 @@
+// src/components/ui/ImageUpload.tsx
 import React, { useState, useRef } from 'react';
 import { Upload, Edit2, Trash2, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import Button from './Button';

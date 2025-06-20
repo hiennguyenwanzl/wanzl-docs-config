@@ -1,3 +1,4 @@
+// src/components/ui/MqttViewer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import {
     FileText,

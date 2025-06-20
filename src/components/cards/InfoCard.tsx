@@ -162,12 +162,6 @@ const InfoCard: React.FC<InfoCardProps> = ({
                     {getDisplayTypeLayout()}
                 </div>
 
-                {/* Display Type Badge */}
-                <div className="absolute bottom-2 left-2">
-                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-medium">
-                        {infoCard.display_type}
-                    </span>
-                </div>
             </div>
         </Card>
     );

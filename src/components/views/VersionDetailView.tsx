@@ -1,3 +1,4 @@
+// src/components/views/VersionDetailView.tsx
 import React, { useState } from 'react';
 import {
     Edit2,

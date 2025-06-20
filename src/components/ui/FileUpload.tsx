@@ -1,3 +1,4 @@
+// src/components/ui/FileUpload.tsx
 import React, { useState, useRef } from 'react';
 import { Upload, Edit2, Trash2, FileText, AlertCircle, Code } from 'lucide-react';
 import Button from './Button.js';

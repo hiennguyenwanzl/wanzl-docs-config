@@ -1,4 +1,4 @@
-// Data handling utilities for saving and loading project data with API specifications
+// src/utils/dataHandlers.ts
 
 export interface FileData {
     name: string;

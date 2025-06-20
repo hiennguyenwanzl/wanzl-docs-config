@@ -1,6 +1,7 @@
+// src/utils/exportUtils.ts
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { EXPORT_STRUCTURE } from '../constants';
+import { EXPORT_STRUCTURE } from '@/constants';
 import { formatDate, generateId, getLatestVersion, compareVersions } from './helpers';
 import { base64ToBlob, optimizeImageToDataUrl, getImageFormatFromDataUrl } from './imageUtils';
 import { DEFAULT_SERVICE_ICON_SVG } from '../components/ui/DefaultServiceIcon';
@@ -13,7 +14,7 @@ import type {
     SearchIndexItem,
     Manifest,
     FileData
-} from '../types';
+} from '@/types';
 
 /**
  * Check if string is a base64 image

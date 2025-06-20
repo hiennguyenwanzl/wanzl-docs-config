@@ -1,3 +1,4 @@
+// src/components/ui/SwaggerViewer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Code,

@@ -1,4 +1,4 @@
-// src/components/views/LandingPageView.tsx - Renamed from ProductsListView
+// src/components/views/LandingPageView.tsx
 import React from 'react';
 import { Plus, Eye, Package, CreditCard } from 'lucide-react';
 import Button from '../ui/Button';
@@ -108,9 +108,12 @@ const LandingPageView: React.FC<LandingPageViewProps> = ({
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
                                     <CreditCard className="w-6 h-6 text-green-600" />
-                                    <span>Landing Page Content</span>
+                                    <span>Landing Page Info Cards</span>
                                 </h2>
-                                <p className="text-gray-600">Cards that guide users to important sections of your documentation</p>
+
+                                <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-4">
+                                    <h3 className="font-medium text-green-900 mb-2">Cards that guide users to important sections of your documentation web site</h3>
+                                </div>
                             </div>
                             <Button
                                 variant="primary"
@@ -151,17 +154,6 @@ const LandingPageView: React.FC<LandingPageViewProps> = ({
                                         ))
                                     }
                                 </div>
-
-                                {/* Landing Page Tips */}
-                                <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
-                                    <h3 className="font-medium text-green-900 mb-2">Landing Page Tips</h3>
-                                    <div className="text-sm text-green-800 space-y-1">
-                                        <p>• These cards appear on your documentation homepage to guide users</p>
-                                        <p>• Link to important sections like getting started, API reference, support, etc.</p>
-                                        <p>• Mix different display types for visual variety</p>
-                                        <p>• Order them by importance using the sort order field</p>
-                                    </div>
-                                </div>
                             </>
                         )}
                     </div>
@@ -174,7 +166,9 @@ const LandingPageView: React.FC<LandingPageViewProps> = ({
                                     <Package className="w-6 h-6 text-blue-600" />
                                     <span>API Products</span>
                                 </h2>
-                                <p className="text-gray-600">Your API products, services, and technical documentation</p>
+                                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <h3 className="font-medium text-blue-900 mb-2">Your API products, services, and technical documentation</h3>
+                                </div>
                             </div>
                             <Button
                                 variant="primary"
@@ -212,17 +206,6 @@ const LandingPageView: React.FC<LandingPageViewProps> = ({
                                             onDelete={handleDeleteProduct}
                                         />
                                     ))}
-                                </div>
-
-                                {/* Products Tips */}
-                                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <h3 className="font-medium text-blue-900 mb-2">API Products Overview</h3>
-                                    <div className="text-sm text-blue-800 space-y-1">
-                                        <p>• Each product represents a distinct API or service offering</p>
-                                        <p>• Products contain services, which in turn contain API versions</p>
-                                        <p>• Use product info cards to highlight features on product detail pages</p>
-                                        <p>• Add comprehensive documentation, code examples, and integration guides</p>
-                                    </div>
                                 </div>
                             </>
                         )}

@@ -9,6 +9,7 @@ import type { InfoCard } from '@/types';
 interface InfoCardDetailViewProps {
     infoCard: InfoCard;
     onGoBack: () => void;
+    onGoToLandingPage: () => void;
     onEdit: (infoCard: InfoCard) => void;
     onDelete: (infoCardId: string) => void;
     isProductLevel?: boolean;
@@ -18,6 +19,7 @@ interface InfoCardDetailViewProps {
 const InfoCardDetailView: React.FC<InfoCardDetailViewProps> = ({
                                                                    infoCard,
                                                                    onGoBack,
+                                                                   onGoToLandingPage,
                                                                    onEdit,
                                                                    onDelete,
                                                                    isProductLevel = false,
@@ -27,7 +29,13 @@ const InfoCardDetailView: React.FC<InfoCardDetailViewProps> = ({
         {
             key: 'home',
             label: 'Landing Page',
-            onClick: onGoBack
+            onClick: onGoToLandingPage
+        },
+        {
+            key: 'product',
+            label: productName,
+            onClick: onGoBack,
+            visible: isProductLevel
         },
         {
             key: 'infocard',

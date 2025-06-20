@@ -1,4 +1,4 @@
-// src/components/layout/MainContentRouter.tsx - Updated with Info Cards
+// src/components/layout/MainContentRouter.tsx
 import React from 'react';
 import ProductDetailView from '../views/ProductDetailView';
 import ServiceDetailView from '../views/ServiceDetailView';
@@ -189,6 +189,7 @@ const MainContentRouter: React.FC<MainContentRouterProps> = ({
             return (
                 <InfoCardDetailView
                     infoCard={currentInfoCard}
+                    onGoToLandingPage={onNavigate.goToLandingPage}
                     onGoBack={isProductInfoCard && productWithInfoCard
                         ? () => onNavigate.goToProductDetail(productWithInfoCard.id)
                         : onNavigate.goToLandingPage

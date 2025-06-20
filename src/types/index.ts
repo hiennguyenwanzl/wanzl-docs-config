@@ -1,4 +1,4 @@
-// src/types/index.ts - Simplified for single project
+// src/types/index.ts
 import type {
     ProductCategory,
     EntityStatus,

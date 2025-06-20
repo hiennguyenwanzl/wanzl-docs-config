@@ -1,3 +1,4 @@
+// src/components/forms/ReleaseNotesEditor.tsx
 import React, { useState } from 'react';
 import { Plus, Trash2, Sparkles, Bug, Zap, AlertTriangle } from 'lucide-react';
 import Button from '../ui/Button';

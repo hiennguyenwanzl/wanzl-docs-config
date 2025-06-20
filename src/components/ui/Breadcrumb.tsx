@@ -1,9 +1,11 @@
+// src/components/ui/Breadcrumb.tsx
 import React from 'react';
 import { Home } from 'lucide-react';
 
 interface BreadcrumbItem {
     key: string;
     label: string;
+    visible?: boolean | true;
     onClick?: () => void;
     isActive?: boolean;
 }
@@ -13,9 +15,11 @@ interface BreadcrumbProps {
 }
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
+    const visibleItems = items.filter(item => item.visible !== false);
+
     return (
         <nav className="flex items-center text-sm mb-6">
-            {items.map((item, index) => (
+            {visibleItems.map((item, index) => (
                 <React.Fragment key={item.key}>
                     {index > 0 && (
                         <span className="text-gray-400 mx-2">›</span>

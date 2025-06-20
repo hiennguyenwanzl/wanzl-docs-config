@@ -1,4 +1,4 @@
-// src/components/views/ProductDetailView.tsx - Updated with Info Cards
+// src/components/views/ProductDetailView.tsx
 import React, { useState } from 'react';
 import { Edit2, Plus, Eye, Package, CreditCard } from 'lucide-react';
 import Button from '../ui/Button';

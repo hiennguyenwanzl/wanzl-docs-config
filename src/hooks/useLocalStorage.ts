@@ -1,3 +1,4 @@
+// src/hooks/useLocalStorage.ts
 import { useState, useEffect, useCallback } from 'react';
 
 // Types
