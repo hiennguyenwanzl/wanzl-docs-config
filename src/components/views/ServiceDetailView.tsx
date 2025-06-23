@@ -179,12 +179,6 @@ const ServiceDetailView: React.FC<EnhancedServiceDetailViewProps> = ({
                         Edit Service
                     </Button>
                     <Button
-                        variant="outline"
-                        leftIcon={<Eye className="w-4 h-4" />}
-                    >
-                        Preview
-                    </Button>
-                    <Button
                         variant="primary"
                         onClick={onAddVersion}
                         leftIcon={<Plus className="w-4 h-4" />}
@@ -194,115 +188,8 @@ const ServiceDetailView: React.FC<EnhancedServiceDetailViewProps> = ({
                 </div>
             </div>
 
-            {/* Service Details */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-gray-700 mb-4 leading-relaxed">
-                            {service.overview || 'No overview available.'}
-                        </p>
-
-                        {service.key_features && service.key_features.length > 0 && (
-                            <div className="mb-6">
-                                <h4 className="font-semibold text-gray-900 mb-3">Key Features</h4>
-                                <ul className="list-disc list-inside space-y-2">
-                                    {service.key_features.map((feature, index) => (
-                                        <li key={index} className="text-gray-700 leading-relaxed">{feature}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {service.integration_guide && (
-                            <div>
-                                <h4 className="font-semibold text-gray-900 mb-3">Integration Guide</h4>
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <p className="text-blue-800 leading-relaxed">{service.integration_guide}</p>
-                                </div>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Service Information</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Service Name</span>
-                                <p className="text-gray-900 font-medium">{service.name}</p>
-                            </div>
-
-                            {service.display_name && service.display_name !== service.name && (
-                                <div>
-                                    <span className="text-sm font-medium text-gray-500">Display Name</span>
-                                    <p className="text-gray-900">{service.display_name}</p>
-                                </div>
-                            )}
-
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Category</span>
-                                <p className="text-gray-900">{service.category || 'General'}</p>
-                            </div>
-
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Protocol Type</span>
-                                <div className="mt-1">
-                                    <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${protocolInfo.badgeColor}`}>
-                                        {protocolInfo.icon}
-                                        <span>{service.protocol_type || 'REST'}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Status</span>
-                                <p className="text-gray-900 capitalize">{service.status || 'Active'}</p>
-                            </div>
-
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Total Versions</span>
-                                <p className="text-gray-900 font-semibold">{versions.length}</p>
-                            </div>
-
-                            {service.supported_protocols && service.supported_protocols.length > 0 && (
-                                <div>
-                                    <span className="text-sm font-medium text-gray-500 block mb-2">Supported Protocols</span>
-                                    <div className="flex flex-wrap gap-2">
-                                        {service.supported_protocols.map(protocol => (
-                                            <span key={protocol} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
-                                                {protocol}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
             {/* API Versions List */}
             <div>
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900">API Versions</h2>
-                    {versions.length > 0 && (
-                        <Button
-                            variant="primary"
-                            onClick={onAddVersion}
-                            leftIcon={<Plus className="w-4 h-4" />}
-                            size="sm"
-                        >
-                            Add New Version
-                        </Button>
-                    )}
-                </div>
-
                 {versions.length === 0 ? (
                     <EmptyState
                         title="No versions yet"

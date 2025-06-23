@@ -88,40 +88,7 @@ const InfoCardDetailView: React.FC<InfoCardDetailViewProps> = ({
                 return <div className="flex space-x-4">{imageElement}{contentElement}</div>;
             case 'imageRight':
                 return <div className="flex space-x-4">{contentElement}{imageElement}</div>;
-            case 'custom1':
-                return (
-                    <div className="space-y-3">
-                        {image_url && <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
-                            <img src={image_url} alt={headline_title} className="w-full h-full object-cover" />
-                        </div>}
-                        {contentElement}
-                    </div>
-                );
-            case 'custom2':
-                return (
-                    <div className="text-center space-y-3">
-                        {image_url && <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full overflow-hidden">
-                            <img src={image_url} alt={headline_title} className="w-full h-full object-cover" />
-                        </div>}
-                        <div>
-                            <h3 className="font-semibold text-gray-900 mb-2">{headline_title}</h3>
-                            <p className="text-sm text-gray-600 mb-2">{brief_description}</p>
-                            {url && (
-                                <div className="flex items-center justify-center space-x-2">
-                                    <ExternalLink className="w-4 h-4 text-blue-600" />
-                                    <a
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-sm text-blue-600 hover:text-blue-700"
-                                    >
-                                        {url}
-                                    </a>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
+
             default:
                 return <div className="flex space-x-4">{imageElement}{contentElement}</div>;
         }
@@ -176,51 +143,6 @@ const InfoCardDetailView: React.FC<InfoCardDetailViewProps> = ({
                     </CardContent>
                 </Card>
 
-                {/* Info */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Card Information</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Display Type</span>
-                                <p className="text-gray-900 capitalize">{infoCard.display_type}</p>
-                            </div>
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Sort Order</span>
-                                <p className="text-gray-900">{infoCard.sort_order}</p>
-                            </div>
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Target URL</span>
-                                <a
-                                    href={infoCard.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-700 text-sm break-all"
-                                >
-                                    {infoCard.url}
-                                </a>
-                            </div>
-                            {infoCard.created_at && (
-                                <div>
-                                    <span className="text-sm font-medium text-gray-500">Created</span>
-                                    <p className="text-gray-900 text-sm">
-                                        {new Date(infoCard.created_at).toLocaleDateString()}
-                                    </p>
-                                </div>
-                            )}
-                            {infoCard.updated_at && (
-                                <div>
-                                    <span className="text-sm font-medium text-gray-500">Last Updated</span>
-                                    <p className="text-gray-900 text-sm">
-                                        {new Date(infoCard.updated_at).toLocaleDateString()}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </div>
     );

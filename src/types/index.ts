@@ -16,7 +16,7 @@ export interface InfoCard {
     image_id?: string | null;
     image_url?: string | null;
     url: string;
-    display_type: 'imageLeft' | 'imageRight' | 'custom1' | 'custom2';
+    display_type: 'imageLeft' | 'imageRight'
     sort_order: number;
     created_at?: string;
     updated_at?: string;

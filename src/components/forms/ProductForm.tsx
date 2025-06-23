@@ -8,7 +8,7 @@ import Select from '../ui/Select';
 import ImageUpload from '../ui/ImageUpload';
 import { DEFAULTS, CATEGORY_OPTIONS, STATUS_OPTIONS, VALIDATION } from '@/constants';
 import { validateRequired, generateId } from '@/utils/helpers.ts';
-import type { ProductFormProps, Product, UseCase, ValidationResult } from '@/types';
+import type { ProductFormProps, Product, ValidationResult } from '@/types';
 
 const ProductForm: React.FC<ProductFormProps> = ({
                                                      product,
@@ -37,55 +37,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     const updateField = (field: keyof Product, value: any): void => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        // Clear error when user starts typing
+        // Clear error when users start typing
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
     };
 
-    const addFeature = (): void => {
-        setFormData(prev => ({
-            ...prev,
-            key_features: [...(prev.key_features || []), '']
-        }));
-    };
-
-    const updateFeature = (index: number, value: string): void => {
-        setFormData(prev => ({
-            ...prev,
-            key_features: prev.key_features?.map((f, i) => i === index ? value : f) || []
-        }));
-    };
-
-    const removeFeature = (index: number): void => {
-        setFormData(prev => ({
-            ...prev,
-            key_features: prev.key_features?.filter((_, i) => i !== index) || []
-        }));
-    };
-
-    const addUseCase = (): void => {
-        setFormData(prev => ({
-            ...prev,
-            use_cases: [...(prev.use_cases || []), { title: '', description: '' }]
-        }));
-    };
-
-    const updateUseCase = (index: number, field: keyof UseCase, value: string): void => {
-        setFormData(prev => ({
-            ...prev,
-            use_cases: prev.use_cases?.map((uc, i) =>
-                i === index ? { ...uc, [field]: value } : uc
-            ) || []
-        }));
-    };
-
-    const removeUseCase = (index: number): void => {
-        setFormData(prev => ({
-            ...prev,
-            use_cases: prev.use_cases?.filter((_, i) => i !== index) || []
-        }));
-    };
 
     const validateForm = (): boolean => {
         const validation: ValidationResult = validateRequired(
@@ -236,108 +193,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     </div>
                 </div>
 
-                {/* Detailed Information */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Detailed Information</h3>
-
-                    <Textarea
-                        label="Overview"
-                        value={formData.overview || ''}
-                        onChange={(e) => updateField('overview', e.target.value)}
-                        rows={4}
-                        placeholder="Detailed description of the product, its purpose, and benefits..."
-                        helperText="This appears on the product detail page"
-                    />
-
-                    {/* Key Features */}
-                    <div className="mt-6">
-                        <div className="flex items-center justify-between mb-3">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Key Features
-                            </label>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addFeature}
-                                leftIcon={<Plus className="w-4 h-4" />}
-                            >
-                                Add Feature
-                            </Button>
-                        </div>
-                        <div className="space-y-3">
-                            {(formData.key_features || ['']).map((feature, index) => (
-                                <div key={index} className="flex items-center space-x-3">
-                                    <Input
-                                        value={feature}
-                                        onChange={(e) => updateFeature(index, e.target.value)}
-                                        placeholder="Enter a key feature..."
-                                        className="flex-1"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => removeFeature(index)}
-                                        className="text-red-600 hover:text-red-700"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Use Cases */}
-                    <div className="mt-6">
-                        <div className="flex items-center justify-between mb-3">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Use Cases
-                            </label>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addUseCase}
-                                leftIcon={<Plus className="w-4 h-4" />}
-                            >
-                                Add Use Case
-                            </Button>
-                        </div>
-                        <div className="space-y-4">
-                            {(formData.use_cases || [{ title: '', description: '' }]).map((useCase, index) => (
-                                <div key={index} className="border border-gray-200 rounded-lg p-4">
-                                    <div className="flex items-start space-x-3">
-                                        <div className="flex-1 space-y-3">
-                                            <Input
-                                                label="Title"
-                                                value={useCase.title}
-                                                onChange={(e) => updateUseCase(index, 'title', e.target.value)}
-                                                placeholder="e.g., Retail Stores"
-                                            />
-                                            <Textarea
-                                                label="Description"
-                                                value={useCase.description}
-                                                onChange={(e) => updateUseCase(index, 'description', e.target.value)}
-                                                placeholder="Describe how this product is used in this scenario..."
-                                                rows={2}
-                                            />
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeUseCase(index)}
-                                            className="text-red-600 hover:text-red-700 mt-6"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
 
                 {/* Visual Assets */}
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -359,54 +214,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
                             maxWidth={1200}
                             maxHeight={600}
                         />
-                    </div>
-
-                    <div className="mt-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                            Gallery Images
-                        </label>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {(formData.gallery_images || []).map((image, index) => (
-                                <div key={index} className="relative">
-                                    <div className="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden">
-                                        <img
-                                            src={image}
-                                            alt={`Gallery ${index + 1}`}
-                                            className="w-full h-32 object-cover rounded-lg"
-                                        />
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => {
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                gallery_images: prev.gallery_images?.filter((_, i) => i !== index) || []
-                                            }));
-                                        }}
-                                        className="absolute top-2 right-2 bg-white bg-opacity-90 hover:bg-opacity-100"
-                                    >
-                                        <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                </div>
-                            ))}
-                            <div className="min-h-[150px]">
-                                <ImageUpload
-                                    label="Add Gallery Image"
-                                    onImageUpload={(image) => {
-                                        if (image) {
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                gallery_images: [...(prev.gallery_images || []), image]
-                                            }));
-                                        }
-                                    }}
-                                    showPreview={false}
-                                    className="h-full"
-                                />
-                            </div>
-                        </div>
                     </div>
                 </div>
             </form>

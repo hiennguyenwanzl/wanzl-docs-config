@@ -216,83 +216,9 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                         </div>
                     )}
 
-                    {/* Info Cards Tips */}
-                    {infoCards.length > 0 && (
-                        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h3 className="font-medium text-blue-900 mb-2">Product Info Cards Tips</h3>
-                            <div className="text-sm text-blue-800 space-y-1">
-                                <p>• Use info cards to highlight key features and benefits of this product</p>
-                                <p>• Link to detailed documentation, demos, or related resources</p>
-                                <p>• Use high-quality images that represent your product well</p>
-                                <p>• Keep descriptions concise but informative</p>
-                            </div>
-                        </div>
-                    )}
                 </div>
             )}
 
-            {/* Product Details - Always visible below tabs */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-gray-700 mb-4">{product.overview || 'No overview available.'}</p>
-
-                        {product.key_features && product.key_features.length > 0 && (
-                            <div className="mb-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Key Features</h4>
-                                <ul className="list-disc list-inside space-y-1">
-                                    {product.key_features.map((feature, index) => (
-                                        <li key={index} className="text-gray-700">{feature}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {product.use_cases && product.use_cases.length > 0 && (
-                            <div>
-                                <h4 className="font-semibold text-gray-900 mb-2">Use Cases</h4>
-                                <div className="space-y-2">
-                                    {product.use_cases.map((useCase, index) => (
-                                        <div key={index}>
-                                            <h5 className="font-medium text-gray-900">{useCase.title}</h5>
-                                            <p className="text-gray-600 text-sm">{useCase.description}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Product Info</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3">
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Category</span>
-                                <p className="text-gray-900">{product.category || 'Not specified'}</p>
-                            </div>
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Status</span>
-                                <p className="text-gray-900">{product.status || 'Active'}</p>
-                            </div>
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Services</span>
-                                <p className="text-gray-900">{getServicesCount(product.id)}</p>
-                            </div>
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">Info Cards</span>
-                                <p className="text-gray-900">{infoCards.length}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
         </div>
     );
 };

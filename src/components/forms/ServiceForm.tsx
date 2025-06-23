@@ -149,14 +149,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                     <div className="flex space-x-3">
                         <Button
                             type="button"
-                            variant="outline"
-                            onClick={handlePreview}
-                            leftIcon={<Eye className="w-4 h-4" />}
-                        >
-                            Preview
-                        </Button>
-                        <Button
-                            type="button"
                             variant="secondary"
                             onClick={onCancel}
                         >
@@ -231,107 +223,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                             options={STATUS_OPTIONS}
                         />
                     </div>
-                </div>
 
-                {/* Protocol Information */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Protocol Information</h3>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                        <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0">
-                                {formData.protocol_type === 'REST' ? (
-                                    <div className="w-8 h-8 rounded bg-green-500 flex items-center justify-center">
-                                        <span className="text-white text-xs font-bold">API</span>
-                                    </div>
-                                ) : (
-                                    <div className="w-8 h-8 rounded bg-purple-500 flex items-center justify-center">
-                                        <span className="text-white text-xs font-bold">MQTT</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="font-medium text-blue-900">
-                                    {formData.protocol_type === 'REST' ? 'REST API Service' : 'MQTT Service'}
-                                </h4>
-                                <p className="text-sm text-blue-700 mt-1">
-                                    {formData.protocol_type === 'REST'
-                                        ? 'This service will use REST API with OpenAPI/Swagger documentation. API versions will require OpenAPI specification files.'
-                                        : 'This service will use MQTT protocol with AsyncAPI documentation. API versions will require AsyncAPI specification files.'
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Detailed Information */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Detailed Information</h3>
-
-                    <Textarea
-                        label="Overview"
-                        value={formData.overview || ''}
-                        onChange={(e) => updateField('overview', e.target.value)}
-                        rows={4}
-                        placeholder="Detailed description of the service, its purpose, and functionality..."
-                        helperText="This appears on the service detail page"
-                    />
-
-                    <div className="mt-6">
-                        <Textarea
-                            label="Integration Guide"
-                            value={formData.integration_guide || ''}
-                            onChange={(e) => updateField('integration_guide', e.target.value)}
-                            rows={4}
-                            placeholder="Instructions on how to integrate this service..."
-                            helperText="Helpful information for developers implementing this service"
-                        />
-                    </div>
-
-                    {/* Key Features */}
-                    <div className="mt-6">
-                        <div className="flex items-center justify-between mb-3">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Key Features
-                            </label>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addFeature}
-                                leftIcon={<Plus className="w-4 h-4" />}
-                            >
-                                Add Feature
-                            </Button>
-                        </div>
-                        <div className="space-y-3">
-                            {(formData.key_features || ['']).map((feature, index) => (
-                                <div key={index} className="flex items-center space-x-3">
-                                    <Input
-                                        value={feature}
-                                        onChange={(e) => updateFeature(index, e.target.value)}
-                                        placeholder="Enter a key feature..."
-                                        className="flex-1"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => removeFeature(index)}
-                                        className="text-red-600 hover:text-red-700"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Visual Assets */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Visual Assets</h3>
-
+                    {/* Service Icon */}
                     <div className="max-w-md">
                         <ImageUpload
                             label="Service Icon"

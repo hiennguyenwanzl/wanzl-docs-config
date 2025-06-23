@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx - Final version with proper main content positioning
 import React, { useState, useCallback } from 'react';
 import { Upload, Download, Package, X } from 'lucide-react';
 
@@ -72,7 +72,7 @@ function App() {
     const [selectedInfoCard, setSelectedInfoCard] = useState<string | null>(null);
     const [showInfoCardForm, setShowInfoCardForm] = useState(false);
     const [editingInfoCard, setEditingInfoCard] = useState<InfoCard | null>(null);
-    const [editingProductId, setEditingProductId] = useState<string | null>(null); // For product-level info cards
+    const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
     // Use empty project data as default
     const [projectData, setProjectData] = useState<ProjectData>(EMPTY_PROJECT_DATA);
@@ -100,6 +100,9 @@ function App() {
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
 
+    // Sidebar state to track if it's collapsed
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
     // Helper functions
     const formatDate = (): string => {
         return new Date().toISOString();
@@ -118,7 +121,7 @@ function App() {
 
     const getServiceProtocolType = (productId: string, serviceId: string): 'REST' | 'MQTT' => {
         const service = projectData.services[productId]?.find(s => s.id === serviceId);
-        return service?.protocol_type || 'REST'; // Default to REST for backward compatibility
+        return service?.protocol_type || 'REST';
     };
 
     // Navigation functions - Enhanced with automatic expansion
@@ -137,7 +140,6 @@ function App() {
             setSelectedInfoCard(null);
             setCurrentView('product_detail');
 
-            // Auto-expand the product in sidebar
             if (!expandedProducts.includes(productId)) {
                 setExpandedProducts(prev => [...prev, productId]);
             }
@@ -149,7 +151,6 @@ function App() {
             setSelectedInfoCard(null);
             setCurrentView('service_detail');
 
-            // Auto-expand the product and service in sidebar
             const productExpanded = expandedProducts.includes(productId);
             const serviceExpanded = expandedProducts.includes(`${productId}-${serviceId}`);
 
@@ -166,7 +167,6 @@ function App() {
             setSelectedInfoCard(null);
             setCurrentView('version_detail');
 
-            // Auto-expand the product and service in sidebar
             const productExpanded = expandedProducts.includes(productId);
             const serviceExpanded = expandedProducts.includes(`${productId}-${serviceId}`);
 
@@ -183,7 +183,6 @@ function App() {
             setSelectedService(null);
             setSelectedVersion(null);
         },
-        // Add the missing method
         goToInfoCardsGrid: () => {
             setCurrentView('info_cards_grid');
             setSelectedProduct(null);
@@ -193,7 +192,7 @@ function App() {
         }
     };
 
-    // Action handlers
+    // Action handlers (keeping all existing handlers)
     const actionHandlers = {
         handleAddProduct: () => {
             setEditingProduct(null);
@@ -211,7 +210,6 @@ function App() {
             delete updatedData.apiSpecs[productId];
             setProjectData(updatedData);
 
-            // Clear selection if deleted product was selected
             if (selectedProduct === productId) {
                 navigationHandlers.goToLandingPage();
             }
@@ -238,7 +236,6 @@ function App() {
             }
             setProjectData(updatedData);
 
-            // Clear selection if deleted service was selected
             if (selectedService === serviceId) {
                 navigationHandlers.goToProductDetail(selectedProduct);
             }
@@ -263,7 +260,6 @@ function App() {
             }
             setProjectData(updatedData);
 
-            // Clear selection if deleted version was selected
             if (selectedVersion === versionId) {
                 navigationHandlers.goToServiceDetail(selectedProduct, selectedService);
             }
@@ -304,12 +300,10 @@ function App() {
             updatedData.info_cards = updatedData.info_cards.filter(card => card.id !== infoCardId);
             setProjectData(updatedData);
 
-            // Clear selection if deleted info card was selected
             if (selectedInfoCard === infoCardId) {
                 navigationHandlers.goToLandingPage();
             }
         },
-
         // Product-level info cards
         handleAddProductInfoCard: (productId: string) => {
             setEditingInfoCard(null);
@@ -330,7 +324,6 @@ function App() {
             }
             setProjectData(updatedData);
 
-            // Clear selection if deleted info card was selected
             if (selectedInfoCard === infoCardId) {
                 navigationHandlers.goToProductDetail(productId);
             }
@@ -341,22 +334,23 @@ function App() {
     const handleToggleProduct = useCallback((id: string) => {
         setExpandedProducts(prev => {
             if (prev.includes(id)) {
-                // If collapsing, also collapse all children
                 if (!id.includes('-')) {
-                    // This is a product, collapse all its services too
                     return prev.filter(item => !item.startsWith(`${id}-`) && item !== id);
                 } else {
-                    // This is a service, just collapse it
                     return prev.filter(item => item !== id);
                 }
             } else {
-                // Expanding
                 return [...prev, id];
             }
         });
     }, []);
 
-    // Form submission handlers
+    // Add home navigation handler
+    const handleLogoClick = () => {
+        navigationHandlers.goToLandingPage();
+    };
+
+    // Form submission handlers (keeping all existing handlers)
     const handleSaveProduct = async (productData: Product) => {
         const updatedData = { ...projectData };
 
@@ -375,8 +369,6 @@ function App() {
         setProjectData(updatedData);
         setShowProductForm(false);
         setEditingProduct(null);
-
-        // Navigate to the new/edited product
         navigationHandlers.goToProductDetail(productData.id);
     };
 
@@ -410,8 +402,6 @@ function App() {
         setProjectData(updatedData);
         setShowServiceForm(false);
         setEditingService(null);
-
-        // Navigate to the new/edited service
         navigationHandlers.goToServiceDetail(selectedProduct, serviceData.id);
     };
 
@@ -434,7 +424,6 @@ function App() {
             updatedData.apiSpecs[selectedProduct][selectedService] = {};
         }
 
-        // Ensure version data includes the correct protocol type
         const versionWithProtocol = {
             ...versionData,
             service_protocol_type: serviceProtocolType,
@@ -461,8 +450,6 @@ function App() {
         setProjectData(updatedData);
         setShowVersionForm(false);
         setEditingVersion(null);
-
-        // Navigate to the new/edited version
         navigationHandlers.goToVersionDetail(selectedProduct, selectedService, versionData.version);
     };
 
@@ -506,32 +493,25 @@ function App() {
             setProjectData(EMPTY_PROJECT_DATA);
         }
         setShowQuickStartModal(false);
-        // Navigate to landing page after setup
         navigationHandlers.goToLandingPage();
     };
 
-    // Template handler - NEW
     const handleOpenTemplate = () => {
         setShowQuickStartModal(true);
     };
 
-    // Settings and preview handlers - NEW
     const handleSettings = () => {
-        // TODO: Implement settings modal
         console.log('Settings clicked');
     };
 
     const handlePreviewProject = () => {
-        // TODO: Implement project preview
         actionHandlers.handlePreviewProducts();
     };
 
-    // Handle submission handler of Info card
     const handleSaveInfoCard = async (infoCardData: InfoCard) => {
         const updatedData = { ...projectData };
 
         if (editingProductId) {
-            // Save to specific product
             const productIndex = updatedData.products.findIndex(p => p.id === editingProductId);
             if (productIndex >= 0) {
                 if (!updatedData.products[productIndex].info_cards) {
@@ -539,26 +519,21 @@ function App() {
                 }
 
                 if (editingInfoCard) {
-                    // Update existing product info card
                     const cardIndex = updatedData.products[productIndex].info_cards!.findIndex(c => c.id === editingInfoCard.id);
                     if (cardIndex >= 0) {
                         updatedData.products[productIndex].info_cards![cardIndex] = infoCardData;
                     }
                 } else {
-                    // Add new product info card
                     updatedData.products[productIndex].info_cards!.push(infoCardData);
                 }
             }
         } else {
-            // Save to project-level info cards
             if (editingInfoCard) {
-                // Update existing project info card
                 const cardIndex = updatedData.info_cards.findIndex(c => c.id === editingInfoCard.id);
                 if (cardIndex >= 0) {
                     updatedData.info_cards[cardIndex] = infoCardData;
                 }
             } else {
-                // Add new project info card
                 updatedData.info_cards.push(infoCardData);
             }
         }
@@ -567,8 +542,6 @@ function App() {
         setShowInfoCardForm(false);
         setEditingInfoCard(null);
         setEditingProductId(null);
-
-        // Navigate to the new/edited info card
         navigationHandlers.goToInfoCardDetail(infoCardData.id);
     };
 
@@ -577,7 +550,6 @@ function App() {
         if (projectData.products.length === 0 && projectData.info_cards.length === 0) {
             setShowQuickStartModal(true);
         } else {
-            // Start on landing page if there's content
             setCurrentView('landing');
         }
     }, [projectData.products.length, projectData.info_cards.length]);
@@ -591,11 +563,12 @@ function App() {
                 onExport={() => setShowExportModal(true)}
                 onSave={handleExportProject}
                 onOpenTemplate={handleOpenTemplate}
+                onLogoClick={handleLogoClick}
                 hasChanges={false}
                 hasProjects={hasProjects}
             />
 
-            <div className="flex flex-1 relative">
+            <div className="flex flex-1">
                 <Sidebar
                     projectData={projectData}
                     selectedProduct={selectedProduct}
@@ -614,7 +587,15 @@ function App() {
                     onSettings={handleSettings}
                 />
 
-                <main className="flex-1 overflow-auto">
+                {/* Main content with proper margin for sidebar */}
+                <main
+                    className="flex-1 overflow-auto transition-all duration-300 ease-in-out"
+                    style={{
+                        marginLeft: sidebarCollapsed ? '64px' : '320px',
+                        marginTop: '80px',
+                        minHeight: 'calc(100vh - 80px)'
+                    }}
+                >
                     <MainContentRouter
                         projectData={projectData}
                         currentView={currentView}
@@ -630,6 +611,7 @@ function App() {
                 </main>
             </div>
 
+            {/* All modals remain the same */}
             {/* Quick Start Modal */}
             <Modal
                 isOpen={showQuickStartModal}
@@ -757,7 +739,7 @@ function App() {
                     version={editingVersion}
                     productId={selectedProduct!}
                     serviceId={selectedService!}
-                    serviceProtocolType={getServiceProtocolType(selectedProduct!, selectedService!)} // Pass protocol type
+                    serviceProtocolType={getServiceProtocolType(selectedProduct!, selectedService!)}
                     onSave={handleSaveVersion}
                     onCancel={() => {
                         setShowVersionForm(false);
