@@ -1,4 +1,4 @@
-// src/App.tsx - Final version with proper main content positioning
+// src/App.tsx - Fixed main content positioning
 import React, { useState, useCallback } from 'react';
 import { Upload, Download, Package, X } from 'lucide-react';
 
@@ -100,7 +100,7 @@ function App() {
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
 
-    // Sidebar state to track if it's collapsed
+    // Sidebar state to track if it's collapsed - FIXED
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     // Helper functions
@@ -275,6 +275,12 @@ function App() {
             updatedData.releaseNotes[productId][serviceId][versionId] = data;
             setProjectData(updatedData);
         },
+        handleEditReleaseNotes: (productId: string, serviceId: string, versionId: string) => {
+            // This would open a release notes editor modal
+            // For now, we'll just log it - you can implement the modal later
+            console.log('Edit release notes for:', { productId, serviceId, versionId });
+            // TODO: Implement release notes editor modal
+        },
         handlePreviewProducts: () => {
             // This will be handled by MainContentRouter
         },
@@ -349,6 +355,11 @@ function App() {
     const handleLogoClick = () => {
         navigationHandlers.goToLandingPage();
     };
+
+    // FIXED: Handle sidebar collapse state change
+    const handleSidebarCollapse = useCallback((collapsed: boolean) => {
+        setSidebarCollapsed(collapsed);
+    }, []);
 
     // Form submission handlers (keeping all existing handlers)
     const handleSaveProduct = async (productData: Product) => {
@@ -585,13 +596,15 @@ function App() {
                     onToggleProduct={handleToggleProduct}
                     onPreviewProject={handlePreviewProject}
                     onSettings={handleSettings}
+                    onSidebarCollapse={handleSidebarCollapse}
                 />
 
-                {/* Main content with proper margin for sidebar */}
+                {/* FIXED: Main content with proper responsive margin */}
                 <main
-                    className="flex-1 overflow-auto transition-all duration-300 ease-in-out"
+                    className={`flex-1 overflow-auto transition-all duration-300 ease-in-out bg-gray-50 ${
+                        sidebarCollapsed ? 'ml-16' : 'ml-80'
+                    } lg:${sidebarCollapsed ? 'ml-16' : 'ml-80'}`}
                     style={{
-                        marginLeft: sidebarCollapsed ? '64px' : '320px',
                         marginTop: '80px',
                         minHeight: 'calc(100vh - 80px)'
                     }}

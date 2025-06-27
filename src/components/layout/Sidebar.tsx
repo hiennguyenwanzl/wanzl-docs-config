@@ -12,7 +12,9 @@ import {
     PanelLeftOpen,
     Plus,
     CreditCard,
-    Box
+    Box,
+    Sparkles,
+    Layers
 } from 'lucide-react';
 import Button from '../ui/Button';
 import type { ProjectData } from '@/types';
@@ -71,7 +73,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     const toggleCollapse = () => {
         const newCollapsed = !isCollapsed;
         setIsCollapsed(newCollapsed);
-        // Notify parent component about collapse state change
         onSidebarCollapse?.(newCollapsed);
     };
 
@@ -471,12 +472,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={handleSidebarClick}
             >
                 {/* Header */}
-                <div className="p-4 border-b border-gray-200 flex-shrink-0 bg-gray-50">
+                <div className="p-4 border-b border-gray-200 flex-shrink-0 bg-gradient-to-r from-gray-50 to-blue-50">
                     <div className="flex items-center justify-between">
                         {!isCollapsed && (
                             <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-sm">
+                                    <Layers className="w-5 h-5 text-white" />
+                                </div>
                                 <div>
-                                    <h2 className="font-bold text-gray-900">Documentation Content</h2>
+                                    <h2 className="font-bold text-gray-900">Content Navigation</h2>
+                                    <p className="text-xs text-gray-600">Manage your documentation</p>
                                 </div>
                             </div>
                         )}
@@ -488,9 +493,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     toggleCollapse();
                                 }}
                                 className={`
-                                    hidden lg:flex p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200
-                                    focus:outline-none text-gray-600 hover:text-gray-900
-                                    ${isCollapsed ? 'w-10 h-10 items-center justify-center' : ''}
+                                    hidden lg:flex p-2 hover:bg-blue-100 rounded-lg transition-all duration-200
+                                    focus:outline-none text-gray-600 hover:text-blue-900 shadow-sm border border-gray-200 hover:border-blue-300
+                                    ${isCollapsed ? 'w-10 h-10 items-center justify-center bg-white' : 'bg-white'}
                                 `}
                                 style={{ border: 'none', boxShadow: 'none' }}
                                 onBlur={(e) => e.target.blur()}
@@ -513,8 +518,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                         <div className="p-4">
                             {!hasContent ? (
                                 <div className="text-center py-12">
-                                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                                        <Package className="w-8 h-8 text-gray-400" />
+                                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                                        <Package className="w-8 h-8 text-blue-600" />
                                     </div>
                                     <h3 className="text-sm font-semibold text-gray-900 mb-2">Start Creating</h3>
                                     <p className="text-sm text-gray-500 mb-6 px-4">
@@ -529,7 +534,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                                 onAddInfoCard();
                                             }}
                                             leftIcon={<Plus className="w-4 h-4" />}
-                                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                                         >
                                             Add Landing Card
                                         </Button>
@@ -541,7 +546,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                                 onAddProduct();
                                             }}
                                             leftIcon={<Plus className="w-4 h-4" />}
-                                            className="w-full"
+                                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                                         >
                                             Add Your First Product
                                         </Button>
@@ -549,47 +554,70 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 </div>
                             ) : (
                                 <div className="space-y-6">
-                                    {/* Landing Cards Group */}
+                                    {/* Enhanced Landing Cards Group */}
                                     {(info_cards.length > 0 || products.length > 0) && (
                                         <div>
-                                            <div className="flex items-center justify-between mb-3 px-2">
+                                            <div className="group mb-3 mx-2">
                                                 <button
                                                     onClick={() => toggleGroup('infoCards')}
-                                                    className="flex items-center space-x-2 text-sm font-semibold text-gray-700 uppercase tracking-wide hover:text-gray-900 transition-colors"
+                                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] ${
+                                                        expandedGroups.infoCards
+                                                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 shadow-md'
+                                                            : 'bg-gradient-to-r from-gray-50 to-green-50 border border-gray-200 hover:border-green-300 hover:shadow-lg'
+                                                    }`}
                                                 >
-                                                    {expandedGroups.infoCards ? (
-                                                        <ChevronDown className="w-4 h-4" />
-                                                    ) : (
-                                                        <ChevronRight className="w-4 h-4" />
-                                                    )}
-                                                    <CreditCard className="w-4 h-4 text-green-600" />
-                                                    <span>Landing Cards ({info_cards.length})</span>
-                                                </button>
-                                                <div className="relative group">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onAddInfoCard();
-                                                        }}
-                                                        className="text-green-600 hover:text-green-700 hover:bg-green-50 p-1.5 rounded-md"
-                                                    >
-                                                        <Plus className="w-4 h-4" />
-                                                    </Button>
-
-                                                    {/* Tooltip */}
-                                                    <div className="absolute right-0 top-full mt-1 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap pointer-events-none">
-                                                        Add Landing Card
-                                                        <div className="absolute bottom-full right-2 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-gray-900"></div>
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className={`p-2 rounded-lg transition-all duration-300 ${
+                                                            expandedGroups.infoCards
+                                                                ? 'bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg'
+                                                                : 'bg-gradient-to-br from-green-400 to-emerald-500 group-hover:shadow-md'
+                                                        }`}>
+                                                            <Sparkles className="w-4 h-4 text-white" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <span className={`font-bold text-sm transition-colors ${
+                                                                expandedGroups.infoCards ? 'text-green-800' : 'text-gray-700 group-hover:text-green-700'
+                                                            }`}>
+                                                                Landing Cards
+                                                            </span>
+                                                            <div className="flex items-center space-x-2 mt-0.5">
+                                                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium transition-all ${
+                                                                    expandedGroups.infoCards
+                                                                        ? 'bg-green-200 text-green-800'
+                                                                        : 'bg-gray-200 text-gray-600 group-hover:bg-green-100 group-hover:text-green-700'
+                                                                }`}>
+                                                                    {info_cards.length} cards
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onAddInfoCard();
+                                                            }}
+                                                            className={`p-2 rounded-lg transition-all duration-200 transform hover:scale-110 ${
+                                                                expandedGroups.infoCards
+                                                                    ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-xl'
+                                                                    : 'bg-gradient-to-br from-green-400 to-emerald-500 text-white hover:shadow-md group-hover:from-green-500 group-hover:to-emerald-600'
+                                                            }`}
+                                                        >
+                                                            <Plus className="w-3 h-3" />
+                                                        </button>
+                                                        <div className={`transition-transform duration-300 ${expandedGroups.infoCards ? 'rotate-180' : ''}`}>
+                                                            <ChevronDown className={`w-4 h-4 transition-colors ${
+                                                                expandedGroups.infoCards ? 'text-green-600' : 'text-gray-500 group-hover:text-green-600'
+                                                            }`} />
+                                                        </div>
+                                                    </div>
+                                                </button>
                                             </div>
 
                                             {expandedGroups.infoCards && (
-                                                <div className="space-y-1 mb-4">
+                                                <div className="space-y-1 mb-4 animate-slide-down">
                                                     {info_cards.length === 0 ? (
-                                                        <div className="mx-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                                        <div className="mx-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                                                             <p className="text-sm text-green-700 text-center">No landing cards yet</p>
                                                         </div>
                                                     ) : (
@@ -600,46 +628,76 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         </div>
                                     )}
 
-                                    {/* Products Group */}
+                                    {/* Enhanced Products Group */}
                                     <div>
-                                        <div className="flex items-center justify-between mb-3 px-2">
+                                        <div className="group mb-3 mx-2">
                                             <button
                                                 onClick={() => toggleGroup('products')}
-                                                className="flex items-center space-x-2 text-sm font-semibold text-gray-700 uppercase tracking-wide hover:text-gray-900 transition-colors"
+                                                className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] ${
+                                                    expandedGroups.products
+                                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-md'
+                                                        : 'bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 hover:border-blue-300 hover:shadow-lg'
+                                                }`}
                                             >
-                                                {expandedGroups.products ? (
-                                                    <ChevronDown className="w-4 h-4" />
-                                                ) : (
-                                                    <ChevronRight className="w-4 h-4" />
-                                                )}
-                                                <Box className="w-4 h-4 text-blue-600" />
-                                                <span>Products ({products.length})</span>
-                                            </button>
-                                            <div className="relative group">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onAddProduct();
-                                                    }}
-                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1.5 rounded-md"
-                                                >
-                                                    <Plus className="w-4 h-4" />
-                                                </Button>
-
-                                                {/* Tooltip */}
-                                                <div className="absolute right-0 top-full mt-1 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap pointer-events-none">
-                                                    Add Product
-                                                    <div className="absolute bottom-full right-2 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-gray-900"></div>
+                                                <div className="flex items-center space-x-3">
+                                                    <div className={`p-2 rounded-lg transition-all duration-300 ${
+                                                        expandedGroups.products
+                                                            ? 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg'
+                                                            : 'bg-gradient-to-br from-blue-400 to-indigo-500 group-hover:shadow-md'
+                                                    }`}>
+                                                        <Box className="w-4 h-4 text-white" />
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <span className={`font-bold text-sm transition-colors ${
+                                                            expandedGroups.products ? 'text-blue-800' : 'text-gray-700 group-hover:text-blue-700'
+                                                        }`}>
+                                                            API Products
+                                                        </span>
+                                                        <div className="flex items-center space-x-2 mt-0.5">
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium transition-all ${
+                                                                expandedGroups.products
+                                                                    ? 'bg-blue-200 text-blue-800'
+                                                                    : 'bg-gray-200 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-700'
+                                                            }`}>
+                                                                {products.length} products
+                                                            </span>
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium transition-all ${
+                                                                expandedGroups.products
+                                                                    ? 'bg-purple-200 text-purple-800'
+                                                                    : 'bg-gray-200 text-gray-600 group-hover:bg-purple-100 group-hover:text-purple-700'
+                                                            }`}>
+                                                                {Object.values(services).reduce((total, productServices) => total + productServices.length, 0)} services
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onAddProduct();
+                                                        }}
+                                                        className={`p-2 rounded-lg transition-all duration-200 transform hover:scale-110 ${
+                                                            expandedGroups.products
+                                                                ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg hover:shadow-xl'
+                                                                : 'bg-gradient-to-br from-blue-400 to-indigo-500 text-white hover:shadow-md group-hover:from-blue-500 group-hover:to-indigo-600'
+                                                        }`}
+                                                    >
+                                                        <Plus className="w-3 h-3" />
+                                                    </button>
+                                                    <div className={`transition-transform duration-300 ${expandedGroups.products ? 'rotate-180' : ''}`}>
+                                                        <ChevronDown className={`w-4 h-4 transition-colors ${
+                                                            expandedGroups.products ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
+                                                        }`} />
+                                                    </div>
+                                                </div>
+                                            </button>
                                         </div>
 
                                         {expandedGroups.products && (
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 animate-slide-down">
                                                 {products.length === 0 ? (
-                                                    <div className="mx-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                                    <div className="mx-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                                                         <p className="text-sm text-blue-700 text-center">No products yet</p>
                                                     </div>
                                                 ) : (
@@ -654,8 +712,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     )}
                 </div>
 
-                {/* Footer */}
-                <div className={`p-4 border-t border-gray-200 flex-shrink-0 bg-gray-50 ${isCollapsed ? 'py-2' : ''}`}>
+                {/* Enhanced Footer */}
+                <div className={`p-4 border-t border-gray-200 flex-shrink-0 bg-gradient-to-r from-gray-50 to-indigo-50 ${isCollapsed ? 'py-2' : ''}`}>
                     {isCollapsed ? (
                         <div className="space-y-2 flex flex-col items-center w-full">
                             <div className="relative group w-full">
@@ -700,10 +758,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     e.stopPropagation();
                                     onPreviewProject?.();
                                 }}
-                                className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 rounded-md p-2 flex items-center space-x-3 focus:outline-none"
+                                className="w-full justify-start text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 rounded-md p-2 flex items-center space-x-3 focus:outline-none transform hover:scale-[1.02]"
                                 onBlur={(e) => e.target.blur()}
                             >
-                                <Eye className="w-4 h-4" />
+                                <div className="p-1 bg-blue-100 rounded-md">
+                                    <Eye className="w-4 h-4 text-blue-600" />
+                                </div>
                                 <span className="font-medium">Preview Site</span>
                             </button>
                             <button
@@ -711,10 +771,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     e.stopPropagation();
                                     onSettings?.();
                                 }}
-                                className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 rounded-md p-2 flex items-center space-x-3 focus:outline-none"
+                                className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 rounded-md p-2 flex items-center space-x-3 focus:outline-none transform hover:scale-[1.02]"
                                 onBlur={(e) => e.target.blur()}
                             >
-                                <Settings className="w-4 h-4" />
+                                <div className="p-1 bg-gray-100 rounded-md">
+                                    <Settings className="w-4 h-4 text-gray-600" />
+                                </div>
                                 <span className="font-medium">Settings</span>
                             </button>
                         </div>

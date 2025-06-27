@@ -8,7 +8,6 @@ import type {
     ViewMode
 } from '@/constants';
 
-// Info Card for landing page content
 export interface InfoCard {
     id: string;
     headline_title: string;
@@ -16,7 +15,8 @@ export interface InfoCard {
     image_id?: string | null;
     image_url?: string | null;
     url: string;
-    display_type: 'imageLeft' | 'imageRight'
+    display_type: 'imageLeft' | 'imageRight';
+    more_info_text?: string; // New field for custom link text
     sort_order: number;
     created_at?: string;
     updated_at?: string;

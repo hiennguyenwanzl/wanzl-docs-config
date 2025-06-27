@@ -12,7 +12,11 @@ import {
     ChevronRight,
     Plus,
     BookOpen,
-    Clock
+    Clock,
+    Sparkles,
+    Bug,
+    AlertTriangle,
+    Zap
 } from 'lucide-react';
 import Button from '../ui/Button';
 import Breadcrumb from '../ui/Breadcrumb';
@@ -27,11 +31,12 @@ interface VersionDetailViewProps {
     productName?: string;
     serviceId: string;
     serviceName?: string;
+    releaseNotes?: any; // Release notes data from projectData.releaseNotes[productId][serviceId][version]
     onGoToService: () => void;
     onGoToProduct: () => void;
     onGoToLandingPage: () => void;
     onEditVersion: (version: ApiVersion) => void;
-    onEditReleaseNotes?: () => void;
+    onEditReleaseNotes?: (productId: string, serviceId: string, versionId: string) => void;
     onViewApiSpec?: (spec: any, type: 'swagger' | 'mqtt', title: string) => void;
 }
 
@@ -41,6 +46,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                                                  productName,
                                                                  serviceId,
                                                                  serviceName,
+                                                                 releaseNotes,
                                                                  onGoToService,
                                                                  onGoToProduct,
                                                                  onGoToLandingPage,
@@ -108,6 +114,12 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
         { id: 'release-notes', label: 'Release Notes', icon: <BookOpen className="w-4 h-4" /> }
     ];
 
+    const handleEditReleaseNotes = () => {
+        if (onEditReleaseNotes) {
+            onEditReleaseNotes(productId, serviceId, version.version);
+        }
+    };
+
     return (
         <div className="p-6">
             <Breadcrumb items={breadcrumbItems} />
@@ -130,6 +142,12 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                             <span className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusColor(version.status)}`}>
                                 {version.status}
                             </span>
+                            {version.breaking_changes && (
+                                <span className="text-sm px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700 flex items-center space-x-1">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    <span>Breaking Changes</span>
+                                </span>
+                            )}
                         </div>
                         <p className="text-gray-600">
                             Released on {new Date(version.release_date).toLocaleDateString()}
@@ -340,9 +358,13 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                             </div>
                                         )}
                                         <div className="flex items-center justify-between py-2">
-                                            <span className="text-gray-600">Examples</span>
-                                            <Button variant="ghost" size="xs">
-                                                <ExternalLink className="w-3 h-3" />
+                                            <span className="text-gray-600">Release Notes</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="xs"
+                                                onClick={() => setActiveTab('release-notes')}
+                                            >
+                                                <BookOpen className="w-3 h-3" />
                                             </Button>
                                         </div>
                                     </div>
@@ -352,8 +374,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                     </div>
                 )}
 
-
-                {/* REST API Tab - Full Width, No Scrollbars */}
+                {/* REST API Tab */}
                 {activeTab === 'swagger' && hasSwaggerSpec && (
                     <div className="w-full -mx-6">
                         <div className="px-6 mb-6">
@@ -361,19 +382,8 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                             <p className="text-gray-600">
                                 Interactive API documentation powered by OpenAPI specification.
                             </p>
-                            {version.api_specs?.openapi && (
-                                <div className="flex items-center mt-2">
-                                    <span className="text-sm text-gray-500 mr-2">File:</span>
-                                    <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                        {typeof version.api_specs.openapi === 'string'
-                            ? 'OpenAPI Specification'
-                            : version.api_specs.openapi?.name || 'openapi.yaml'}
-                    </span>
-                                </div>
-                            )}
                         </div>
 
-                        {/* Full-width API Spec Viewer with NO scrollbars, proper height */}
                         <div className="w-full bg-white border-t border-gray-200">
                             <SwaggerViewer
                                 spec={typeof version.api_specs.openapi === 'string'
@@ -386,7 +396,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                     </div>
                 )}
 
-                {/* MQTT API Tab - Full Width, No Scrollbars */}
+                {/* MQTT API Tab */}
                 {activeTab === 'mqtt' && hasMqttSpec && (
                     <div className="w-full -mx-6">
                         <div className="px-6 mb-6">
@@ -394,19 +404,8 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                             <p className="text-gray-600">
                                 Event-driven API documentation for MQTT messaging.
                             </p>
-                            {version.api_specs?.mqtt && (
-                                <div className="flex items-center mt-2">
-                                    <span className="text-sm text-gray-500 mr-2">File:</span>
-                                    <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                        {typeof version.api_specs.mqtt === 'string'
-                            ? 'AsyncAPI Specification'
-                            : version.api_specs.mqtt?.name || 'asyncapi.yaml'}
-                    </span>
-                                </div>
-                            )}
                         </div>
 
-                        {/* Full-width API Spec Viewer with NO scrollbars, proper height */}
                         <div className="w-full bg-white border-t border-gray-200">
                             <MqttViewer
                                 spec={typeof version.api_specs.mqtt === 'string'
@@ -419,7 +418,7 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                     </div>
                 )}
 
-                {/* Release Notes Tab */}
+                {/* Release Notes Tab - FIXED */}
                 {activeTab === 'release-notes' && (
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
@@ -429,36 +428,147 @@ const VersionDetailView: React.FC<VersionDetailViewProps> = ({
                                     What's new, changed, or fixed in version {version.version}
                                 </p>
                             </div>
-                            {onEditReleaseNotes && (
-                                <Button
-                                    variant="outline"
-                                    onClick={onEditReleaseNotes}
-                                    leftIcon={<Edit2 className="w-4 h-4" />}
-                                >
-                                    Edit Release Notes
-                                </Button>
-                            )}
+                            <Button
+                                variant="outline"
+                                onClick={handleEditReleaseNotes}
+                                leftIcon={<Edit2 className="w-4 h-4" />}
+                            >
+                                {releaseNotes ? 'Edit Release Notes' : 'Create Release Notes'}
+                            </Button>
                         </div>
 
                         <Card>
                             <CardContent className="p-6">
-                                <div className="text-center py-8">
-                                    <BookOpen className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                                    <h3 className="text-sm font-medium text-gray-900 mb-1">No release notes yet</h3>
-                                    <p className="text-sm text-gray-500 mb-4">
-                                        Document what's new, changed, or fixed in this version
-                                    </p>
-                                    {onEditReleaseNotes && (
+                                {releaseNotes ? (
+                                    <div className="space-y-6">
+                                        {/* Release Summary */}
+                                        {releaseNotes.summary && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-3">Summary</h3>
+                                                <p className="text-gray-700 leading-relaxed">{releaseNotes.summary}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Key Highlights */}
+                                        {releaseNotes.highlights && releaseNotes.highlights.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Highlights</h3>
+                                                <ul className="list-disc list-inside space-y-2">
+                                                    {releaseNotes.highlights.map((highlight: string, index: number) => (
+                                                        <li key={index} className="text-gray-700">{highlight}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* New Features */}
+                                        {releaseNotes.new_features && releaseNotes.new_features.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                                                    <Sparkles className="w-5 h-5 text-green-600" />
+                                                    <span>New Features</span>
+                                                </h3>
+                                                <div className="space-y-3">
+                                                    {releaseNotes.new_features.map((feature: any, index: number) => (
+                                                        <div key={index} className="border-l-4 border-green-200 pl-4 py-2 bg-green-50 rounded-r-lg">
+                                                            <h4 className="font-medium text-green-900">{feature.title}</h4>
+                                                            <p className="text-green-800 text-sm mt-1">{feature.description}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Bug Fixes */}
+                                        {releaseNotes.bug_fixes && releaseNotes.bug_fixes.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                                                    <Bug className="w-5 h-5 text-yellow-600" />
+                                                    <span>Bug Fixes</span>
+                                                </h3>
+                                                <ul className="space-y-2">
+                                                    {releaseNotes.bug_fixes.map((fix: string, index: number) => (
+                                                        <li key={index} className="flex items-start space-x-2">
+                                                            <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                            <span className="text-gray-700">{fix}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* Breaking Changes */}
+                                        {releaseNotes.breaking_changes && releaseNotes.breaking_changes.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                                                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                                                    <span>Breaking Changes</span>
+                                                </h3>
+                                                <div className="space-y-3">
+                                                    {releaseNotes.breaking_changes.map((change: any, index: number) => (
+                                                        <div key={index} className="border-l-4 border-red-200 pl-4 py-2 bg-red-50 rounded-r-lg">
+                                                            <h4 className="font-medium text-red-900">{change.title}</h4>
+                                                            <p className="text-red-800 text-sm mt-1">{change.description}</p>
+                                                            {change.migration_guide && (
+                                                                <div className="mt-2 p-2 bg-red-100 rounded text-xs text-red-900">
+                                                                    <strong>Migration:</strong> {change.migration_guide}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Improvements */}
+                                        {releaseNotes.improvements && releaseNotes.improvements.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                                                    <Zap className="w-5 h-5 text-blue-600" />
+                                                    <span>Improvements</span>
+                                                </h3>
+                                                <ul className="space-y-2">
+                                                    {releaseNotes.improvements.map((improvement: string, index: number) => (
+                                                        <li key={index} className="flex items-start space-x-2">
+                                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                            <span className="text-gray-700">{improvement}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    // No release notes state
+                                    <div className="text-center py-12">
+                                        <BookOpen className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No release notes yet</h3>
+                                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                                            Document what's new, changed, or fixed in this version to help developers understand the updates.
+                                        </p>
                                         <Button
-                                            onClick={onEditReleaseNotes}
+                                            onClick={handleEditReleaseNotes}
                                             leftIcon={<Plus className="w-4 h-4" />}
+                                            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
                                         >
                                             Create Release Notes
                                         </Button>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
+
+                        {/* Release Notes Tips */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                            <h3 className="font-medium text-blue-900 mb-3">Release Notes Best Practices</h3>
+                            <div className="text-sm text-blue-800 space-y-2">
+                                <p>• <strong>Be Clear:</strong> Use simple language that both technical and non-technical users can understand</p>
+                                <p>• <strong>Categorize Changes:</strong> Group updates into features, fixes, improvements, and breaking changes</p>
+                                <p>• <strong>Include Migration Guides:</strong> For breaking changes, provide step-by-step migration instructions</p>
+                                <p>• <strong>Highlight Impact:</strong> Explain how changes affect existing users and integrations</p>
+                                <p>• <strong>Version Consistency:</strong> Keep the same format and structure across all release notes</p>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

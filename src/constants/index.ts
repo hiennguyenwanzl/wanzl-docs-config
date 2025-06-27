@@ -42,9 +42,7 @@ export type ProductCategory = typeof PRODUCT_CATEGORIES[number];
 // Info Card Display Types
 export const INFO_CARD_DISPLAY_TYPES = [
     'imageLeft',
-    'imageRight',
-    'custom1',
-    'custom2'
+    'imageRight'
 ] as const;
 
 export type InfoCardDisplayType = typeof INFO_CARD_DISPLAY_TYPES[number];
@@ -52,10 +50,7 @@ export type InfoCardDisplayType = typeof INFO_CARD_DISPLAY_TYPES[number];
 // Protocols (kept for compatibility)
 export const PROTOCOLS = [
     'REST',
-    'MQTT',
-    'GraphQL',
-    'WebSocket',
-    'gRPC'
+    'MQTT'
 ];
 
 export type Protocol = typeof PROTOCOLS[number];

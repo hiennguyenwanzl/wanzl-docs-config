@@ -1,6 +1,6 @@
 // src/components/forms/InfoCardForm.tsx
 import React, { useState, useEffect } from 'react';
-import { Eye, ExternalLink } from 'lucide-react';
+import { Eye, ExternalLink, ArrowRight } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
@@ -34,6 +34,7 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
         brief_description: '',
         image_url: null,
         url: '',
+        more_info_text: 'More Information', // Default value
         display_type: 'imageLeft',
         sort_order: 1,
         ...infoCard
@@ -49,6 +50,7 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                 brief_description: '',
                 image_url: null,
                 url: '',
+                more_info_text: 'More Information',
                 display_type: 'imageLeft',
                 sort_order: 1,
                 ...infoCard
@@ -103,6 +105,7 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                 headline_title: formData.headline_title || '',
                 brief_description: formData.brief_description || '',
                 url: formData.url || '',
+                more_info_text: formData.more_info_text || 'More Information',
                 display_type: formData.display_type || 'imageLeft',
                 sort_order: formData.sort_order || 1
             } as InfoCard;
@@ -129,40 +132,39 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
         }
 
         const getPreviewLayout = () => {
-            const { display_type, image_url, headline_title, brief_description, url } = formData;
+            const { display_type, image_url, headline_title, brief_description, url, more_info_text } = formData;
 
+            // Enhanced image element matching the card component
             const imageElement = image_url ? (
-                <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 overflow-hidden shadow-lg">
                     <img src={image_url} alt={headline_title} className="w-full h-full object-cover" />
                 </div>
             ) : (
-                <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-gray-200 flex items-center justify-center shadow-sm">
-                    <div className="w-10 h-10 bg-blue-200 rounded-lg text-blue-600 flex items-center justify-center text-sm font-bold">
+                <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border-2 border-blue-200 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white flex items-center justify-center text-lg font-bold shadow-inner">
                         {headline_title ? headline_title.charAt(0).toUpperCase() : 'C'}
                     </div>
                 </div>
             );
 
-            const linkElement = url ? (
-                <div className="inline-flex items-center px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-xs font-medium text-blue-700">
-                    <ExternalLink className="w-3 h-3 mr-1.5" />
-                    <span className="truncate max-w-32">
-                        {url.startsWith('http') ? new URL(url).hostname : url}
-                    </span>
-                </div>
-            ) : (
-                <div className="inline-flex items-center px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-full text-xs font-medium text-gray-500">
-                    <ExternalLink className="w-3 h-3 mr-1.5" />
-                    <span>No URL set</span>
+            // Enhanced link element matching the card component
+            const linkElement = (
+                <div className="inline-flex items-center group/link">
+                    <div className="flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg cursor-pointer">
+                        <span className="text-sm font-semibold mr-2">
+                            {more_info_text || 'More Information'}
+                        </span>
+                        <ArrowRight className="w-4 h-4" />
+                    </div>
                 </div>
             );
 
             const contentElement = (
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-2 mb-3">
+                    <h3 className="font-bold text-gray-900 text-xl leading-tight line-clamp-2 mb-4">
                         {headline_title || 'Your headline title'}
                     </h3>
-                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed mb-4">
+                    <p className="text-gray-600 line-clamp-3 leading-relaxed mb-6 text-base">
                         {brief_description || 'Your brief description will appear here'}
                     </p>
                     {linkElement}
@@ -172,21 +174,22 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
             switch (display_type) {
                 case 'imageLeft':
                     return (
-                        <div className="flex space-x-4 items-start">
+                        <div className="flex space-x-6 items-start">
                             {imageElement}
                             {contentElement}
                         </div>
                     );
                 case 'imageRight':
                     return (
-                        <div className="flex space-x-4 items-start">
+                        <div className="flex space-x-6 items-start">
                             {contentElement}
                             {imageElement}
                         </div>
                     );
+
                 default:
                     return (
-                        <div className="flex space-x-4 items-start">
+                        <div className="flex space-x-6 items-start">
                             {imageElement}
                             {contentElement}
                         </div>
@@ -195,7 +198,7 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
         };
 
         return (
-            <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
                 {getPreviewLayout()}
             </div>
         );
@@ -294,6 +297,15 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                                 className="focus:ring-blue-500 focus:border-blue-500"
                             />
 
+                            <Input
+                                label="Link Button Text"
+                                value={formData.more_info_text || ''}
+                                onChange={(e) => updateField('more_info_text', e.target.value)}
+                                placeholder="More Information"
+                                helperText="Custom text for the call-to-action button (defaults to 'More Information')"
+                                className="focus:ring-blue-500 focus:border-blue-500"
+                            />
+
                             <Select
                                 label="Display Layout"
                                 value={formData.display_type || 'imageLeft'}
@@ -324,15 +336,25 @@ const InfoCardForm: React.FC<InfoCardFormProps> = ({
                             />
 
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                <h4 className="font-medium text-gray-900 mb-3">Image Guidelines</h4>
+                                <h4 className="font-medium text-gray-900 mb-3">Image Guidelines by Layout</h4>
                                 <div className="text-sm text-gray-600 space-y-2">
-                                    <p>• <strong>Image Left/Right:</strong> Square images (1:1) work best</p>
-                                    <p>• <strong>Image Top:</strong> Landscape images (16:9) are recommended</p>
-                                    <p>• <strong>Centered Layout:</strong> Square images for profile-style display</p>
-                                    <p>• Keep file size under 2MB for optimal loading</p>
+                                    <p>• <strong>Image Left/Right:</strong> Square images (1:1) work best for side positioning</p>
+                                    <p>• <strong>Image Top (Card Style):</strong> Landscape images (16:9) are recommended</p>
+                                    <p>• <strong>Centered Layout:</strong> Square images for profile-style circular display</p>
+                                    <p>• Keep file size under 2MB for optimal loading performance</p>
+                                    <p>• High resolution images will be automatically optimized</p>
                                 </div>
                             </div>
 
+                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <h4 className="font-medium text-blue-900 mb-3">Link Button Design</h4>
+                                <div className="text-sm text-blue-800 space-y-2">
+                                    <p>• The button uses a modern gradient design with hover effects</p>
+                                    <p>• Custom text allows you to match your brand voice</p>
+                                    <p>• Arrow icon automatically animates on hover</p>
+                                    <p>• Button scales and lifts on hover for better interaction feedback</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -36,6 +36,8 @@ interface MainContentRouterProps {
         handlePreviewProducts: () => void;
         handlePreviewProduct: (product: Product) => void;
         handlePreviewVersion: (version: ApiVersion) => void;
+        handleSaveReleaseNotes: (productId: string, serviceId: string, versionId: string, data: any) => void;
+        handleEditReleaseNotes: (productId: string, serviceId: string, versionId: string) => void;
         // Info Card actions
         handleAddInfoCard: () => void;
         handleEditInfoCard: (infoCard: InfoCard) => void;
@@ -60,7 +62,7 @@ const MainContentRouter: React.FC<MainContentRouterProps> = ({
                                                                  getServicesCount,
                                                                  getVersionsCount
                                                              }) => {
-    const { project, info_cards, products, services, versions } = projectData;
+    const { project, info_cards, products, services, versions, releaseNotes } = projectData;
 
     // Get current entities
     const currentProduct = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
@@ -70,6 +72,17 @@ const MainContentRouter: React.FC<MainContentRouterProps> = ({
     const currentVersion = selectedVersion ? currentVersions.find(v => v.version === selectedVersion) : null;
     const currentInfoCard = selectedInfoCard ?
         [...info_cards, ...products.flatMap(p => p.info_cards || [])].find(ic => ic.id === selectedInfoCard) : null;
+
+    // Get release notes for current version
+    const currentReleaseNotes = selectedProduct && selectedService && selectedVersion
+        ? releaseNotes[selectedProduct]?.[selectedService]?.[selectedVersion]
+        : null;
+
+    // Handle release notes editing
+    const handleEditReleaseNotes = (productId: string, serviceId: string, versionId: string) => {
+        // Use the onActions handler for editing release notes
+        onActions.handleEditReleaseNotes(productId, serviceId, versionId);
+    };
 
     // Route to appropriate view
     switch (currentView) {
@@ -166,10 +179,12 @@ const MainContentRouter: React.FC<MainContentRouterProps> = ({
                     serviceId={currentService.id}
                     productName={currentProduct.display_name || currentProduct.name}
                     serviceName={currentService.display_name || currentService.name}
+                    releaseNotes={currentReleaseNotes} // Pass release notes data
                     onGoToService={() => onNavigate.goToServiceDetail(currentProduct.id, currentService.id)}
                     onGoToProduct={() => onNavigate.goToProductDetail(currentProduct.id)}
                     onGoToLandingPage={onNavigate.goToLandingPage}
                     onEditVersion={onActions.handleEditVersion}
+                    onEditReleaseNotes={handleEditReleaseNotes} // Pass release notes handler
                 />
             );
 
@@ -206,7 +221,6 @@ const MainContentRouter: React.FC<MainContentRouterProps> = ({
                     productName={productWithInfoCard?.display_name || productWithInfoCard?.name}
                 />
             );
-
     }
 };
 
