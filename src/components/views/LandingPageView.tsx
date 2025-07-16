@@ -187,7 +187,8 @@ const LandingPageView: React.FC<LandingPageViewProps> = ({
                                         </Button>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    // ONE CARD PER ROW - FULL WIDTH
+                                    <div className="space-y-6">
                                         {infoCards
                                             .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
                                             .map(infoCard => (
@@ -197,6 +198,7 @@ const LandingPageView: React.FC<LandingPageViewProps> = ({
                                                     onClick={() => onSelectInfoCard(infoCard.id)}
                                                     onEdit={onEditInfoCard}
                                                     onDelete={handleDeleteInfoCard}
+                                                    fullWidth={true}
                                                 />
                                             ))
                                         }
@@ -262,7 +264,8 @@ const LandingPageView: React.FC<LandingPageViewProps> = ({
                                         </Button>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    // TWO PRODUCTS PER ROW - WIDER CARDS
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                         {products.map(product => (
                                             <ProductCard
                                                 key={product.id}

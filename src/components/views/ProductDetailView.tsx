@@ -178,7 +178,7 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
             {activeTab === 'info-cards' && (
                 <div>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-6">
                         <div>
                             <h2 className="text-xl font-semibold text-gray-900">Product Info Cards</h2>
                             <p className="text-gray-600 text-sm">Cards that showcase this product's features and benefits</p>
@@ -200,7 +200,8 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                             onAction={onAddInfoCard}
                         />
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        // ONE INFO CARD PER ROW - FULL WIDTH
+                        <div className="space-y-6">
                             {infoCards
                                 .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
                                 .map(infoCard => (
@@ -210,15 +211,28 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                                         onClick={() => onSelectInfoCard(infoCard.id)}
                                         onEdit={onEditInfoCard}
                                         onDelete={handleDeleteInfoCard}
+                                        fullWidth={true}
                                     />
                                 ))
                             }
                         </div>
                     )}
 
+                    {/* Product Info Cards Tips */}
+                    {infoCards.length > 0 && (
+                        <div className="mt-8 bg-green-50 border border-green-200 rounded-xl p-6">
+                            <h3 className="font-medium text-green-900 mb-3">Product Info Cards Tips</h3>
+                            <div className="text-sm text-green-800 space-y-2">
+                                <p>• <strong>Feature Highlights:</strong> Use info cards to showcase key product features and capabilities</p>
+                                <p>• <strong>User Journeys:</strong> Guide users through different aspects of your product with targeted cards</p>
+                                <p>• <strong>Call-to-Actions:</strong> Link to specific documentation sections, demos, or getting started guides</p>
+                                <p>• <strong>Visual Consistency:</strong> Maintain consistent imagery and messaging that aligns with your product brand</p>
+                                <p>• <strong>Prioritization:</strong> Order cards by importance using the sort order field to guide user attention</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
-
         </div>
     );
 };
